@@ -1,1 +1,1 @@
-Rubric Validation
+Rubric Integrity Checker
