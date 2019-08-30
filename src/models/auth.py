@@ -26,7 +26,7 @@ def login(app, db_conn):
     else:
         return {
             'code': -2,
-            'msg': 'Incorrect password'
+            'err_msg': 'Incorrect password'
         }
 
 

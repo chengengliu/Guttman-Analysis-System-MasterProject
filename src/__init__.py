@@ -1,10 +1,9 @@
 from flask import Flask, escape, request
-
 import MySQLdb
 from . import config
-from .models import auth
+from .views import *
 
-app = Flask("rv")
+app = Flask(__name__)
 
 conf = config.get_config()
 db_conf = conf['db']
@@ -15,15 +14,6 @@ db_conn = MySQLdb.connect(
     db=db_conf['db'],
     port=db_conf['port'],
 )
-
-
-@app.route('/auth', methods=['POST'])
-def login():
-    return auth.login(
-        app=app,
-        db_conn=db_conn
-    )
-
 
 
 
