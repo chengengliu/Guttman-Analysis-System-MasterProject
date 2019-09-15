@@ -1,5 +1,10 @@
 from flask import Flask, escape, request
-import MySQLdb
+# For using on macOs, MySQLClient cannot be installed correctly...
+# import MySQLdb
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 from . import config
 from .views import *
 
