@@ -103,7 +103,7 @@ sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)
 #TODO: 可以接受数据的时候存储行 / 列,两个单独的.但是又感觉没有必要.
 
 
-# Another way of using Pandas
+# Another way of using Pandas. The following code will clean and sort the data.
 # Sample Format:
 #             student0  student1  student2  student3  student4  ItemSum
 # item0            1.0       1.0       1.0       1.0       1.0      5.0
@@ -119,9 +119,7 @@ def formatData(matrix):
 
     data_pd = pd.DataFrame(data, retrieveIndexOfItems(matrix))
     # data_pd.loc['StudentSum'] = sumStudentScore(matrix)
-    print(data_pd)
     additional = pd.DataFrame({'ItemSum': sumItemScore(matrix)}, retrieveIndexOfItems(matrix))  # Add column
-    print(additional)
     result = pd.concat([data_pd, additional], axis=1, sort= True)
     lis = sumStudentScore(matrix)
     lis.append(None)
@@ -132,6 +130,15 @@ def retrieveIndexOfItems(matrix):
     for i in range(len(matrix[0])):
         item_name.append("item"+str(i))
     return item_name
+def sortStudentandItems(data):
+    data = data.sort_values(by= ['ItemSum'], ascending=False)
+    print(data)
+    data = data.sort_values(by='StudentSum', axis = 1, ascending=False)
+    print(data)
+    return data
+
 # def sortStudent(matrix):
 #     matrix.sort_values('')
-print(formatData(Matrix))
+data = formatData(Matrix)
+print(data)
+data= sortStudentandItems(data)
