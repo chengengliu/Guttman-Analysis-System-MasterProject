@@ -10,7 +10,7 @@ from scipy.stats.stats import pearsonr
 import numpy
 import copy
 
-Matrix = [[1,1,1,1], [1,1,1,0], [1,1,1,0], [1,1,0,0]]
+Matrix = [[1,1,1,1], [1,1,1,0], [1,1,1,0], [1,1,0,0], [1,2,0,0]]
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -19,12 +19,20 @@ def detectDimenstion(matrix):
     :return: A tuple containing the number of student and numebr of items.
     """
     return (matrix.__len__(), matrix[0].__len__())
-def detectStudentIrregular(matrix):
-    print("Hello")
 # Calculate the summation of student score.
 def sumStudentScore(matrix):
     return map(sum,matrix)
+# Calculate the summation of item/skill/assessment score.
 def sumItemScore(matrix):
+    result = []
+    for i in range(len(matrix[0])):
+        sum_item = sum([row[i] for row in matrix])
+        result.append(sum_item)
+        # print([row[i] for row in matrix])
+        # print(sum([row[i] for row in matrix]))
+    print(result)
+    return result
+    # print([row[1] for row in matrix])
 
 def appendStudentSum(matrix):
     result = list(sumStudentScore(matrix))
@@ -32,6 +40,9 @@ def appendStudentSum(matrix):
     real_matrix = copy.deepcopy(matrix)
     real_matrix.append(result)  # Student result is appended.
     return real_matrix
+
+def detectStudentIrregular(matrix):
+    print("hello")
 
 
 a = [1,4,6]
@@ -47,3 +58,5 @@ b = [1,1,1]
 # for i in appendStudentSum(Matrix):
 #     print(i)
 print(detectDimenstion(Matrix))
+
+sumItemScore(Matrix)
