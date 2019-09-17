@@ -106,14 +106,56 @@ def retrieve_items_columns(matrix):
     result = [list(x) for x in zip(*matrix)]
     print(result)
     return result
+# [0.24999999999999997, -0.07912414523193152, -2.7755575615628914e-17, 0.40824829046386296]
+def retrieve_correlation_columns(matrix):
+    result = []
+    for i in range(len(matrix)):
+        result.append(cal_correlation_items(matrix, i))
+    return  [j for i in result for j in i]
 
 def cal_correlation_items(matrix, current_index):
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    if current_index == 0 or current_index == len(matrix[0])-1:
-
-
-
-
+    result = []
+    if current_index == 0:
+        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index+1])[0,1])
+    elif current_index == len(matrix)-1:
+        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index-1])[0,1])
+    else:
+        temp = numpy.corrcoef(matrix[current_index],
+                                  matrix[current_index+1])[0,1] + numpy.corrcoef(
+            matrix[current_index],matrix[current_index-1])[0,1]
+        result.append(temp/2.0)
+    return result
+#
+#
+# def mean(itemlist):
+#     total = 0
+#     for i in itemlist:
+#         total += float(i)
+#     mean = total/len(itemlist)
+#     return mean
+#
+# ###
+# # Here is a bug: How do you deal with all ones???? Standard Deviation will be zero.
+# def stand_dev(itemlist):
+#     dev = 0.0
+#     for i in range(len(itemlist)):
+#         dev += (itemlist[i] -mean(itemlist))**2
+#     dev = dev**(1/2.0)
+#     return dev
+#
+# def correlation_column(itemlist1, itemlist2):
+#     # Calculate means and standard deviations for two lists.
+#     x_mean = mean(itemlist1)
+#     y_mean = mean(itemlist2)
+#     x_stand_dev = stand_dev(itemlist1)
+#     y_stand_dev = stand_dev(itemlist2)
+#     numerator = 0.0
+#     for i in range(len(itemlist1)):
+#         numerator += (itemlist1[i]-x_mean) * (itemlist2[i]-y_mean)
+#     denominator = x_stand_dev * y_stand_dev
+#     result = numerator/denominator
+#     return result
 
 def detectStudentIrregular(data_list):
     print()
@@ -153,7 +195,7 @@ two areas will not flag the student or items. The flags will be raised only if t
 
 '''
 def main():
-    Matrix = [[1, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
+    Matrix = [[0, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
     print(Matrix)
     studentSum = sumStudentScore(Matrix)
     itemSum = sumItemScore(Matrix)
@@ -178,9 +220,13 @@ def main():
     student_score_ave = cal_average(matrix, student_sum_copy, len(studentSum))
     item_ave = cal_average(matrix, item_sum_copy, len(itemSum))
 
-    ave_per_item = retrieve_average_per_item(matrix, item_sum_copy)
+    ave_per_item = retrieve_average_per_item(matrix, item_sum_copy)  # Average of each column. Sorted list.
     items_in_matrix = retrieve_items_columns(matrix)
 
+    # This is the result to return back to the server, a list of correlation, in the order with each columns.
+    correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
+    print(correlation_of_columns)
+    print(numpy.corrcoef(items_in_matrix[0], items_in_matrix[1])[0,1])
 
 
 
