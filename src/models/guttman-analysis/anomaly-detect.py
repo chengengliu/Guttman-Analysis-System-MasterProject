@@ -6,20 +6,23 @@
 # For testing purpose, the 2-d matrix will be a 4*4 matrix, initialised with ones and zeros.
 # The element of the inner array is the result of a student.
 
-from scipy.stats.stats import pearsonr
 import pandas as pd
 import copy
+import math
+import numpy
+from numpy import dot
+from numpy.linalg import norm
 
-Matrix = [[1,1,1,1], [1,1,1,0], [1,1,1,0], [1,1,0,0], [1,2,0,0]]
 
-test = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0], [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0], [1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1]]
-test_data = [[1],[0],[1],[0],]
-print(len(test[0]))
+
+# test = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0], [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0], [1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1]]
+# test_data = [[1],[0],[1],[0],]
+# print(len(test[0]))
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -67,92 +70,127 @@ def sortBasedOnItem(matrix, itemSum):
     sublist_item = list(zip(itemSum, index))
     sublist_item = sorted(sublist_item,key = lambda x:x[0], reverse=True)  # Order that the inner list should follow.
     sorted_item_order = [x[1] for x in sublist_item]
-    print("Sorted_item_order")
-    print(sorted_item_order)
+    # print("Sorted_item_order")
+    # print(sorted_item_order)
     result = copy.deepcopy(matrix)
-
-    # for student in result:
-    #     temp_student = list(zip(sorted_item_order, student))
-    #     temp_student = sorted(temp_student, key=lambda x:x[0])
-    #     temp_student_list = [x [1] for x in temp_student]
-    #     student = temp_student_list
-    #     print(student)
     for i in range(len(itemSum)):
         temp_student = list(zip(sorted_item_order, result[i]))
         temp_student = sorted(temp_student, key=lambda x:x[0])
         temp_student_list = [x [1] for x in temp_student]
         result[i] = temp_student_list
     return result
+# Can return either the median of the students scores, or the median of the items.
+def cal_median(matrix, summation):
+    if len(summation) %2 ==0:
+        median = summation[int(len(summation)/2)] + summation[int(len(summation)/2)-1]
+        return median/2
+    else:
+        median = summation[math.floor(len(summation)/2)]
+        return median
+# Can return either the average of the students scores, or the average score of the items.
+def cal_average(matrix, summation, number):
+    return sum(summation)/number
 
-def detectMedian(data,data_list):
+# Return the average score of item, per student.
+def retrieve_average_per_item(matrix, itemsum):
+    # Initialise a matrix to store items average results.
+    result = []
+    for i in range(len(itemsum)):
+        result.append(itemsum[i]/len(matrix))
+    return result
+
+# Transpose of the input matrix. The output is a 2-d/ nested list, but with row: items  and column: students.
+# This function doesn't modify the original data, except the format(performa a transpose function on the original data)
+# This will be helpful for later use.
+def retrieve_items_columns(matrix):
+    result = [list(x) for x in zip(*matrix)]
+    print(result)
+    return result
+
+def cal_correlation_items(matrix):
     print()
-# These two functions will return the headers for columns and rows after the data is sorted.
-# The order of both columns and rows are sorted.
-def retrieve_column_headers(data):
-    return list(data.columns.values)
-def retrieve_row_headers(data):
-    return list(data.index)
 
-
-# Calculate correlation between columns.
-# Require that there are at least 5 students.
-
-
-def calculate_correlation_columns(data, row_header, column_header):
-    print()
 
 
 
 def detectStudentIrregular(data_list):
-    for s in data:
-        print(s)
-
+    print()
 
 # Receive a real_matrix (with student and item summation appended)
 def detectItemIttegulat(matrix):
     print ("hello")
 
+#TODO: 我认为这个算法可以分为三部分： 1. detect周围的correlation(1-2个?)，correlation 的比值应该小于 多少多少，这个比值应该调参，目前来说还不知道。 correlation部分应该占比1/2
+#TODO： 2. 计算当前item与整体items的similarty， 用cosine夹角计算。 占比1/2
+#TODO: 3. 四分之一法，暴力规划四部分区域大小， 检测有无异常行为。 这部分占比小，但是如果检测出来，就应该加一个flag， 告诉之前的算法，当前item有存在不合格风险。
 
-# print(pearsonr(a,b))
-# print(numpy.corrcoef(a,b))
-# detectStudentIrregular(Matrix)
-# for i in sumStudentScore(Matrix):
-#     print(i)
-# for i in appendStudentSum(Matrix):
-#     print(i)
-# for i in appendStudentSum(Matrix):
-#     print(i)
-# print(detectDimenstion(Matrix))
+# 'Four Partition'
 
-# sumItemScore(Matrix)
-# real_matrix  = appendStudentSum(Matrix)
-# print(appendItemSum(Matrix, real_matrix))
+'''
+According to the median of the items and students numbers, as well as students performance, 
+The following 'Four Partitions' algorithm is implemented. 
+Since the counter will start from the top left, block 'A' will be the most compentent student, answerign the easiest items/questions. 
+This block tend to have a low percentage of false. If detect a zero/false, falge this student and this items. Even though it may 
+not effect the total correlation performace, the anomaly shows that there is unusual/odd zero. 
+Similarly, the percentage of block 'B' and block 'C', containing zeros/false will be higher than blcok 'A'. Detection in these
+two areas will not flag the student or items. The flags will be raised only if the anomaly 
 
-# matrix = sortBasedOnStudent(real_matrix)
-# print(matrix)
-studentSum = sumStudentScore(Matrix)
-itemSum = sumItemScore(Matrix)
-print(studentSum)
-print(itemSum)
-print("Orginal data: ")
-print(Matrix)
-sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)   # After sorting based on student summation.
-print("Sort based on student summation; ")
-print(sortedMatrixStudent)
-sortedMatrixItem = sortBasedOnItem(sortedMatrixStudent, itemSum) # After sorting based on item summation.
-print("Sort based on item summation: ")
-print(sortedMatrixItem)
+          |  
+    A     |    B
+          |  
+          |
+---------- ----------
+          |  
+    C     |    D     
+          |  
+          |
 
 
+'''
+def main():
+    Matrix = [[1, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
+    print(Matrix)
+    studentSum = sumStudentScore(Matrix)
+    itemSum = sumItemScore(Matrix)
+    print(studentSum)
+    print(itemSum)
+    sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)  # After sorting based on student summation.
+    sortedMatrixItem = sortBasedOnItem(sortedMatrixStudent, itemSum)  # After sorting based on item summation.
+    matrix = sortedMatrixItem
+    print(matrix)
+
+    # After sorting the data, both item_summation and student_summation records should be sorted.
+    # Keep the orginal order unchanged.
+    student_sum_copy = copy.deepcopy(studentSum)
+    item_sum_copy = copy.deepcopy(itemSum)
+    student_sum_copy.sort()
+    item_sum_copy.sort()
+    student_sum_copy = list(reversed(student_sum_copy))
+    item_sum_copy = list(reversed(item_sum_copy))
+
+    student_score_median = cal_median(matrix, student_sum_copy)
+    item_median = cal_median(matrix, item_sum_copy)
+    student_score_ave = cal_average(matrix, student_sum_copy, len(studentSum))
+    item_ave = cal_average(matrix, item_sum_copy, len(itemSum))
+
+    ave_per_item = retrieve_average_per_item(matrix, item_sum_copy)
+    items_in_matrix = retrieve_items_columns(matrix)
 
 
 
 
 
 
+if __name__ == '__main__':
+    main()
 
 
-############################################################################### Currently depreciated.
+
+
+
+###############################################################################
+####### Any code bleow this line are depreciated(the use of pandas)
+###############################################################################
 # Another way of using Pandas. The following code will clean and sort the data.
 # Sample Format:
 #             student0  student1  student2  student3  student4  ItemSum
@@ -187,14 +225,23 @@ def sortStudentandItems(data):
     # print(data)
     return data
 
+# These two functions will return the headers for columns and rows after the data is sorted.
+# The order of both columns and rows are sorted.
+def retrieve_column_headers(data):
+    return list(data.columns.values)
+def retrieve_row_headers(data):
+    return list(data.index)
+
+
 # def sortStudent(matrix):
 #     matrix.sort_values('')
-data = formatData(Matrix)
-# print(data)
-data= sortStudentandItems(data)
-data_list = [tuple(x) for x in data.to_records(index=True)]
+
+# data = formatData(Matrix)
+# # print(data)
+# data= sortStudentandItems(data)
+# data_list = [tuple(x) for x in data.to_records(index=True)]
+
 # print(data_list)
-detectStudentIrregular(data_list)
 # detectStudentIrregular(data)
 # print("Correlation: ")
 '''
@@ -217,20 +264,21 @@ StudentSum  0.000000       NaN  0.645497  0.790569    1.000000'''
 
 # print(retrieve_column_headers(data))
 # print(retrieve_row_headers(data))
-row_header = retrieve_row_headers(data)
-column_header = retrieve_column_headers(data)
+# row_header = retrieve_row_headers(data)
+# column_header = retrieve_column_headers(data)
 
-data2 = formatData(test)
+# data2 = formatData(test)
 # print(data2)
-data2_sort = sortStudentandItems(data2)
+# data2_sort = sortStudentandItems(data2)
 # print(data2[data2.columns[1:]].corr()[:-1])
 # print("test 2: Correlation between one column and multiple coluns: ")
 # print(data2[['1','2','3','4','5','6','7','8','9','10','0','12']].corrwith(data2['11']))
 
-correlation = pd.DataFrame()
-for a in list('0'):
-    for b in list(data.columns.values):
-        correlation.loc[a,b] = data.corr().loc[a,b]
+# correlation = pd.DataFrame()
+# for a in list('0'):
+#     for b in list(data.columns.values):
+#         correlation.loc[a,b] = data.corr().loc[a,b]
+
 # print("Correlation")
 # print(data2_sort['8'].corr(data2_sort['5']))
 # print("data 12 ")
