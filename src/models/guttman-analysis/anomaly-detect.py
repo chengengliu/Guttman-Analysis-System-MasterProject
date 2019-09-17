@@ -119,8 +119,18 @@ def cal_correlation_items(matrix, current_index):
         result.append(temp/2.0)
     return result
 
-def detectStudentIrregular(data_list):
-    print()
+def detect_item_irregular(similarity1, similarity2):
+    average_sim = [(x+y)/2 for (x,y) in zip(similarity1, similarity2)]
+    result = []
+    for i in range(len(average_sim)):
+        if average_sim[i] < 0.5:
+            result.append(i)
+    return result
+
+
+
+# [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
+# [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
 def similarity_between_columns(matrix):
     similarity = []
     for i in range(len(matrix)):
@@ -134,13 +144,16 @@ def similarity_between_columns(matrix):
             cosine = (cosine1+cosine2)/2
         similarity.append(cosine)
     return similarity
-def similarity_between_column_whole(matrix, ):
+def similarity_between_column_whole(matrix, ave_per_student):
     similarity = []
     for i in range(len(matrix)):
+        cosine = dot(matrix[i], ave_per_student)/(norm(matrix[i])*norm(ave_per_student))
+        similarity.append(cosine)
+    return similarity
 
 
-# Receive a real_matrix (with student and item summation appended)
-def detectItemIttegulat(matrix):
+
+def detect_student_irregular(matrix):
     print ("hello")
 
 #TODO: 我认为这个算法可以分为三部分： 1. detect周围的correlation(1-2个?)，correlation 的比值应该小于 多少多少，这个比值应该调参，目前来说还不知道。 correlation部分应该占比1/2
@@ -207,7 +220,12 @@ def main():
 
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
     correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
-    print(similarity_between_columns(items_in_matrix))
+
+    # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
+    columns_similarity = similarity_between_columns(items_in_matrix)
+    columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
+    irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity)
+
 
 
 
