@@ -15,14 +15,6 @@ from numpy.linalg import norm
 
 
 
-# test = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0], [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0],
-#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0], [1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
-#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0],
-#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0],
-#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0],
-#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1]]
-# test_data = [[1],[0],[1],[0],]
-# print(len(test[0]))
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -106,7 +98,7 @@ def retrieve_items_columns(matrix):
     result = [list(x) for x in zip(*matrix)]
     print(result)
     return result
-# [0.24999999999999997, -0.07912414523193152, -2.7755575615628914e-17, 0.40824829046386296]
+
 def retrieve_correlation_columns(matrix):
     result = []
     for i in range(len(matrix)):
@@ -126,39 +118,26 @@ def cal_correlation_items(matrix, current_index):
             matrix[current_index],matrix[current_index-1])[0,1]
         result.append(temp/2.0)
     return result
-#
-#
-# def mean(itemlist):
-#     total = 0
-#     for i in itemlist:
-#         total += float(i)
-#     mean = total/len(itemlist)
-#     return mean
-#
-# ###
-# # Here is a bug: How do you deal with all ones???? Standard Deviation will be zero.
-# def stand_dev(itemlist):
-#     dev = 0.0
-#     for i in range(len(itemlist)):
-#         dev += (itemlist[i] -mean(itemlist))**2
-#     dev = dev**(1/2.0)
-#     return dev
-#
-# def correlation_column(itemlist1, itemlist2):
-#     # Calculate means and standard deviations for two lists.
-#     x_mean = mean(itemlist1)
-#     y_mean = mean(itemlist2)
-#     x_stand_dev = stand_dev(itemlist1)
-#     y_stand_dev = stand_dev(itemlist2)
-#     numerator = 0.0
-#     for i in range(len(itemlist1)):
-#         numerator += (itemlist1[i]-x_mean) * (itemlist2[i]-y_mean)
-#     denominator = x_stand_dev * y_stand_dev
-#     result = numerator/denominator
-#     return result
 
 def detectStudentIrregular(data_list):
     print()
+def similarity_between_columns(matrix):
+    similarity = []
+    for i in range(len(matrix)):
+        if i == 0:
+            cosine = dot(matrix[i], matrix[i+1])/(norm(matrix[i])*norm(matrix[i+1]))
+        elif i==len(matrix)-1:
+            cosine = dot(matrix[i], matrix[i-1])/(norm(matrix[i])*norm(matrix[i-1]))
+        else:
+            cosine1 = dot(matrix[i], matrix[i+1])/(norm(matrix[i])*norm(matrix[i+1]))
+            cosine2 = dot(matrix[i], matrix[i-1])/(norm(matrix[i])*norm(matrix[i-1]))
+            cosine = (cosine1+cosine2)/2
+        similarity.append(cosine)
+    return similarity
+def similarity_between_column_whole(matrix, ):
+    similarity = []
+    for i in range(len(matrix)):
+
 
 # Receive a real_matrix (with student and item summation appended)
 def detectItemIttegulat(matrix):
@@ -204,7 +183,7 @@ def main():
     sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)  # After sorting based on student summation.
     sortedMatrixItem = sortBasedOnItem(sortedMatrixStudent, itemSum)  # After sorting based on item summation.
     matrix = sortedMatrixItem
-    print(matrix)
+    print("After sorting:", matrix)
 
     # After sorting the data, both item_summation and student_summation records should be sorted.
     # Keep the orginal order unchanged.
@@ -221,12 +200,14 @@ def main():
     item_ave = cal_average(matrix, item_sum_copy, len(itemSum))
 
     ave_per_item = retrieve_average_per_item(matrix, item_sum_copy)  # Average of each column. Sorted list.
+    ave_per_student = retrieve_average_per_item(matrix, student_sum_copy)
+    print("Student ave", ave_per_student)
     items_in_matrix = retrieve_items_columns(matrix)
+    print(ave_per_item)
 
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
     correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
-    print(correlation_of_columns)
-    print(numpy.corrcoef(items_in_matrix[0], items_in_matrix[1])[0,1])
+    print(similarity_between_columns(items_in_matrix))
 
 
 
@@ -239,6 +220,18 @@ if __name__ == '__main__':
 
 
 
+
+
+
+###############################################################################
+####### Any code bleow this line are depreciated(the use of pandas)
+###############################################################################
+###############################################################################
+####### Any code bleow this line are depreciated(the use of pandas)
+###############################################################################
+###############################################################################
+####### Any code bleow this line are depreciated(the use of pandas)
+###############################################################################
 ###############################################################################
 ####### Any code bleow this line are depreciated(the use of pandas)
 ###############################################################################
@@ -250,6 +243,14 @@ if __name__ == '__main__':
 # item2            1.0       1.0       1.0       0.0       0.0      3.0
 # item3            1.0       0.0       0.0       0.0       0.0      1.0
 # StudentSum       4.0       3.0       3.0       2.0       3.0      NaN
+# test = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0], [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0], [1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1]]
+# test_data = [[1],[0],[1],[0],]
+
 def formatData(matrix):
     studentName = []
     for i in range(len(matrix)):
