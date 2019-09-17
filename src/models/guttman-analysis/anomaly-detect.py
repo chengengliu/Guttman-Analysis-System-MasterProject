@@ -14,7 +14,6 @@ from numpy import dot
 from numpy.linalg import norm
 
 
-
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -23,20 +22,217 @@ def detectDimenstion(matrix):
     :return: A tuple containing the number of student and numebr of items.
     """
     return (matrix.__len__(), matrix[0].__len__())
+
+
 # Calculate the summation of student score.
 def sumStudentScore(matrix):
-    return list(map(sum,matrix))
-# Calculate the summation of item/skill/assessment score.
+    """
+    Summation of student total scores.
+    :param matrix: the original data.
+    :return: list that containing each students' scores.
+    """
+    return list(map(sum, matrix))
+
+
 def sumItemScore(matrix):
+    """
+    Summation of item scores.
+    :param matrix:  The original data.
+    :return:    List that containing each column's scores.
+    """
     result = []
     for i in range(len(matrix[0])):
         sum_item = sum([row[i] for row in matrix])
         result.append(sum_item)
-        # print([row[i] for row in matrix])
-        # print(sum([row[i] for row in matrix]))
-    # print(result)
     return result
-    # print([row[1] for row in matrix])
+
+
+# In case the user accidently provides an unsorted Guttman Chart, sort the chart based on student first.
+def sortBasedOnStudent(matrix, studentSum):
+    """
+    Sort the original data/matrix, in case the user uploads an unsorted data.
+    This sort is based on the student performance/scores.
+    :param matrix:  The original data.
+    :param studentSum:  List of Summation of student scores.
+    :return:    The original data after sorting.
+    """
+    # matrix.sort(key = lambda x: x[len(matrix)-2])
+    result = [x for (y, x) in sorted(zip(studentSum, matrix), key=lambda pair: pair[0])]
+    return list(reversed(result))
+
+
+# Receive a real_matrix (with student and item summation appended)
+def sortBasedOnItem(matrix, itemSum):
+    """
+    Sort the original data/matrix, in case the user uploads an unsorted data.
+    This sort is based on the item/column performace/scores.
+    :param matrix:  The original data.
+    :param itemSum:  List of Summation of student scores.
+    :return:    The original data after sorting.
+    """
+    index = list(range(len(itemSum)))
+    sublist_item = list(zip(itemSum, index))
+    sublist_item = sorted(sublist_item, key=lambda x: x[0], reverse=True)  # Order that the inner list should follow.
+    sorted_item_order = [x[1] for x in sublist_item]
+    result = copy.deepcopy(matrix)
+    for i in range(len(itemSum)):
+        temp_student = list(zip(sorted_item_order, result[i]))
+        temp_student = sorted(temp_student, key=lambda x: x[0])
+        temp_student_list = [x[1] for x in temp_student]
+        result[i] = temp_student_list
+    return result
+
+
+# Can return either the median of the students scores, or the median of the items.
+def cal_median(matrix, summation):
+    """
+    Helper function. Not used for now. It will be used in the next phase, when dividing the partitions
+    It calculate the median of summation list.
+    :param matrix:  null
+    :param summation: A list of summations
+    :return:  The median of the summations
+    """
+    if len(summation) % 2 == 0:
+        median = summation[int(len(summation) / 2)] + summation[int(len(summation) / 2) - 1]
+        return median / 2
+    else:
+        median = summation[math.floor(len(summation) / 2)]
+        return median
+
+
+def cal_average(matrix, summation, number):
+    """
+    Can return either the average of the students scores, or the average score of the items.
+    Not used for now, maybe useful for later usage.
+    :param matrix: null
+    :param summation:   A list of summation.
+    :param number:  Number of element in summation.
+    :return:    Average of the summation.
+    """
+    return sum(summation) / number
+
+
+# Return the average score of item, per student.
+def retrieve_average_per_item(matrix, itemsum):
+    """
+    Retrieve the average of the summation, per student.
+    :param matrix:  The original input matrix data.
+    :param itemsum: Either studentSum or itemSum
+    :return:    Average
+    """
+    # Initialise a matrix to store items average results. len(matrix) is the number of student.
+    result = []
+    for i in range(len(itemsum)):
+        result.append(itemsum[i] / len(matrix))
+    return result
+
+
+# This will be helpful for later use.
+def transpose_matrix(matrix):
+    """
+    Transpose of the input matrix. The output is a 2-d/ nested list, but with row: items  and column: students.
+    This function doesn't modify the original data, except the format(performa a transpose function on the original data)
+    :param matrix:  The original input data.
+    :return:    The original input data after performing transpose.
+    """
+    result = [list(x) for x in zip(*matrix)]
+    print(result)
+    return result
+
+
+def retrieve_correlation_columns(matrix):
+    """
+    Retrieve the correlation between each column. This function utilises cal_correlation_items
+    :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+    :return:    A list of correlation calculated.
+    """
+    result = []
+    for i in range(len(matrix)):
+        result.append(cal_correlation_items(matrix, i))
+    return [j for i in result for j in i]
+
+
+def cal_correlation_items(matrix, current_index):
+    """
+    Calculate the correlation between each column. For now this function is implemented as this column, the column before
+    it, the column after it. A more sensible way of doing it will be updated later(to calculate a range of columns).
+    :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+    :param current_index: Current index of the column
+    :return: A list of correlation calculated.
+    """
+    # If the row you want to check is the first column or the last column, only check the column after it or before it.
+    result = []
+    if current_index == 0:
+        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
+    elif current_index == len(matrix) - 1:
+        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
+    else:
+        temp = numpy.corrcoef(matrix[current_index],
+                              matrix[current_index + 1])[0, 1] + numpy.corrcoef(
+            matrix[current_index], matrix[current_index - 1])[0, 1]
+        result.append(temp / 2.0)
+    return result
+
+
+def detect_item_irregular(similarity1, similarity2):
+    """
+    Detect if the column/item is irregular. If it is irregular, append its position to the list.
+    If the average score of the two lists are smaller than 0.5(for now, I don't know how good the data will be, let's try 0.5 for now)
+    This parameter will change as development goes.
+    :param similarity1: Similarity calculated between each column.
+    :param similarity2: Similarity calculated between each column and the whole table(student data)
+    :return: the list of index/position that is irregular
+    """
+    average_sim = [(x + y) / 2 for (x, y) in zip(similarity1, similarity2)]
+    result = []
+    for i in range(len(average_sim)):
+        if average_sim[i] < 0.5:
+            result.append(i)
+    return result
+
+
+# [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
+# [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
+def similarity_between_columns(matrix):
+    """
+    Calculate the similarity between one column with the column before it and after it. This calculation is based on cosine,
+    which generated by dot product divided by normalised production.
+    :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+    :return: A list of similarities of each column/item.
+    """
+    similarity = []
+    for i in range(len(matrix)):
+        if i == 0:
+            cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
+        elif i == len(matrix) - 1:
+            cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
+        else:
+            cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
+            cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
+            cosine = (cosine1 + cosine2) / 2
+        similarity.append(cosine)
+    return similarity
+
+
+def similarity_between_column_whole(matrix, ave_per_student):
+    """
+    Calculate the similarity between each column and the whole table(student average score). This calculation is based on cosine,
+    which generated by dot product divided by normalised production.
+    :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+    :param ave_per_student: The average score each column, per student.
+    :return: A list of similarities of each column/item.
+    """
+    similarity = []
+    for i in range(len(matrix)):
+        cosine = dot(matrix[i], ave_per_student) / (norm(matrix[i]) * norm(ave_per_student))
+        similarity.append(cosine)
+    return similarity
+
+# Not implemented yet. Ideally should work under the 'Fou Partition' detection.
+def detect_student_irregular(matrix):
+    print("hello")
+
+
 
 # def appendStudentSum(matrix):
 #     result = list(sumStudentScore(matrix))
@@ -49,116 +245,10 @@ def sumItemScore(matrix):
 #     real_matrix.append(result)
 #     return real_matrix
 
-# In case the user accidently provides an unsorted Guttman Chart, sort the chart based on student first.
-def sortBasedOnStudent(matrix, studentSum):
-    # print(matrix)
-    # matrix.sort(key = lambda x: x[len(matrix)-2])
-    result = [x for (y,x) in sorted(zip(studentSum, matrix), key=lambda pair:pair[0])]
-    return list(reversed(result))
-# Receive a real_matrix (with student and item summation appended)
-def sortBasedOnItem(matrix, itemSum):
 
-    index = list(range(len(itemSum)))
-    sublist_item = list(zip(itemSum, index))
-    sublist_item = sorted(sublist_item,key = lambda x:x[0], reverse=True)  # Order that the inner list should follow.
-    sorted_item_order = [x[1] for x in sublist_item]
-    # print("Sorted_item_order")
-    # print(sorted_item_order)
-    result = copy.deepcopy(matrix)
-    for i in range(len(itemSum)):
-        temp_student = list(zip(sorted_item_order, result[i]))
-        temp_student = sorted(temp_student, key=lambda x:x[0])
-        temp_student_list = [x [1] for x in temp_student]
-        result[i] = temp_student_list
-    return result
-# Can return either the median of the students scores, or the median of the items.
-def cal_median(matrix, summation):
-    if len(summation) %2 ==0:
-        median = summation[int(len(summation)/2)] + summation[int(len(summation)/2)-1]
-        return median/2
-    else:
-        median = summation[math.floor(len(summation)/2)]
-        return median
-# Can return either the average of the students scores, or the average score of the items.
-def cal_average(matrix, summation, number):
-    return sum(summation)/number
-
-# Return the average score of item, per student.
-def retrieve_average_per_item(matrix, itemsum):
-    # Initialise a matrix to store items average results.
-    result = []
-    for i in range(len(itemsum)):
-        result.append(itemsum[i]/len(matrix))
-    return result
-
-# Transpose of the input matrix. The output is a 2-d/ nested list, but with row: items  and column: students.
-# This function doesn't modify the original data, except the format(performa a transpose function on the original data)
-# This will be helpful for later use.
-def retrieve_items_columns(matrix):
-    result = [list(x) for x in zip(*matrix)]
-    print(result)
-    return result
-
-def retrieve_correlation_columns(matrix):
-    result = []
-    for i in range(len(matrix)):
-        result.append(cal_correlation_items(matrix, i))
-    return  [j for i in result for j in i]
-
-def cal_correlation_items(matrix, current_index):
-    # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    result = []
-    if current_index == 0:
-        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index+1])[0,1])
-    elif current_index == len(matrix)-1:
-        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index-1])[0,1])
-    else:
-        temp = numpy.corrcoef(matrix[current_index],
-                                  matrix[current_index+1])[0,1] + numpy.corrcoef(
-            matrix[current_index],matrix[current_index-1])[0,1]
-        result.append(temp/2.0)
-    return result
-
-def detect_item_irregular(similarity1, similarity2):
-    average_sim = [(x+y)/2 for (x,y) in zip(similarity1, similarity2)]
-    result = []
-    for i in range(len(average_sim)):
-        if average_sim[i] < 0.5:
-            result.append(i)
-    return result
-
-
-
-# [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
-# [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
-def similarity_between_columns(matrix):
-    similarity = []
-    for i in range(len(matrix)):
-        if i == 0:
-            cosine = dot(matrix[i], matrix[i+1])/(norm(matrix[i])*norm(matrix[i+1]))
-        elif i==len(matrix)-1:
-            cosine = dot(matrix[i], matrix[i-1])/(norm(matrix[i])*norm(matrix[i-1]))
-        else:
-            cosine1 = dot(matrix[i], matrix[i+1])/(norm(matrix[i])*norm(matrix[i+1]))
-            cosine2 = dot(matrix[i], matrix[i-1])/(norm(matrix[i])*norm(matrix[i-1]))
-            cosine = (cosine1+cosine2)/2
-        similarity.append(cosine)
-    return similarity
-def similarity_between_column_whole(matrix, ave_per_student):
-    similarity = []
-    for i in range(len(matrix)):
-        cosine = dot(matrix[i], ave_per_student)/(norm(matrix[i])*norm(ave_per_student))
-        similarity.append(cosine)
-    return similarity
-
-
-
-def detect_student_irregular(matrix):
-    print ("hello")
-
-#TODO: 我认为这个算法可以分为三部分： 1. detect周围的correlation(1-2个?)，correlation 的比值应该小于 多少多少，这个比值应该调参，目前来说还不知道。 correlation部分应该占比1/2
-#TODO： 2. 计算当前item与整体items的similarty， 用cosine夹角计算。 占比1/2
-#TODO: 3. 四分之一法，暴力规划四部分区域大小， 检测有无异常行为。 这部分占比小，但是如果检测出来，就应该加一个flag， 告诉之前的算法，当前item有存在不合格风险。
+# TODO: 我认为这个算法可以分为三部分： 1. detect周围的correlation(1-2个?)，correlation 的比值应该小于 多少多少，这个比值应该调参，目前来说还不知道。 correlation部分应该占比1/2
+# TODO： 2. 计算当前item与整体items的similarty， 用cosine夹角计算。 占比1/2
+# TODO: 3. 四分之一法，暴力规划四部分区域大小， 检测有无异常行为。 这部分占比小，但是如果检测出来，就应该加一个flag， 告诉之前的算法，当前item有存在不合格风险。
 
 # TODO: RoadMap : We can treate the problem as a anomaly detection problem and apply outelier detection algorithms, including
 # TODO: 基于密度异常点检测 / 基于邻近度异常点检测等等。 Isolation Forest看起来是个不错的选择。 而且Isolation Forest 在sklearn有实现，调包可完成。
@@ -186,6 +276,10 @@ two areas will not flag the student or items. The flags will be raised only if t
 
 
 '''
+
+'''
+Driver function. Test data is Matrix(probably not a good idea) 
+'''
 def main():
     Matrix = [[0, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
     print(Matrix)
@@ -199,7 +293,7 @@ def main():
     print("After sorting:", matrix)
 
     # After sorting the data, both item_summation and student_summation records should be sorted.
-    # Keep the orginal order unchanged.
+    # Keep the original order unchanged.
     student_sum_copy = copy.deepcopy(studentSum)
     item_sum_copy = copy.deepcopy(itemSum)
     student_sum_copy.sort()
@@ -207,6 +301,7 @@ def main():
     student_sum_copy = list(reversed(student_sum_copy))
     item_sum_copy = list(reversed(item_sum_copy))
 
+    # The four variables below are not used for now, but maybe useful for later partitions.
     student_score_median = cal_median(matrix, student_sum_copy)
     item_median = cal_median(matrix, item_sum_copy)
     student_score_ave = cal_average(matrix, student_sum_copy, len(studentSum))
@@ -214,31 +309,25 @@ def main():
 
     ave_per_item = retrieve_average_per_item(matrix, item_sum_copy)  # Average of each column. Sorted list.
     ave_per_student = retrieve_average_per_item(matrix, student_sum_copy)
-    print("Student ave", ave_per_student)
-    items_in_matrix = retrieve_items_columns(matrix)
-    print(ave_per_item)
+    items_in_matrix = transpose_matrix(matrix)
 
+    #####################################################################################
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
     correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
+
 
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
     columns_similarity = similarity_between_columns(items_in_matrix)
     columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
+
+    #####################################################################################
+    # This list should be returned to the server, a list of irregular columns.
+    # This list contains the position of irregular columns.
     irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity)
-
-
-
-
 
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
 
 
 ###############################################################################
@@ -278,27 +367,34 @@ def formatData(matrix):
     data_pd = pd.DataFrame(data, retrieveIndexOfItems(matrix))
     # data_pd.loc['StudentSum'] = sumStudentScore(matrix)
     additional = pd.DataFrame({'ItemSum': sumItemScore(matrix)}, retrieveIndexOfItems(matrix))  # Add column
-    result = pd.concat([data_pd, additional], axis=1, sort= True)
+    result = pd.concat([data_pd, additional], axis=1, sort=True)
     lis = sumStudentScore(matrix)
     lis.append(None)
-    result.loc['StudentSum'] = lis   # Add addtional row
+    result.loc['StudentSum'] = lis  # Add addtional row
     return result
+
+
 def retrieveIndexOfItems(matrix):
     item_name = []
     for i in range(len(matrix[0])):
         item_name.append(str(i))
     return item_name
+
+
 def sortStudentandItems(data):
-    data = data.sort_values(by= ['ItemSum'], ascending=False)
+    data = data.sort_values(by=['ItemSum'], ascending=False)
     # print(data)
-    data = data.sort_values(by='StudentSum', axis = 1, ascending=False)
+    data = data.sort_values(by='StudentSum', axis=1, ascending=False)
     # print(data)
     return data
+
 
 # These two functions will return the headers for columns and rows after the data is sorted.
 # The order of both columns and rows are sorted.
 def retrieve_column_headers(data):
     return list(data.columns.values)
+
+
 def retrieve_row_headers(data):
     return list(data.index)
 
@@ -322,6 +418,8 @@ Correlation:
 2           0.821584  0.894427  1.000000  0.707107    0.645497
 3           0.580948  0.632456  0.707107  1.000000    0.790569
 StudentSum  0.000000       NaN  0.645497  0.790569    1.000000'''
+
+
 # print(data.T.corr())
 # The above correlation is not correct? Probably.
 
