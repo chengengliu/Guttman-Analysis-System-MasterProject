@@ -59,15 +59,30 @@ def sortBasedOnStudent(matrix, studentSum):
     # print(matrix)
     # matrix.sort(key = lambda x: x[len(matrix)-2])
     result = [x for (y,x) in sorted(zip(studentSum, matrix), key=lambda pair:pair[0])]
-    # print(result)
     return list(reversed(result))
 # Receive a real_matrix (with student and item summation appended)
 def sortBasedOnItem(matrix, itemSum):
-    print(matrix)
-    # print(itemSum)
-    # for student in matrix:
-    #     for item in student:
-    #         print("hello")
+
+    index = list(range(len(itemSum)))
+    sublist_item = list(zip(itemSum, index))
+    sublist_item = sorted(sublist_item,key = lambda x:x[0], reverse=True)  # Order that the inner list should follow.
+    sorted_item_order = [x[1] for x in sublist_item]
+    print("Sorted_item_order")
+    print(sorted_item_order)
+    result = copy.deepcopy(matrix)
+
+    # for student in result:
+    #     temp_student = list(zip(sorted_item_order, student))
+    #     temp_student = sorted(temp_student, key=lambda x:x[0])
+    #     temp_student_list = [x [1] for x in temp_student]
+    #     student = temp_student_list
+    #     print(student)
+    for i in range(len(itemSum)):
+        temp_student = list(zip(sorted_item_order, result[i]))
+        temp_student = sorted(temp_student, key=lambda x:x[0])
+        temp_student_list = [x [1] for x in temp_student]
+        result[i] = temp_student_list
+    return result
 
 def detectMedian(data,data_list):
     print()
@@ -119,11 +134,17 @@ studentSum = sumStudentScore(Matrix)
 itemSum = sumItemScore(Matrix)
 print(studentSum)
 print(itemSum)
-sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)
+print("Orginal data: ")
+print(Matrix)
+sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)   # After sorting based on student summation.
+print("Sort based on student summation; ")
+print(sortedMatrixStudent)
+sortedMatrixItem = sortBasedOnItem(sortedMatrixStudent, itemSum) # After sorting based on item summation.
+print("Sort based on item summation: ")
+print(sortedMatrixItem)
 
 
 
-#TODO: 可以接受数据的时候存储行 / 列,两个单独的.但是又感觉没有必要.
 
 
 
@@ -131,8 +152,7 @@ sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)
 
 
 
-
-
+############################################################################### Currently depreciated.
 # Another way of using Pandas. The following code will clean and sort the data.
 # Sample Format:
 #             student0  student1  student2  student3  student4  ItemSum
