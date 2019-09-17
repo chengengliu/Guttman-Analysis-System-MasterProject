@@ -126,6 +126,13 @@ sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)
 #TODO: 可以接受数据的时候存储行 / 列,两个单独的.但是又感觉没有必要.
 
 
+
+
+
+
+
+
+
 # Another way of using Pandas. The following code will clean and sort the data.
 # Sample Format:
 #             student0  student1  student2  student3  student4  ItemSum
@@ -155,21 +162,21 @@ def retrieveIndexOfItems(matrix):
     return item_name
 def sortStudentandItems(data):
     data = data.sort_values(by= ['ItemSum'], ascending=False)
-    print(data)
+    # print(data)
     data = data.sort_values(by='StudentSum', axis = 1, ascending=False)
-    print(data)
+    # print(data)
     return data
 
 # def sortStudent(matrix):
 #     matrix.sort_values('')
 data = formatData(Matrix)
-print(data)
+# print(data)
 data= sortStudentandItems(data)
 data_list = [tuple(x) for x in data.to_records(index=True)]
-print(data_list)
+# print(data_list)
 detectStudentIrregular(data_list)
 # detectStudentIrregular(data)
-print("Correlation: ")
+# print("Correlation: ")
 '''
 Correlation: 
                    1         0         2         3  StudentSum
@@ -182,36 +189,37 @@ StudentSum  0.000000       NaN  0.645497  0.790569    1.000000'''
 # The above correlation is not correct? Probably.
 
 # This will return the correlation between each column.
-print(data['1'].corr(data['0']))
-print(data['1'].corr(data['4']))
-print(data['1'].corr(data['2']))
-print("Correlation between one column and multiple columns: ")
-print(data[['1','2','3','4']].corrwith(data['0']))
+# print(data['1'].corr(data['0']))
+# print(data['1'].corr(data['4']))
+# print(data['1'].corr(data['2']))
+# print("Correlation between one column and multiple columns: ")
+# print(data[['1','2','3','4']].corrwith(data['0']))
 
-print(retrieve_column_headers(data))
-print(retrieve_row_headers(data))
+# print(retrieve_column_headers(data))
+# print(retrieve_row_headers(data))
 row_header = retrieve_row_headers(data)
 column_header = retrieve_column_headers(data)
 
 data2 = formatData(test)
-print(data2)
+# print(data2)
 data2_sort = sortStudentandItems(data2)
 # print(data2[data2.columns[1:]].corr()[:-1])
-print("test 2: Correlation between one column and multiple coluns: ")
-print(data2[['1','2','3','4','5','6','7','8','9','10','0','12']].corrwith(data2['11']))
+# print("test 2: Correlation between one column and multiple coluns: ")
+# print(data2[['1','2','3','4','5','6','7','8','9','10','0','12']].corrwith(data2['11']))
 
 correlation = pd.DataFrame()
 for a in list('0'):
     for b in list(data.columns.values):
         correlation.loc[a,b] = data.corr().loc[a,b]
-print("Correlation")
-print(data2_sort['8'].corr(data2_sort['5']))
-print("data 12 ")
-print(data2_sort['10'])
-print(data2_sort['11'])
-print(data2_sort['1'])
+# print("Correlation")
+# print(data2_sort['8'].corr(data2_sort['5']))
+# print("data 12 ")
+# print(data2_sort['10'])
+# print(data2_sort['11'])
+# print(data2_sort['1'])
 
 def calculateRowCorrelation(data):
-    print(data.T.corr().unstack().reset_index(name="corr"))
-    print(data.T.corr())
-calculateRowCorrelation(data2_sort)
+    # print(data.T.corr().unstack().reset_index(name="corr"))
+    # print(data.T.corr())
+    print()
+# calculateRowCorrelation(data2_sort)
