@@ -1,0 +1,16 @@
+DROP SCHEMA IF EXISTS `swen90014-rv`;
+
+CREATE SCHEMA `swen90014-rv`;
+
+CREATE TABLE `swen90014-rv`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(20) NOT NULL,
+  `passhash` BINARY(48) NOT NULL,
+  `salt` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+  UNIQUE INDEX `name_UNIQUE` (`name` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+INSERT INTO `swen90014-rv`.`users` (`id`, `name`, `passhash`, `salt`) VALUES ('1', 'test', 0xe499c0f02e9ed90b4987169a76b920ec3bafb7b6f59e7cc6ffb2b38785696310a6bbe38f5bf81f25108aa859257a85e1, 'FRxARATncx5YvepZppW8');
