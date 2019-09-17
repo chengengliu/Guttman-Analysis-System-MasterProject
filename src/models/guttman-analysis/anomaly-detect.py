@@ -107,8 +107,10 @@ def retrieve_items_columns(matrix):
     print(result)
     return result
 
-def cal_correlation_items(matrix):
-    print()
+def cal_correlation_items(matrix, current_index):
+    # If the row you want to check is the first column or the last column, only check the column after it or before it.
+    if current_index == 0 or current_index == len(matrix[0])-1:
+
 
 
 
@@ -123,6 +125,9 @@ def detectItemIttegulat(matrix):
 #TODO: 我认为这个算法可以分为三部分： 1. detect周围的correlation(1-2个?)，correlation 的比值应该小于 多少多少，这个比值应该调参，目前来说还不知道。 correlation部分应该占比1/2
 #TODO： 2. 计算当前item与整体items的similarty， 用cosine夹角计算。 占比1/2
 #TODO: 3. 四分之一法，暴力规划四部分区域大小， 检测有无异常行为。 这部分占比小，但是如果检测出来，就应该加一个flag， 告诉之前的算法，当前item有存在不合格风险。
+
+# TODO: RoadMap : We can treate the problem as a anomaly detection problem and apply outelier detection algorithms, including
+# TODO: 基于密度异常点检测 / 基于邻近度异常点检测等等。 Isolation Forest看起来是个不错的选择。 而且Isolation Forest 在sklearn有实现，调包可完成。
 
 # 'Four Partition'
 
