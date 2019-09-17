@@ -11,6 +11,15 @@ import pandas as pd
 import copy
 
 Matrix = [[1,1,1,1], [1,1,1,0], [1,1,1,0], [1,1,0,0], [1,2,0,0]]
+
+test = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0], [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0], [1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1]]
+test_data = [[1],[0],[1],[0],]
+print(len(test[0]))
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -45,9 +54,6 @@ def sumItemScore(matrix):
 #     real_matrix.append(result)
 #     return real_matrix
 
-
-
-
 # In case the user accidently provides an unsorted Guttman Chart, sort the chart based on student first.
 def sortBasedOnStudent(matrix, studentSum):
     # print(matrix)
@@ -63,11 +69,28 @@ def sortBasedOnItem(matrix, itemSum):
     #     for item in student:
     #         print("hello")
 
+def detectMedian(data,data_list):
+    print()
+# These two functions will return the headers for columns and rows after the data is sorted.
+# The order of both columns and rows are sorted.
+def retrieve_column_headers(data):
+    return list(data.columns.values)
+def retrieve_row_headers(data):
+    return list(data.index)
 
 
-def detectStudentIrregular(matrix):
-    for s in matrix:
-        print("hello")
+# Calculate correlation between columns.
+# Require that there are at least 5 students.
+
+
+def calculate_correlation_columns(data, row_header, column_header):
+    print()
+
+
+
+def detectStudentIrregular(data_list):
+    for s in data:
+        print(s)
 
 
 # Receive a real_matrix (with student and item summation appended)
@@ -114,7 +137,7 @@ sortedMatrixStudent = sortBasedOnStudent(Matrix, studentSum)
 def formatData(matrix):
     studentName = []
     for i in range(len(matrix)):
-        studentName.append("student"+str(i))
+        studentName.append(str(i))
     data = dict(zip(studentName, matrix))
 
     data_pd = pd.DataFrame(data, retrieveIndexOfItems(matrix))
@@ -128,7 +151,7 @@ def formatData(matrix):
 def retrieveIndexOfItems(matrix):
     item_name = []
     for i in range(len(matrix[0])):
-        item_name.append("item"+str(i))
+        item_name.append(str(i))
     return item_name
 def sortStudentandItems(data):
     data = data.sort_values(by= ['ItemSum'], ascending=False)
@@ -142,3 +165,53 @@ def sortStudentandItems(data):
 data = formatData(Matrix)
 print(data)
 data= sortStudentandItems(data)
+data_list = [tuple(x) for x in data.to_records(index=True)]
+print(data_list)
+detectStudentIrregular(data_list)
+# detectStudentIrregular(data)
+print("Correlation: ")
+'''
+Correlation: 
+                   1         0         2         3  StudentSum
+1           1.000000  0.979796  0.821584  0.580948    0.000000
+0           0.979796  1.000000  0.894427  0.632456         NaN
+2           0.821584  0.894427  1.000000  0.707107    0.645497
+3           0.580948  0.632456  0.707107  1.000000    0.790569
+StudentSum  0.000000       NaN  0.645497  0.790569    1.000000'''
+# print(data.T.corr())
+# The above correlation is not correct? Probably.
+
+# This will return the correlation between each column.
+print(data['1'].corr(data['0']))
+print(data['1'].corr(data['4']))
+print(data['1'].corr(data['2']))
+print("Correlation between one column and multiple columns: ")
+print(data[['1','2','3','4']].corrwith(data['0']))
+
+print(retrieve_column_headers(data))
+print(retrieve_row_headers(data))
+row_header = retrieve_row_headers(data)
+column_header = retrieve_column_headers(data)
+
+data2 = formatData(test)
+print(data2)
+data2_sort = sortStudentandItems(data2)
+# print(data2[data2.columns[1:]].corr()[:-1])
+print("test 2: Correlation between one column and multiple coluns: ")
+print(data2[['1','2','3','4','5','6','7','8','9','10','0','12']].corrwith(data2['11']))
+
+correlation = pd.DataFrame()
+for a in list('0'):
+    for b in list(data.columns.values):
+        correlation.loc[a,b] = data.corr().loc[a,b]
+print("Correlation")
+print(data2_sort['8'].corr(data2_sort['5']))
+print("data 12 ")
+print(data2_sort['10'])
+print(data2_sort['11'])
+print(data2_sort['1'])
+
+def calculateRowCorrelation(data):
+    print(data.T.corr().unstack().reset_index(name="corr"))
+    print(data.T.corr())
+calculateRowCorrelation(data2_sort)
