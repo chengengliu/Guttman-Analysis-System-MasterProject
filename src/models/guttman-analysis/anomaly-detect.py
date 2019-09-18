@@ -280,17 +280,45 @@ def similarity_between_columns(matrix):
     :return: A list of similarities of each column/item.
     """
     similarity = []
+    similarity_reuslt = []
+
+    # The range of either the number of student or items/columns
+    range_similarrity = math.floor(math.sqrt(len(matrix)))
     for i in range(len(matrix)):
+        # If it is the first column
         if i == 0:
-            cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
+            temp_similarity = 0.0
+            for j in range(range_similarrity):
+                try:
+                    temp_similarity += dot(matrix[i], matrix[i + j+1]) / (norm(matrix[i]) * norm(matrix[i +j+ 1]))
+                except:
+                    pass
+            similarity_reuslt.append(temp_similarity/range_similarrity)
+            # cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
         elif i == len(matrix) - 1:
-            cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
+            for j in range(range_similarrity):
+                try:
+                    temp_similarity += dot(matrix[i], matrix[i -j -1]) / (norm(matrix[i]) * norm(matrix[i -j -1]))
+                except:
+                    pass
+            similarity_reuslt.append(temp_similarity/range_similarrity)
+            # cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
         else:
-            cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
-            cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
-            cosine = (cosine1 + cosine2) / 2
-        similarity.append(cosine)
-    return similarity
+            for j in range(range_similarrity):
+                try:
+                    temp_similarity += dot(matrix[i], matrix[i + j+1]) / (norm(matrix[i]) * norm(matrix[i + j+1]))
+                except:
+                    pass
+                try:
+                    temp_similarity += dot(matrix[i], matrix[i -j-1]) / (norm(matrix[i]) * norm(matrix[i -j - 1]))
+                except:
+                    pass
+            similarity_reuslt.append(temp_similarity/(2*range_similarrity))
+            # cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
+            # cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
+            # cosine = (cosine1 + cosine2) / 2
+        # similarity.append(cosine)
+    return similarity_reuslt
 
 
 def similarity_between_column_whole(matrix, ave_per_student):
@@ -365,6 +393,7 @@ def return_irregular_columns(original_data):
     columns_whole_similarity = similarity_between_column_whole(transpose, ave_per_student)
 
     irregular_columns = detect_item_irregular(columns_similarity, columns_whole_similarity)
+    print("Similarity between columns",similarity_between_columns(matrix))
     return irregular_columns
 
 
