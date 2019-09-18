@@ -1,3 +1,18 @@
+'''
+Module usage:
+1. To get the correlation, for output purpose:
+either call the variable:  'correlation_of_columns'
+or call the function: 'retrieve_correlation_columns(transpose_matrix(data))' Notice the 'data' is meant to be 2-d array/matrix/nested list,
+that containing the original data.
+
+2. To get the irregular columns:
+either call the variable: 'irregular_column_items'
+or call the function: 'detect_item_irregular(similarity_between_columns(transpose_matrix(data),
+    similarity_between_column_whole(transpose_matrix(data), ave_per_student))'
+
+'''
+
+
 # Detect the anomaly, able to detect either row/ column.
 # The input is assumed to be sorted, with both row sorted(from good performance student to poor performance studet)
 # and column sorted (good performance item and poor performance item).
