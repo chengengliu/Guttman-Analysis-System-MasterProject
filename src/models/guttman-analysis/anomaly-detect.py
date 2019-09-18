@@ -1,3 +1,22 @@
+'''
+
+USAGE MANUAL:
+
+Module usage (interface):
+1. To get the correlation, for output purpose:
+call the function 'return_correlation(original_data)', where the input is the original data (it is supposed to be nested list)
+This function assumes that the input data is sorted. However, if the data is not sorted, the function will perform sorting
+inside.
+
+2. To get the irregular columns:
+either call the variable: 'irregular_column_items'
+or call the function: 'retuen_irregular_columns(original_data)', where the input is the original data (it is supposed to be nested list)
+This function assumes that the input data is sorted. However, if the data is not sorted, the function will perform sorting
+inside.
+
+'''
+
+
 # Detect the anomaly, able to detect either row/ column.
 # The input is assumed to be sorted, with both row sorted(from good performance student to poor performance studet)
 # and column sorted (good performance item and poor performance item).
@@ -277,11 +296,50 @@ two areas will not flag the student or items. The flags will be raised only if t
 
 '''
 
+# Getter for correlations
+# The INTERFACE exposed to the outside package.
+def return_correlation(original_data):
+    """
+    Return the correlations of each column. This is the interface exposed to other modules.
+    The input data is assumed to be sorted. If it is not, the following sorted matrix will sort the data input.
+    :param original_data:   Original data.
+    :return: A list of correlations of each item/column.
+    """
+    student_sum = sumStudentScore(original_data)
+    item_sum = sumItemScore(original_data)
+    sorted_student = sortBasedOnStudent(original_data, student_sum)
+    sorted_item = sortBasedOnItem(sorted_student, item_sum)
+    matrix = sorted_item
+    transpose = transpose_matrix(matrix)
+
+    correlations = retrieve_correlation_columns(transpose)
+    print("Getter Correlation: ", correlations)
+    return correlations
+
+    return original_data
+# Getter for irregular columns
+# The INTERFACE exposed to the outside package
+def return_irregular_columns(original_data):
+    student_sum = sumStudentScore(original_data)
+    item_sum = sumItemScore(original_data)
+    sorted_student = sortBasedOnStudent(original_data, student_sum)
+    sorted_item = sortBasedOnItem(sorted_student, item_sum)
+    matrix = sorted_item
+    transpose = transpose_matrix(matrix)
+    student_sum.sort()
+    student_sum = list(reversed(student_sum))
+    ave_per_student = retrieve_average_per_item(matrix, student_sum)
+    columns_similarity = similarity_between_columns(transpose)
+    columns_whole_similarity = similarity_between_column_whole(transpose, ave_per_student)
+
+    irregular_columns = detect_item_irregular(columns_similarity, columns_whole_similarity)
+    return irregular_columns
 '''
 Driver function. Test data is Matrix(probably not a good idea) 
 '''
 def main():
     Matrix = [[0, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
+
     print(Matrix)
     studentSum = sumStudentScore(Matrix)
     itemSum = sumItemScore(Matrix)
@@ -314,16 +372,22 @@ def main():
     #####################################################################################
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
     correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
+    print(correlation_of_columns)
+    return_correlation(Matrix)
 
 
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
     columns_similarity = similarity_between_columns(items_in_matrix)
     columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
+    print(columns_whole_similarity)
+    print(columns_similarity)
 
     #####################################################################################
     # This list should be returned to the server, a list of irregular columns.
     # This list contains the position of irregular columns.
     irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity)
+    return_irregular_columns(Matrix)
+
 
 
 if __name__ == '__main__':
