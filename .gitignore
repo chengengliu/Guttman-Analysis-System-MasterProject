@@ -2,6 +2,7 @@ node_modules
 __pycache__
 src/config.py
 .idea
+upload/
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]
