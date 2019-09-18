@@ -252,7 +252,7 @@ def cal_correlation_items(matrix, current_index,flag):
 # Newer: This is the Student Correlation: ------>  [0.5222329678670935, 0.8831249518616929, 0.883124951861693, -0.6220084679281461, 0.0]
 # Original : This is the Student Correlation: ------>  [0.5222329678670935, 0.7611164839335467, 0.33333333333333337, -0.4553418012614795, -0.5773502691896257]
 
-def detect_item_irregular(similarity1, similarity2):
+def detect_item_irregular(similarities, correlations, matrix):
     """
     Detect if the column/item is irregular. If it is irregular, append its position to the list.
     If the average score of the two lists are smaller than 0.5(for now, I don't know how good the data will be, let's try 0.5 for now)
@@ -261,11 +261,24 @@ def detect_item_irregular(similarity1, similarity2):
     :param similarity2: Similarity calculated between each column and the whole table(student data)
     :return: the list of index/position that is irregular
     """
-    average_sim = [(x + y) / 2 for (x, y) in zip(similarity1, similarity2)]
     result = []
-    for i in range(len(average_sim)):
-        if average_sim[i] < 0.5:
+    # Set the boundary value for the number of irregular detection.
+    range_irregular = math.floor(math.log(len(matrix)))
+
+    positions = [i for i in range(len(matrix))]
+    potential_list = list(zip(similarities, positions))
+    potential_list = sorted(potential_list, key=lambda x:x[0])
+    print(potential_list)
+    print(range_irregular)
+    for i in potential_list[0:range_irregular]:
+        if i[1] < 0.4:  # 阈值。 之后要检改变。 当前implementation并没有应用cluster
             result.append(i)
+
+    # average_sim = [(x + y) / 2 for (x, y) in zip(similarity1, similarity2)]
+    # result = []
+    # for i in range(len(average_sim)):
+    #     if average_sim[i] < 0.5:
+    #         result.append(i)
     return result
 
 
@@ -279,13 +292,15 @@ def similarity_between_columns(matrix):
     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
     :return: A list of similarities of each column/item.
     """
-    similarity = []
+    # similarity = []
     similarity_reuslt = []
 
     # The range of either the number of student or items/columns
     range_similarrity = math.floor(math.sqrt(len(matrix)))
+    # Traverse each column/stduent.
     for i in range(len(matrix)):
         # If it is the first column
+        temp_result = []
         if i == 0:
             temp_similarity = 0.0
             for j in range(range_similarrity):
@@ -293,32 +308,36 @@ def similarity_between_columns(matrix):
                     temp_similarity += dot(matrix[i], matrix[i + j+1]) / (norm(matrix[i]) * norm(matrix[i +j+ 1]))
                 except:
                     pass
-            similarity_reuslt.append(temp_similarity/range_similarrity)
+            temp_result.append(temp_similarity/range_similarrity)
             # cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
         elif i == len(matrix) - 1:
+            temp_similarity = 0.0
             for j in range(range_similarrity):
                 try:
                     temp_similarity += dot(matrix[i], matrix[i -j -1]) / (norm(matrix[i]) * norm(matrix[i -j -1]))
                 except:
                     pass
-            similarity_reuslt.append(temp_similarity/range_similarrity)
+            temp_result.append(temp_similarity/range_similarrity)
             # cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
         else:
+            temp_similarity = 0.0
             for j in range(range_similarrity):
                 try:
                     temp_similarity += dot(matrix[i], matrix[i + j+1]) / (norm(matrix[i]) * norm(matrix[i + j+1]))
                 except:
                     pass
                 try:
-                    temp_similarity += dot(matrix[i], matrix[i -j-1]) / (norm(matrix[i]) * norm(matrix[i -j - 1]))
+                    temp_similarity += dot(matrix[i], matrix[i -j-1]) / (norm(matrix[i]) * norm(matrix[i -j -1]))
                 except:
                     pass
-            similarity_reuslt.append(temp_similarity/(2*range_similarrity))
+            temp_result.append(temp_similarity/(2*range_similarrity))
             # cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
             # cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
             # cosine = (cosine1 + cosine2) / 2
         # similarity.append(cosine)
-    return similarity_reuslt
+        similarity_reuslt.append(temp_result)
+        result = [j for i in similarity_reuslt for j in i]
+    return result
 
 
 def similarity_between_column_whole(matrix, ave_per_student):
@@ -356,7 +375,9 @@ def detect_student_irregular(matrix):
 
 # Getter for correlations
 # The INTERFACE exposed to the outside package.
-def return_correlation(original_data):
+### Notice that the second arg is a Bool, the thrid arg is a string
+###
+def return_correlation(original_data, student, flag):
     """
     Return the correlations of each column. This is the interface exposed to other modules.
     The input data is assumed to be sorted. If it is not, the following sorted matrix will sort the data input.
@@ -392,16 +413,16 @@ def return_irregular_columns(original_data):
     columns_similarity = similarity_between_columns(transpose)
     columns_whole_similarity = similarity_between_column_whole(transpose, ave_per_student)
 
-    irregular_columns = detect_item_irregular(columns_similarity, columns_whole_similarity)
+    irregular_columns = detect_item_irregular(columns_similarity, columns_whole_similarity, transpose)
     print("Similarity between columns",similarity_between_columns(matrix))
     return irregular_columns
 
 
-'''
-Driver function. Test data is Matrix(probably not a good idea) 
-'''
 
 
+'''
+Driver function. NO NEDD to read this function AT ALL
+'''
 def main():
     Matrix = [[0, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
 
@@ -448,13 +469,13 @@ def main():
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
     columns_similarity = similarity_between_columns(items_in_matrix)
     columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
-    print(columns_whole_similarity)
-    print(columns_similarity)
+    print("Columns whole similarity", columns_whole_similarity)
+    print("columns_similarity", columns_similarity)
 
     #####################################################################################
     # This list should be returned to the server, a list of irregular columns.
     # This list contains the position of irregular columns.
-    irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity)
+    irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity, items_in_matrix)
     return_irregular_columns(Matrix)
 
 
