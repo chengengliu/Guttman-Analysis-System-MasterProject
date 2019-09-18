@@ -40,6 +40,7 @@ Input Desciption:
 Notice: For now I have not implemented the cluster algorithm for detecting unusual behaviour. This will be added in sprint3.
 Current method is to set a threshold value and to see if the value is below the threshold. （阈值）
 '''
+#TODO: The code for calculating similarity can be refactored and improved, to calculate together with correlation. 今天不做了， 明天代码重构写。
 
 
 
@@ -289,7 +290,7 @@ def cal_correlation_items(matrix, current_index, flag):
 
 # [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
 # [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
-
+##### 这部分的代码可以和correlation 合并。 重构代码时候可以直接返回nested lists， 根据需求取出相对应的值。
 def similarity_between_columns(matrix):
     """
     Calculate the similarity between one column with the column before it and after it. This calculation is based on cosine,
