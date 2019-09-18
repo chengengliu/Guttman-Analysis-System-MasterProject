@@ -180,14 +180,51 @@ def cal_correlation_items(matrix, current_index):
     """
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
     result = []
+    temp_results = []
+    correlation_result = []
+
+    # Retrieve the square root of number of items (the matrix is in transposed form). This will
+    # be the range of calculating the neighbourhood of the column when calculating the correlation.
+    range_correlation = math.floor(math.sqrt(len(matrix)))
+    print("range is:", range_correlation)
+
+    # for i in range(range_correlation):
+    #     try:
+    #         temp_correlation =
+
+
+    # 1 2 3 4 5
+
+    # If the column is the first column, calculate the correlation within the range but only for the column after it.
+    # Try-except is to prevent extreme cases, but generally it will not be used.
     if current_index == 0:
+        temp_correlation = 0.0
+        for i in range(range_correlation):
+            try:
+                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index+i])[0,1]
+            except:
+                pass
+        correlation_result.append(temp_correlation/(2*range_correlation))
         result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
+
+    # If the column is the last column, calculate the correlation within the range but only for the column before it.
+    # Try-except is to prevent extreme cases, but generally it will not be used.
     elif current_index == len(matrix) - 1:
+        temp_correlation = 0.0
+        for i in range(range_correlation):
+            try:
+                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index-i])[0,1]
+            except:
+                pass
+        correlation_result.append(temp_correlation/(2*range_correlation))
         result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
+    # When the current column is neither the first column nor the last column(a.k.a the general column),
+    # calculate the correlation between the current column and the columns (within the range) before it and after it.
     else:
         temp = numpy.corrcoef(matrix[current_index],
                               matrix[current_index + 1])[0, 1] + numpy.corrcoef(
             matrix[current_index], matrix[current_index - 1])[0, 1]
+
         result.append(temp / 2.0)
     return result
 
@@ -255,7 +292,7 @@ def detect_student_irregular(matrix):
 
 # TODO: 根据栗百宫的建议， column anomaly detection 可以分为两类， 1. 计算column correlation 2. 计算column similarity
 # 更具体的来说： 1. Correlation的计算： 当前完成了： 计算当前列的前面和后面的列，得出两个correlation，进行加权返回。
-# 但是更合理的方法是： （1）计算当前列， 与当前列的累加值(top1 student, top2 student....until top 50 student)进行correlation计算。
+# 但是更合理的方法是： （1）计算当前列(的累加值）， 与当前列的累加值(top1 student, top2 student....until top 50 student)进行correlation计算。
 #                   （2）计算当前列， 与前后 根号下（列数） 的列进行correlation计算。
 #                   得到两个correlation list以后， 取根号下（列数）个top 异常值， 高于阈值的都输出即可。此处不需要Clustering, 只需要一个精度不大的阈值即可。
 #             2. Similarity 的计算： 当前完成了当前column与前，后column的similarity计算， 以及当前列和整体similarity的计算。
