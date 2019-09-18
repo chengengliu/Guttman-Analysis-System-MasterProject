@@ -1,18 +1,39 @@
 '''
 
-USAGE MANUAL:
+USAGE MANUAL/INTERFACE Introduction:
 
 Module usage (interface):
-1. To get the correlation, for output purpose:
-call the function 'return_correlation(original_data)', where the input is the original data (it is supposed to be nested list)
-This function assumes that the input data is sorted. However, if the data is not sorted, the function will perform sorting
-inside.
+1. To get the correlation, for either the student or the items/criteria:
+
+call the function:
+    'return_correlation(original_data, is_student, flag)'
+Input Description:
+
+    Original_data: where the input is the original data (it is supposed to be nested list)
+    This function assumes that the input data is sorted. However, if the data is not sorted, the function will perform sorting
+    inside.
+
+    is_student: Is a boolean variable, can be either True or False. This boolean values specifies whether you want to get
+    student correlation (row), or item/criteria correlation(column). For example,
+    If 'is_student' is set to True, the program will return the correlation calculated for rows.
+
+    flag: This is for testing algorithm purpose. It is a string, can either be 'Accumulation', or 'Correlation'.
+        'Accumulation' will use the accumulated value of the column/student, while 'Correlation' is simple calculate the
+        data.
 
 2. To get the irregular columns:
-either call the variable: 'irregular_column_items'
-or call the function: 'retuen_irregular_columns(original_data)', where the input is the original data (it is supposed to be nested list)
-This function assumes that the input data is sorted. However, if the data is not sorted, the function will perform sorting
-inside.
+
+call the function:
+    'retuen_irregular_columns(original_data, is_student)'
+Input Desciption:
+
+    Original_data: where the input is the original data (it is supposed to be nested list)
+    This function assumes that the input data is sorted. However, if the data is not sorted, the function will perform sorting
+    inside.
+
+    is_student: Is a boolean variable, can be either True or False. This boolean values specifies whether you want to get
+    student correlation (row), or item/criteria correlation(column). For example,
+    If 'is_student' is set to True, the program will return the correlation calculated for rows.
 
 '''
 
@@ -356,8 +377,9 @@ def detect_item_irregular(similarities, matrix):
     print(potential_list)
     print(range_irregular)
     for i in potential_list[0:range_irregular]:
-        if i[1] < 0.4:  # 阈值。 之后要检改变。 当前implementation并没有应用cluster
-            result.append(i)
+        print("i is ",i)
+        if i[0] <0.5:  # 阈值。 之后要检改变。 当前implementation并没有应用cluster
+            result.append(i[1])
 
     # average_sim = [(x + y) / 2 for (x, y) in zip(similarity1, similarity2)]
     # result = []
@@ -384,7 +406,7 @@ def detect_item_irregular(similarities, matrix):
 # The INTERFACE exposed to the outside package.
 ### Notice that the second arg is a Bool, the thrid arg is a string
 ###
-def return_correlation(original_data, student, flag):
+def return_correlation(original_data, is_student, flag):
     """
     Return the correlations of each column. This is the interface exposed to other modules.
     The input data is assumed to be sorted. If it is not, the following sorted matrix will sort the data input.
@@ -395,20 +417,21 @@ def return_correlation(original_data, student, flag):
     item_sum = sumItemScore(original_data)
     sorted_student = sortBasedOnStudent(original_data, student_sum)
     sorted_item = sortBasedOnItem(sorted_student, item_sum)
+
     matrix = sorted_item
     transpose = transpose_matrix(matrix)
 
-    correlations = retrieve_correlation_columns(transpose)
-    print("Getter Correlation: ", correlations)
-    return correlations
-
-    return original_data
+    # Retrieve the correlation of columns, use transpose
+    if not is_student:
+        return retrieve_correlation_columns(transpose, flag)
+    elif is_student:
+        return retrieve_correlation_columns(matrix, flag)
 
 
 # Getter for irregular columns
 # The INTERFACE exposed to the outside package
 # Student is a Bool.
-def return_irregular_column_index(original_data,student):
+def return_irregular_column_index(original_data,is_student):
     student_sum = sumStudentScore(original_data)
     item_sum = sumItemScore(original_data)
     sorted_student = sortBasedOnStudent(original_data, student_sum)
@@ -422,10 +445,10 @@ def return_irregular_column_index(original_data,student):
     student_sum = list(reversed(student_sum))
     ave_per_student = retrieve_average_per_item(matrix, student_sum)
 
-    if not student:
+    if not is_student:
         columns_similarity = similarity_between_columns(transpose)
         return detect_item_irregular(columns_similarity, transpose)
-    elif student:
+    elif is_student:
         columns_similarity = similarity_between_columns(matrix)
         return detect_item_irregular(columns_similarity, matrix)
     # columns_whole_similarity = similarity_between_column_whole(transpose, ave_per_student)
@@ -482,23 +505,28 @@ def main():
     # correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
     # print(correlation_of_columns)
     # print(" This is Student Distribution : ------> ", matrix)
-    print("This is the Accumulation Correlation of Student: ------> ")
-    print(retrieve_correlation_columns(matrix, 'Accumulation'))
-    print("This is the Correlation of Student: ----->")
-    print(retrieve_correlation_columns(matrix, 'Correlation'))
-    # return_correlation(Matrix)
+
+    #
+    # print("This is the Accumulation Correlation of Student: ------> ")
+    # print(retrieve_correlation_columns(matrix, 'Accumulation'))
+    # print("This is the Correlation of Student: ----->")
+    # print(retrieve_correlation_columns(matrix, 'Correlation'))
+    # print("Student, Accumulation: ", return_correlation(Matrix, True, 'Accumulation'))
 
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
-    columns_similarity = similarity_between_columns(items_in_matrix)
-    columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
-    print("Columns whole similarity", columns_whole_similarity)
-    print("columns_similarity", columns_similarity)
+    # columns_similarity = similarity_between_columns(items_in_matrix)
+    # columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
+    # print("Columns whole similarity", columns_whole_similarity)
+    # print("columns_similarity", columns_similarity)
 
     #####################################################################################
     # This list should be returned to the server, a list of irregular columns.
     # This list contains the position of irregular columns.
     # irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity, items_in_matrix)
-    # return_irregular_columns(Matrix)
+    # print("Irregular Column index: ", return_irregular_column_index(Matrix, True))
+
+
+
 
 
 if __name__ == '__main__':
@@ -517,6 +545,13 @@ if __name__ == '__main__':
 ###############################################################################
 ####### Any code bleow this line are depreciated(the use of pandas)
 ###############################################################################
+# 9.19
+# This is the Accumulation Correlation of Student: ------>
+# [0.5222329678670935, 0.8897395944346991, 0.8897395944346991, 0.5396491510576825, 0.0]
+# This is the Correlation of Student: ----->
+# [0.5222329678670935, 0.44156247593084647, 0.4415624759308465, -0.31100423396407306, 0.0]
+# Columns whole similarity [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
+# columns_similarity [0.7481279560894893, 0.36530843641820254, 0.44176824351876154, 0.2886751345948129]
 # Another way of using Pandas. The following code will clean and sort the data.
 # Sample Format:
 #             student0  student1  student2  student3  student4  ItemSum
