@@ -20,11 +20,13 @@ Input Description:
     flag: This is for testing algorithm purpose. It is a string, can either be 'Accumulation', or 'Correlation'.
         'Accumulation' will use the accumulated value of the column/student, while 'Correlation' is simple calculate the
         data.
+Notice: Two different ways of calculating correlation are implemented and can be retrieved. Which way is better needs to
+be tested using test results.
 
 2. To get the irregular columns:
 
 call the function:
-    'retuen_irregular_columns(original_data, is_student)'
+    'return_irregular_column_index(original_data, is_student)'
 Input Desciption:
 
     Original_data: where the input is the original data (it is supposed to be nested list)
@@ -35,7 +37,11 @@ Input Desciption:
     student correlation (row), or item/criteria correlation(column). For example,
     If 'is_student' is set to True, the program will return the correlation calculated for rows.
 
+Notice: For now I have not implemented the cluster algorithm for detecting unusual behaviour. This will be added in sprint3.
+Current method is to set a threshold value and to see if the value is below the threshold. （阈值）
 '''
+
+
 
 # Detect the anomaly, able to detect either row/ column.
 # The input is assumed to be sorted, with both row sorted(from good performance student to poor performance studet)
@@ -201,10 +207,11 @@ def retrieve_correlation_columns(matrix, flag):
 
 def cal_correlation_items(matrix, current_index, flag):
     """
-    Calculate the correlation between each column. For now this function is implemented as this column, the column before
-    it, the column after it. A more sensible way of doing it will be updated later(to calculate a range of columns).
+    Calculate the correlation of columns or rows.
     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
     :param current_index: Current index of the column
+    :flag: Specifying either 'Accumulation' -> calculate in accumulative way and use accumulative data or
+    'Correlation' -> calculate in a normal way.
     :return: A list of correlation calculated.
     """
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
@@ -364,7 +371,8 @@ def detect_item_irregular(similarities, matrix):
     If the average score of the two lists are smaller than 0.5(for now, I don't know how good the data will be, let's try 0.5 for now)
     This parameter will change as development goes.
     :param similarity1: Similarity calculated between each column.
-    :param similarity2: Similarity calculated between each column and the whole table(student data)
+    :param matrix:  Data input. Either has row as student(matrix), or has row as items/criteria(needs to call transpose to
+    re-format the data)
     :return: the list of index/position that is irregular
     """
     result = []
@@ -411,6 +419,7 @@ def return_correlation(original_data, is_student, flag):
     Return the correlations of each column. This is the interface exposed to other modules.
     The input data is assumed to be sorted. If it is not, the following sorted matrix will sort the data input.
     :param original_data:   Original data.
+    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
     :return: A list of correlations of each item/column.
     """
     student_sum = sumStudentScore(original_data)
@@ -432,6 +441,12 @@ def return_correlation(original_data, is_student, flag):
 # The INTERFACE exposed to the outside package
 # Student is a Bool.
 def return_irregular_column_index(original_data,is_student):
+    """
+    Return the index of irregular column/ row.
+    :param original_data: The original data.
+    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
+    :return:    A list of irregular pattern.
+    """
     student_sum = sumStudentScore(original_data)
     item_sum = sumItemScore(original_data)
     sorted_student = sortBasedOnStudent(original_data, student_sum)
