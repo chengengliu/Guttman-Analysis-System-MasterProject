@@ -158,37 +158,27 @@ def transpose_matrix(matrix):
     return result
 
 
-def retrieve_correlation_columns(matrix):
+def retrieve_correlation_columns(matrix, flag):
     """
     Retrieve the correlation between each column. This function utilises cal_correlation_items
     :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
     :return:    A list of correlation calculated.
     """
-    result = []
+    accumulation_result = []
+    correlation_result = []
     # Traverse each column/ or row.
     for i in range(len(matrix)):
-        result.append(cal_correlation_items(matrix, i))
-    return [j for i in result for j in i]
-############################################################################################ Notice:
-# This is an alternative approach, comparing with the function retrieve_correlation_columns(matrix).
-
-# For each column, calculate the current column accumulation correlation, between each other columns that are in the range.
-# Whether to choose between 'retrieve_correlation_columns(matrix)' or 'retrieve_correlation_in_accumulation(matrix)' is to be decided.
-# (OR MAYBE Use the weighted average between both of them)
-
-# def retrive_correlation_in_accumulation(matrix):
-#     print()
-#     result = []
-#     for i in range(len(matrix)):
-#         result.append(cal_correlation_accumulation(i))
-#     return [j for i in result for j in i]
-#
-# def cal_correlation_accumulation(column, index):
-#     accumulation_list =[]
-#     accumulation = 0.0
+        accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation'))
+    for i in range(len(matrix)):
+        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation'))
+    if flag == 'Correlation' :
+        return  [j for i in correlation_result for j in i]
+    elif flag == 'Accumulation':
+        return [j for i in accumulation_result for j in i]
+    # return [j for i in accumulation_result for j in i]
 
 
-def cal_correlation_items(matrix, current_index):
+def cal_correlation_items(matrix, current_index,flag):
     """
     Calculate the correlation between each column. For now this function is implemented as this column, the column before
     it, the column after it. A more sensible way of doing it will be updated later(to calculate a range of columns).
@@ -197,7 +187,7 @@ def cal_correlation_items(matrix, current_index):
     :return: A list of correlation calculated.
     """
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    # result = []
+    result = []
     correlation_result = []
     accumulation_correlation_result = []
     accumulate_current = numpy.cumsum(matrix[current_index])
@@ -253,14 +243,11 @@ def cal_correlation_items(matrix, current_index):
             except:
                 pass
         correlation_result.append(temp_correlation/(2*range_correlation))
-        accumulation_correlation_result.append(temp_accumulation_correlation/2*(range_correlation))
-        # temp = numpy.corrcoef(matrix[current_index],
-        #                       matrix[current_index + 1])[0, 1] + numpy.corrcoef(
-        #     matrix[current_index], matrix[current_index - 1])[0, 1]
-        # result.append(temp / 2.0)
-    print("This is the BETTER Correlation???? : -----> ", correlation_result)
-    # print("This is the Original Correlation   : -----> ", result)
-    return correlation_result
+        accumulation_correlation_result.append(temp_accumulation_correlation/(2*range_correlation))
+    if flag == 'Accumulation':
+        return accumulation_correlation_result
+    elif flag == 'Correlation':
+        return correlation_result
 # Diveide by length *2: ->>>>>[0.5222329678670935, 0.44156247593084647, 0.4415624759308465, -0.31100423396407306, 0.0]
 # Newer: This is the Student Correlation: ------>  [0.5222329678670935, 0.8831249518616929, 0.883124951861693, -0.6220084679281461, 0.0]
 # Original : This is the Student Correlation: ------>  [0.5222329678670935, 0.7611164839335467, 0.33333333333333337, -0.4553418012614795, -0.5773502691896257]
@@ -422,8 +409,11 @@ def main():
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
     # correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
     # print(correlation_of_columns)
-    print(" This is Student Distribution : ------> ", matrix)
-    print("This is the Item Correlation: ------> ", retrieve_correlation_columns(matrix))
+    # print(" This is Student Distribution : ------> ", matrix)
+    print("This is the Accumulation Correlation of Student: ------> ")
+    print(retrieve_correlation_columns(matrix, 'Accumulation'))
+    print("This is the Correlation of Student: ----->")
+    print(retrieve_correlation_columns(matrix, 'Correlation'))
     # return_correlation(Matrix)
 
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
