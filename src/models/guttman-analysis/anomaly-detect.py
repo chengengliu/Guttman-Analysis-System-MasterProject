@@ -165,9 +165,27 @@ def retrieve_correlation_columns(matrix):
     :return:    A list of correlation calculated.
     """
     result = []
+    # Traverse each column/ or row.
     for i in range(len(matrix)):
         result.append(cal_correlation_items(matrix, i))
     return [j for i in result for j in i]
+############################################################################################ Notice:
+# This is an alternative approach, comparing with the function retrieve_correlation_columns(matrix).
+
+# For each column, calculate the current column accumulation correlation, between each other columns that are in the range.
+# Whether to choose between 'retrieve_correlation_columns(matrix)' or 'retrieve_correlation_in_accumulation(matrix)' is to be decided.
+# (OR MAYBE Use the weighted average between both of them)
+
+# def retrive_correlation_in_accumulation(matrix):
+#     print()
+#     result = []
+#     for i in range(len(matrix)):
+#         result.append(cal_correlation_accumulation(i))
+#     return [j for i in result for j in i]
+#
+# def cal_correlation_accumulation(column, index):
+#     accumulation_list =[]
+#     accumulation = 0.0
 
 
 def cal_correlation_items(matrix, current_index):
@@ -179,55 +197,73 @@ def cal_correlation_items(matrix, current_index):
     :return: A list of correlation calculated.
     """
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    result = []
-    temp_results = []
+    # result = []
     correlation_result = []
+    accumulation_correlation_result = []
+    accumulate_current = numpy.cumsum(matrix[current_index])
 
     # Retrieve the square root of number of items (the matrix is in transposed form). This will
     # be the range of calculating the neighbourhood of the column when calculating the correlation.
     range_correlation = math.floor(math.sqrt(len(matrix)))
-    print("range is:", range_correlation)
-
-    # for i in range(range_correlation):
-    #     try:
-    #         temp_correlation =
-
-
-    # 1 2 3 4 5
 
     # If the column is the first column, calculate the correlation within the range but only for the column after it.
     # Try-except is to prevent extreme cases, but generally it will not be used.
     if current_index == 0:
         temp_correlation = 0.0
+        temp_accumulation_correlation = 0.0
         for i in range(range_correlation):
             try:
-                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index+i])[0,1]
+                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index+i+1])[0,1]
+                temp_accumulation_correlation += numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index+i+1]))[0,1]
             except:
                 pass
-        correlation_result.append(temp_correlation/(2*range_correlation))
-        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
+        correlation_result.append(temp_correlation/range_correlation)
+        accumulation_correlation_result.append(temp_correlation/range_correlation)
+        # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
 
     # If the column is the last column, calculate the correlation within the range but only for the column before it.
     # Try-except is to prevent extreme cases, but generally it will not be used.
     elif current_index == len(matrix) - 1:
         temp_correlation = 0.0
+        temp_accumulation_correlation =0.0
         for i in range(range_correlation):
             try:
-                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index-i])[0,1]
+                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index-i-1])[0,1]
+                temp_accumulation_correlation += numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index-i-1]))[0,1]
             except:
                 pass
-        correlation_result.append(temp_correlation/(2*range_correlation))
-        result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
+        correlation_result.append(temp_correlation/range_correlation)
+        accumulation_correlation_result.append(temp_correlation/range_correlation)
+        # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
     # When the current column is neither the first column nor the last column(a.k.a the general column),
     # calculate the correlation between the current column and the columns (within the range) before it and after it.
     else:
-        temp = numpy.corrcoef(matrix[current_index],
-                              matrix[current_index + 1])[0, 1] + numpy.corrcoef(
-            matrix[current_index], matrix[current_index - 1])[0, 1]
-
-        result.append(temp / 2.0)
-    return result
-
+        temp_correlation = 0.0
+        temp_accumulation_correlation = 0.0
+        for i in range(range_correlation):
+            try:
+                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index-i-1])[0,1]
+                temp_accumulation_correlation += numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index-i-1]))[0,1]
+            # The index may beyond the range, if the current column is near the tail or the head of the list.
+            except:
+                pass
+            try:
+                temp_correlation += numpy.corrcoef(matrix[current_index],matrix[current_index+i+1])[0,1]
+                temp_accumulation_correlation += numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index+i+1]))[0,1]
+            except:
+                pass
+        correlation_result.append(temp_correlation/(2*range_correlation))
+        accumulation_correlation_result.append(temp_accumulation_correlation/2*(range_correlation))
+        # temp = numpy.corrcoef(matrix[current_index],
+        #                       matrix[current_index + 1])[0, 1] + numpy.corrcoef(
+        #     matrix[current_index], matrix[current_index - 1])[0, 1]
+        # result.append(temp / 2.0)
+    print("This is the BETTER Correlation???? : -----> ", correlation_result)
+    # print("This is the Original Correlation   : -----> ", result)
+    return correlation_result
+# Diveide by length *2: ->>>>>[0.5222329678670935, 0.44156247593084647, 0.4415624759308465, -0.31100423396407306, 0.0]
+# Newer: This is the Student Correlation: ------>  [0.5222329678670935, 0.8831249518616929, 0.883124951861693, -0.6220084679281461, 0.0]
+# Original : This is the Student Correlation: ------>  [0.5222329678670935, 0.7611164839335467, 0.33333333333333337, -0.4553418012614795, -0.5773502691896257]
 
 def detect_item_irregular(similarity1, similarity2):
     """
@@ -384,9 +420,11 @@ def main():
 
     #####################################################################################
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
-    correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
-    print(correlation_of_columns)
-    return_correlation(Matrix)
+    # correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
+    # print(correlation_of_columns)
+    print(" This is Student Distribution : ------> ", matrix)
+    print("This is the Item Correlation: ------> ", retrieve_correlation_columns(matrix))
+    # return_correlation(Matrix)
 
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
     columns_similarity = similarity_between_columns(items_in_matrix)
