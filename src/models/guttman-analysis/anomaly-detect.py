@@ -16,7 +16,6 @@ inside.
 
 '''
 
-
 # Detect the anomaly, able to detect either row/ column.
 # The input is assumed to be sorted, with both row sorted(from good performance student to poor performance studet)
 # and column sorted (good performance item and poor performance item).
@@ -212,6 +211,7 @@ def detect_item_irregular(similarity1, similarity2):
 
 # [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
 # [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
+
 def similarity_between_columns(matrix):
     """
     Calculate the similarity between one column with the column before it and after it. This calculation is based on cosine,
@@ -247,54 +247,24 @@ def similarity_between_column_whole(matrix, ave_per_student):
         similarity.append(cosine)
     return similarity
 
-# Not implemented yet. Ideally should work under the 'Fou Partition' detection.
+
+# Not implemented yet.
 def detect_student_irregular(matrix):
     print("hello")
 
 
-
-# def appendStudentSum(matrix):
-#     result = list(sumStudentScore(matrix))
-#     print(matrix.__len__())
-#     real_matrix = copy.deepcopy(matrix)
-#     real_matrix.append(result)  # Student result is appended.
-#     return real_matrix
-# def appendItemSum(original_matrix, real_matrix):
-#     result = sumItemScore(original_matrix)
-#     real_matrix.append(result)
-#     return real_matrix
-
-
-# TODO: 我认为这个算法可以分为三部分： 1. detect周围的correlation(1-2个?)，correlation 的比值应该小于 多少多少，这个比值应该调参，目前来说还不知道。 correlation部分应该占比1/2
-# TODO： 2. 计算当前item与整体items的similarty， 用cosine夹角计算。 占比1/2
-# TODO: 3. 四分之一法，暴力规划四部分区域大小， 检测有无异常行为。 这部分占比小，但是如果检测出来，就应该加一个flag， 告诉之前的算法，当前item有存在不合格风险。
+# TODO: 根据栗百宫的建议， column anomaly detection 可以分为两类， 1. 计算column correlation 2. 计算column similarity
+# 更具体的来说： 1. Correlation的计算： 当前完成了： 计算当前列的前面和后面的列，得出两个correlation，进行加权返回。
+# 但是更合理的方法是： （1）计算当前列， 与当前列的累加值(top1 student, top2 student....until top 50 student)进行correlation计算。
+#                   （2）计算当前列， 与前后 根号下（列数） 的列进行correlation计算。
+#                   得到两个correlation list以后， 取根号下（列数）个top 异常值， 高于阈值的都输出即可。此处不需要Clustering, 只需要一个精度不大的阈值即可。
+#             2. Similarity 的计算： 当前完成了当前column与前，后column的similarity计算， 以及当前列和整体similarity的计算。
+# 更合理的方法是：    （1）取根号下列个数长度，检测前后长度区间内的similarity。 然后用clustering（sprint3）筛选top异常值。
 
 # TODO: RoadMap : We can treate the problem as a anomaly detection problem and apply outelier detection algorithms, including
 # TODO: 基于密度异常点检测 / 基于邻近度异常点检测等等。 Isolation Forest看起来是个不错的选择。 而且Isolation Forest 在sklearn有实现，调包可完成。
 
-# 'Four Partition'
-
-'''
-According to the median of the items and students numbers, as well as students performance, 
-The following 'Four Partitions' algorithm is implemented. 
-Since the counter will start from the top left, block 'A' will be the most compentent student, answerign the easiest items/questions. 
-This block tend to have a low percentage of false. If detect a zero/false, falge this student and this items. Even though it may 
-not effect the total correlation performace, the anomaly shows that there is unusual/odd zero. 
-Similarly, the percentage of block 'B' and block 'C', containing zeros/false will be higher than blcok 'A'. Detection in these
-two areas will not flag the student or items. The flags will be raised only if the anomaly 
-
-          |  
-    A     |    B
-          |  
-          |
----------- ----------
-          |  
-    C     |    D     
-          |  
-          |
-
-
-'''
+# 'Four Partition' is not used anymore. Detect odd zero or odd ones will be implemented as a nested-loop.
 
 # Getter for correlations
 # The INTERFACE exposed to the outside package.
@@ -317,6 +287,8 @@ def return_correlation(original_data):
     return correlations
 
     return original_data
+
+
 # Getter for irregular columns
 # The INTERFACE exposed to the outside package
 def return_irregular_columns(original_data):
@@ -334,9 +306,13 @@ def return_irregular_columns(original_data):
 
     irregular_columns = detect_item_irregular(columns_similarity, columns_whole_similarity)
     return irregular_columns
+
+
 '''
 Driver function. Test data is Matrix(probably not a good idea) 
 '''
+
+
 def main():
     Matrix = [[0, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
 
@@ -367,14 +343,13 @@ def main():
 
     ave_per_item = retrieve_average_per_item(matrix, item_sum_copy)  # Average of each column. Sorted list.
     ave_per_student = retrieve_average_per_item(matrix, student_sum_copy)
-    items_in_matrix = transpose_matrix(matrix)
+    items_in_matrix = transpose_matrix(matrix)  # Perform transpose on the sorted original data.
 
     #####################################################################################
     # This is the result to return back to the server, a list of correlation, in the order with each columns.
     correlation_of_columns = retrieve_correlation_columns(items_in_matrix)
     print(correlation_of_columns)
     return_correlation(Matrix)
-
 
     # Two lists containing similarities. Inputs are items/criteria inputs, not student matrix(not the original data).
     columns_similarity = similarity_between_columns(items_in_matrix)
@@ -387,7 +362,6 @@ def main():
     # This list contains the position of irregular columns.
     irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity)
     return_irregular_columns(Matrix)
-
 
 
 if __name__ == '__main__':
