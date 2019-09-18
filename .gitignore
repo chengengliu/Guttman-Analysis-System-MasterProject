@@ -3,6 +3,7 @@ __pycache__
 src/config.py
 .idea
 upload/
+package-lock.json
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]

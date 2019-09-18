@@ -1,5 +1,8 @@
 import os
 
+if not os.path.exists('upload/'):
+    os.mkdir('upload/')
+
 def get_export_path(file_id):
     dir = get_base_dir(file_id) + 'mod/'
     for file in os.listdir(dir):
