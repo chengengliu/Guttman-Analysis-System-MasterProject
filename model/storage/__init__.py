@@ -3,15 +3,18 @@ import os
 if not os.path.exists('upload/'):
     os.mkdir('upload/')
 
+
 def get_export_path(file_id):
-    dir = get_base_dir(file_id) + 'mod/'
-    for file in os.listdir(dir):
+    file_dir = get_base_dir(file_id) + 'mod/'
+    for file in os.listdir(file_dir):
         if file.endswith(".xls") or file.endswith(".xlsx"):
-            return (dir, file)  
+            return file_dir, file
+
 
 def get_base_dir(file_id):
     return 'upload/' + str(file_id) + '/'
-    
+
+
 def make_new_path(name):
     last_id = 0
     for file in os.listdir('upload/'):
@@ -23,17 +26,19 @@ def make_new_path(name):
     
     return new_id, 'upload/' + str(new_id) + '/ori/' + name
 
+
 def allowed_file(name):
     return '.' in name and name.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
-    
+
+
 def get_file_list():
-    list = []
-    for dir in os.listdir('upload/'):
-        for file in os.listdir('upload/' + dir + '/ori/'):
+    file_list = []
+    for file_id in os.listdir('upload/'):
+        for file in os.listdir('upload/' + file_id + '/ori/'):
             if file.endswith(".xls") or file.endswith(".xlsx"):
-                list.append({
-                    'file_id': int(dir), 
+                file_list.append({
+                    'file_id': int(file_id),
                     'file_name': file,
-                    'export_url': '/export/' + dir
+                    'export_url': '/export/' + file_id
                 })
-    return list
+    return file_list
