@@ -26,7 +26,7 @@ def make_new_path(name):
     os.mkdir('upload/' + str(new_id) + '/ori/')
     os.mkdir('upload/' + str(new_id) + '/mod/')
     
-    return new_id, 'upload/' + str(new_id) + '/ori/' + name
+    return new_id, 'upload/' + str(new_id) + '/ori/' + name, 'upload/' + str(new_id) + '/mod/' + name
 
 
 def allowed_file(name):
