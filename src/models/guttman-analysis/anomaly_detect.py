@@ -251,6 +251,12 @@ def transpose_matrix(matrix):
 
 # The inputs are in transposed form.
 def detect_full_score(matrix):
+    """
+    Notice: This function assumes that the highest marks in the data are the full marks.
+    This is a helper function for calculating score rate for different criteria.
+    :param matrix:  Input. It would make more sense if the inputs are transposed(have student as column, criteria as a row)
+    :return:    A list of full marks of all questions.
+    """
     full_score = []
     for criteria in matrix:
         full_score.append(max(criteria))
@@ -259,6 +265,13 @@ def detect_full_score(matrix):
 # Receive a student matrix. Wants to accumulate the score rate accumulated matrix.
 # Assume the input is cleaned and sorted. No more sorting needed.
 def cal_scorerate_accumulated_matrix(matrix):
+    """
+    Calculate the score rate for either student or criteria. It would make more sense if it is used for calculate
+    the score rate for each question per student. And it is accumulated as well. This function is a helper function
+    for calculating Accumulated Correlation.
+    :param matrix:  Hopefully a student as row, criteria as column matrix. (But if it is in a transposed form, no error will occur).
+    :return:    A nested list containing each student accumulated score rate.
+    """
     # Accumulated score for all students.
     transposed = transpose_matrix(matrix)
 
