@@ -115,19 +115,14 @@ class importFile:
                 total_neighbours = 0
                 for (x, y) in neighbours:
                     if i + x > 0 and i + x < len(matrix) and j + y > 0 and j + y < len(matrix[0]):
+                        total_neighbours += 1
                         if matrix[i + x][j + y] == 0:
                             count_zeros += 1
-                            total_neighbours +=1
                         else:
                             count_ones += 1
-                            total_neighbours += 1
-
                 if matrix[i][j] == 0 and count_ones / total_neighbours > threshold:
-                    # print(count_ones, count_ones + count_zeros, i , j , x , y)
-                    print(i, j, count_zeros, count_ones, total_neighbours, matrix[4][2])
                     cells.append((i, j))
                 elif matrix[i][j] > 0 and count_zeros / total_neighbours > threshold:
-                    # print(i, j, count_zeros, count_ones, total_neighbours)
                     cells.append((i, j))
         return cells
 
@@ -135,12 +130,7 @@ file = importFile('test.xlsx')
 array = importFile.readfile(file)
 # array's column and row are flipped, use transpose function to make it correct
 newarray = importFile.transpose(file, array)
-print(newarray)
-print(newarray[4][2])
 newarray = importFile.sort2darray(file, newarray)
-for i in newarray:
-    print(i)
-
 """
 calculate corresponding radius based on the size of a 2d array
 """
