@@ -75,6 +75,10 @@ class exceloutput:
                 self.worksheet.write(i, j, self.array[i][j], self.cell_format)
 
 
+
+	def addborder(self, row1, row2, column1, column2):
+		self.worksheet.conditional_format( row1, row2, column1, column2 , { 'type' : 'no_blanks' , 'format' : border_format})
+
     def setColor(self):
         """
         # set color from a color list for highlighting excel blocks.
