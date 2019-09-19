@@ -12,6 +12,17 @@ const parseJSON = data => {
     let boxs = data.boxes;
     let j = 0;
     let temp = "";
+
+    let font_size = "";
+    if((data.content.length * data.content[0][Object.keys(data.content[0])].length) < 300){
+        font_size = "24px";
+    }
+    else{
+        font_size = "middle";
+    }
+    temp += "<table table cellspacing=\"0\" style=\"font-size: "+ font_size +"\">\n" +
+        "<tbody  class = \"test\">";
+
     for (let l = 0; l < data.content.length; l++) {
         let stu = Object.keys(data.content[l]).toString()
         j++;
@@ -56,6 +67,8 @@ const parseJSON = data => {
         }
         temp += "</tr>";
     }
+    temp += "</tbody>\n" +
+        "</table>";
     return temp;
 };
 
@@ -89,18 +102,45 @@ const renderFeedback = data => {
             <div class="feedback-body">
                 <ul class="rule-list">
                     <li>
-                        <span>Rule 1</span>
-                        <p>Rule 1 says the rubric should be specific.</p>
+                        <span>Irregular Student Patterns</span>
+                        <p>Irregular students are marked with yellow color, which are ${data["irregular_student"]}.</p>
+                        <p> An irregular row of ones and zeros indicates that the student has not engaged fully in the assessment.
+                         The pattern is a reflection of the student’s attention to the task, rather than their skills. Therefore,
+                         it is not possible to identify the student’s point of readiness to learn from the assessment and alternate
+                         means must be used
+                         </p>
                     </li>
 
                     <li>
-                        <span>Rule 2</span>
-                        <p>Rule 2 says the rubric should be specific.</p>
+                        <span>Irregular students pattern</span>
+                        <p>Irregular students are marked with blue color, which are ${data["irregular_item"]}.</p>
+                        <p>If there is an irregular mixture of ones and zeros within
+                            a column, it shows the item is not an indicator of a student’s ability in the underlying construct. This may be
+                            due to ambiguity in the item, inconsistent marking, or
+                            an item that is not matched to the underlying construct.
+                            (Eg: if a maths question is written in difficult language,
+                            the question may measure reading ability, not maths
+                            ability.) It could also be an indication that the item is too
+                            difficult for the students undertaking the assessment.
+                            Items which perform like this should be removed from
+                            the current analysis, and teachers can use this information to improve their assessment tasks in the future.
+                        </p>
                     </li>
 
                     <li>
-                        <span>Rule 3</span>
-                        <p>Rule 3 says the rubric should be specific.</p>
+                        <span>odd cells</span>
+                        <p>odd cells are shown as a list of tuples. For example, [(1,2),(3,4)] means skill1, student2 and skill3, student4 are odd cells.</p>
+                        <p>odd cells in this graph are ${data["odd_cells"]}.</p>
+                        <p>An unexpected greater-then-zero odd cell after the pattern has broken down
+                            should also be disregarded. It is an indication of lucky
+                            guessing or an unusual event, not a skill that the student has mastered.
+                            This is much more likely if the assessment is a multiple choice test,
+                             where the probability of guessing correctly is relatively high.
+                             <br />
+                             An unusual zero amongst a lot of ones is most likely an
+                            indication of a lapse in concentration and not an indication that the student needs to be taught the skill
+                            again. We all occasionally made mistakes with something we can do accurately most of the time!
+                        </p>
                     </li>
                 </ul>
             </div>

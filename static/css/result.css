@@ -73,7 +73,7 @@ a.download-link:active {
 .feedback-container {
     /* background-image: url("../assets/feedback-panel.svg"); */
     width: 43.5rem;
-    height: 52.4rem;
+    /* height: 52.4rem; */
     border: 1px solid rgb(170, 170, 170);
     border-radius: 5px;
     box-shadow: rgba(0, 0, 0, 0.35) 5px 5px 5px;
@@ -100,7 +100,7 @@ a.download-link:active {
 }
 
 .feedback-body {
-    width: 100%;
+    width: 95%;
     padding: 10px;
     overflow-wrap: break-word;
     text-transform: none;
@@ -160,7 +160,7 @@ a.download-link:active {
 
 table{
     border:1px solid #000;
-    /* margin: 3px auto; */
+    margin: auto;
     border-radius:5px;
     font-size: 1.5rem;
 }

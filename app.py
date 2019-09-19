@@ -75,9 +75,10 @@ def upload():
             'total': guttman_analysis.sumItemScore(matrix)
         })
         odd_cells = guttman_analysis.odd_cells(matrix)
-
+        odd_cells_str_tuple = []
         for (r, c) in odd_cells:
             excel.highlight_area(r + 1, r + 1, c + 1, c + 1, 'orange')
+            odd_cells_str_tuple.append("(%d, %d)" % (c, r))
 
         json = {
             'file_id': file_id,
@@ -88,7 +89,7 @@ def upload():
             'item_performance': corr_item,
             'content': content_list,
             'boxes': boxes_json,
-            'odd_cells': odd_cells
+            'odd_cells': odd_cells_str_tuple
         }
 
         print(json)
