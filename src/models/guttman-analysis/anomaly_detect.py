@@ -13,6 +13,12 @@ Section I.  Source Code Reading Instructions:
 
 
 Section II. Module usage (interface):
+
+Special notice:
+
+    The function clean_input(original_data) must be used, if Yi Wang's package gives me the inputs with both
+    columns name and rows name. This is to be confirmed, whether he or I should make the data format conherent.
+
 1. To get the correlation, for either the student or the items/criteria:
 
 call the function:
@@ -92,6 +98,31 @@ from numpy.linalg import norm
 # The following functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
 # There is no algorithm involved in above functions.
 #######################################################################################################################
+
+# This function will be used if Yi Wang's module returns the follwing data to me:
+
+# [['file', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'], ['student1', 1, 1, 0, 0, 0, 0, 0,
+# 0], ['student2', 0, 1, 0, 0, 0, 0, 0, 0], ['student3', 1, 1, 1, 0, 0, 0, 0, 0], ['student4', 1, 1, 1, 1, 0, 0, 0, 0],
+# ['student5', 1, 1, 1, 1, 1, 0, 0, 0], ['student6', 1, 1, 1, 1, 1, 1, 0, 0], ['student7', 0, 1, 1, 1, 1, 1, 1, 0],
+# ['student8', 1, 1, 0, 1, 1, 1, 1, 1], ['student9', 1, 1, 1, 1, 0, 1, 1, 1], ['student10', 1, 1, 0, 0, 1, 1, 1, 1],
+# ['student11', 1, 1, 1, 0, 1, 1, 0, 1]]
+# It is necessary to clean the original_data to get the desired format like [[...], [...]],
+# without any names of columns/rows.
+def clean_input(original_data):
+    # Here sample input == original_data. To simplify the test procedure.
+    sample_input = [['file', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'],
+                    ['student1', 1, 1, 0, 0, 0, 0, 0, 0], ['student2', 0, 1, 0, 0, 0, 0, 0, 0],
+                    ['student3', 1, 1, 1, 0, 0, 0, 0, 0], ['student4', 1, 1, 1, 1, 0, 0, 0, 0],
+                    ['student5', 1, 1, 1, 1, 1, 0, 0, 0], ['student6', 1, 1, 1, 1, 1, 1, 0, 0],
+                    ['student7', 0, 1, 1, 1, 1, 1, 1, 0], ['student8', 1, 1, 0, 1, 1, 1, 1, 1],
+                    ['student9', 1, 1, 1, 1, 0, 1, 1, 1], ['student10', 1, 1, 0, 0, 1, 1, 1, 1],
+                    ['student11', 1, 1, 1, 0, 1, 1, 0, 1]]
+    removed_header = sample_input[1:]
+    for i in range(len(removed_header)):
+        removed_header[i] = removed_header[i][1:]
+    print(removed_header)
+    return removed_header
+
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -458,6 +489,7 @@ def return_correlation(original_data, is_student, flag):
     :return: A list of correlations of each item/column.
     """
     student_sum = sumStudentScore(original_data)
+    print("Student sum is: ", student_sum)
     item_sum = sumItemScore(original_data)
     sorted_student = sortBasedOnStudent(original_data, student_sum)
     sorted_item = sortBasedOnItem(sorted_student, item_sum)
@@ -568,12 +600,16 @@ def main():
     # columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
     # print("Columns whole similarity", columns_whole_similarity)
     # print("columns_similarity", columns_similarity)
+    print(return_correlation(Matrix, True, 'Accumulation'))
+    print(return_correlation(Matrix, False, 'Accumulation'))
 
     #####################################################################################
     # This list should be returned to the server, a list of irregular columns.
     # This list contains the position of irregular columns.
     # irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity, items_in_matrix)
     # print("Irregular Column index: ", return_irregular_column_index(Matrix, True))
+
+    clean_input("hello")
 
 
 
