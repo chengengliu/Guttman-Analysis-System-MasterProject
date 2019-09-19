@@ -70,7 +70,7 @@ const uploadFile = file => {
         if (xhr.status >= 200 && xhr.status < 400) {
 
             const fileID = JSON.parse(xhr.responseText).file_id;
-            const downloadURL = JSON.parse(xhr.responseText).file_url;
+            const downloadURL = JSON.parse(xhr.responseText).export_url;
 
             fileView.clearNode('.file-container.processing');
             fileView.renderProcessDone(fileID, file.name, downloadURL);

@@ -31,7 +31,7 @@ class ExcelOutput:
         :return: null
         """
         cell_format = self.workbook.add_format(self.base_format)
-        cell_format.set_bg_color('yellow')
+        # cell_format.set_bg_color('yellow')
         # total score of rows
         self.worksheet.write(0, len(self.array[0]), 'total score', cell_format)
         self.worksheet.write(len(self.array), 0, 'total score', cell_format)
@@ -55,7 +55,7 @@ class ExcelOutput:
         :return: null
         """
         cell_format = self.workbook.add_format(self.base_format)
-        cell_format.set_bg_color('yellow')
+        # cell_format.set_bg_color('yellow')
         if types == 'row':
             self.worksheet.write(0, len(self.array[0]) + 1, 'correlation', cell_format)
             for i in range(1, len(self.array)):
@@ -65,18 +65,18 @@ class ExcelOutput:
             for i in range(1, len(self.array[0])):
                 self.worksheet.write(len(self.array) + 1, i, array[i - 1], cell_format)
 
-    def highlight_area(self, row1, row2, column1, column2, color):
+    def highlight_area(self, row1, row2, col1, col2, color):
         """
         # highlight blocks in excel file
         :param row1: index of the first row
         :param row2: index of the second row
-        :param column1: index of the first column
-        :param column2: index of the second column
+        :param col1: index of the first column
+        :param col2: index of the second column
         :param color: text color
         :return: null
         """
-        for i in range(row1, row2):
-            for j in range(column1, column2):
+        for i in range(row1, row2 + 1):
+            for j in range(col1, col2 + 1):
                 self.formats[i][j].set_bg_color(color)
                 self.worksheet.write(i, j, self.array[i][j], self.formats[i][j])
 

@@ -7,23 +7,22 @@ Array.prototype.Exists = function (v) {
 };
 
 const parseJSON = data => {
-    let irregularStudent = data["irregular Students"];
-    let irregularItem = data["irregular item"];
-    let boxs = data["boxes"];
+    let irregularStudent = data.irregular_student;
+    let irregularItem = data.irregular_item;
+    let boxs = data.boxes;
     let j = 0;
     let temp = "";
-
-    for (let stu in data["content"]) {
+    for (let l = 0; l < data.content.length; l++) {
+        let stu = Object.keys(data.content[l]).toString()
         j++;
         temp += "<tr>";
         if (irregularStudent.Exists(stu)) {
             temp += "<td  class='irregular-student'>" + stu + "</td>";
-        }
-        else {
+        } else {
             temp += "<td  >" + stu + "</td>";
         }
 
-        for (let i = 0; i < data.content[stu].length; i++) {
+        for (let i = 0; i < data.content[l][stu].length; i++) {
             let class_ = "";
 
             for (let k = 0; k < boxs.length; k++) {
@@ -46,14 +45,14 @@ const parseJSON = data => {
                 }
             }
 
-            if (data.content[stu][i] > 0 && (i !== data.content[stu].length - 1) && (stu !== "total")) {
+            if (l > 0 && data.content[l][stu][i] > 0 && (i !== data.content[l][stu].length - 1) && (stu !== "total")) {
                 class_ += " greater-than-0";
             }
-            else if (irregularItem.Exists(data.content[stu][i])) {
+            else if (irregularItem.Exists(data.content[l][stu][i])) {
                 class_ += " irregular-item"
             }
 
-            temp += "<td class = \" " + class_ + "\" >" + data.content[stu][i] + "</td>";
+            temp += "<td class = \" " + class_ + "\" >" + data.content[l][stu][i] + "</td>";
         }
         temp += "</tr>";
     }

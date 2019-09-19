@@ -19,7 +19,7 @@ def sort_2d_array(array):
                 array[j], array[j+1] = array[j+1], array[j]
 
     for i in range(1, len(array[0]) - 1):
-        for j in range(1, len(array[0]) - 1 - i):
+        for j in range(1, len(array[0]) - i):
             count1 = 0
             count2 = 0
             for k in range(1, len(array) - 1):
@@ -56,5 +56,6 @@ def readfile(file_name):
         for index in excel_dict[key]:
             temp_array.append(excel_dict[key][index])
         array.append(temp_array)
-    # nrow + 1 includes header
+    for i in range(len(array[0])):
+        array[0][i] = str(array[0][i])
     return array

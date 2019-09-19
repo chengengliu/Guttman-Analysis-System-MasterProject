@@ -20,7 +20,7 @@ const renderResult = async () => {
     // if the request file has not been processed before
     if (!localStorage.getItem(fileID)) {
         processedData = await getProcessedResult(fileID);  // should be a JSON object
-        localStorage[fileID] = processedData;
+        localStorage[fileID] = JSON.stringify(processedData);
     } else {
         processedData = JSON.parse(localStorage.getItem(fileID));
     }
