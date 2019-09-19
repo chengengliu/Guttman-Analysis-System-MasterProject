@@ -93,8 +93,8 @@ class exceloutput:
             self.worksheet.write(i, column2, self.array[row1][i], right_border)
         self.worksheet.write(row1, column1, self.array[row1][column1], top_left_border)
         self.worksheet.write(row1, column2, self.array[row1][column2], top_right_border)
-        self.worksheet.write(row2, column1, self.array[row1][column1], bottom_left_border)
-        self.worksheet.write(row2, column2, self.array[row1][column2], bottom_right_border)
+        self.worksheet.write(row2, column1, self.array[row2][column1], bottom_left_border)
+        self.worksheet.write(row2, column2, self.array[row2][column2], bottom_right_border)
 
 
     def setColor(self):
