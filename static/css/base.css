@@ -1,0 +1,102 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    box-sizing: border-box;
+    font-size: 62.5%;  /* so that 1em = 10px, 1rem = 10px*/
+}
+@media only screen and (max-width: 68.75rem) {
+    html {
+        font-size: 50%;
+    }
+}
+
+body {
+    /* font-family: 'Noto Serif', serif; */
+    font-weight: 400;
+    color: #655A56;
+    background-size: cover;
+    min-height: calc(100vh - 2 * 4vw);
+    background-color: #F2F2F2;
+}
+
+.container {
+    width: 100%;
+    background-color: white;
+    /* display: flex;
+    flex-direction: column; */
+    display: grid;
+    /* grid-template-columns: 23rem auto;  */
+    grid-template-rows: 12rem minmax(60rem, auto);
+    grid-template-areas: 'header' 'body';
+    overflow: hidden;
+}
+
+.header {
+    grid-area: header;
+    width: 100%;
+    background-color: #094183;
+    position: relative;
+}
+.header-logo {
+    height: 100%;
+    border: none;
+}
+
+.heading {
+    font-family: 'Comic Sans MS';
+    font-size: 3rem;
+    color: #FFFFFF;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+@media only screen and (max-width: 68.75rem) {
+    .heading {
+        font-size: 2.4rem;
+    }
+
+    .container {
+        grid-template-rows: 12rem minmax(77rem, auto);
+    }
+
+    /* .guttman-page-right */
+}
+
+.body-container {
+    grid-area: body;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    /* grid-template-rows: 12rem minmax(60rem, auto); */
+}
+
+.left-panel {
+    min-width: 20rem;
+    background-color: rgba(51, 51, 51, 1);
+    border: none;
+    border-radius: 0px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+    font-family: 'Arial Normal', 'Arial';
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.left-panel > * {
+    margin-top: 8rem;
+}
+
+.left-panel span {
+    color: #FFFFFF; 
+}
+
+.text {
+    font-family: 'AppleSDGothicNeo-SemiBold', 'Apple SD Gothic Neo SemiBold', 'Apple SD Gothic Neo';
+    font-weight: 650;
+    font-size: 2rem;
+    text-align: center;
+}

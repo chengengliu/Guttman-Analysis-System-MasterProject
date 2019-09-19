@@ -32,3 +32,19 @@ def upload():
 def file_list():
     return {'file_list': storage.get_file_list()}
 
+
+@app.route('/delete/<int:file_id>', methods=['GET'])
+def delete_file(file_id):
+    storage.delete_file(file_id)
+    return {}
+
+
+@app.route('/result/<int:file_id>', methods=['GET'])
+def get_result(file_id):
+    return storage.get_result(file_id)
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+

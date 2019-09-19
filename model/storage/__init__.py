@@ -1,4 +1,6 @@
 import os
+import shutil
+import json
 
 if not os.path.exists('upload/'):
     os.mkdir('upload/')
@@ -42,3 +44,13 @@ def get_file_list():
                     'export_url': '/export/' + file_id
                 })
     return file_list
+
+
+def delete_file(file_id):
+    shutil.rmtree('upload/' + str(file_id), ignore_errors=True, onerror=None)
+
+
+def get_result(file_id):
+    with open('upload/' + str(file_id) + '/result.json') as json_file:
+        return json.load(json_file)
+

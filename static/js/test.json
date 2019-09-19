@@ -1,0 +1,24 @@
+
+{
+  "fileID": 1,
+  "url": "http://www.example.com",
+  "name": "Guttman Chart (back-end can rename this as the fileName user upload or something else)",
+  "content" : {
+  "skill": ["skill1", "skill2", "skill3", "skill4", "skill5", "total"],
+  "student1": [1, 1, 1, 1, 1, 5],
+  "student2": [1, 1, 1, 1, 0, 4],
+  "student3": [1, 1, 0, 0, 0, 2],
+  "student4": [1, 1, 0, 1, 0, 3],
+  "student5": [1, 0, 0, 0, 0, 1],
+  "student6": [0, 0, 0, 0, 0, 0],
+    "total": [5, 4, 2, 3, 1, " "]
+  },
+
+  "boxes" : [{"row_range": [4, 6], "column_range": [1,2]}, {"row_range": [1,3], "column_range": [3,5]}],
+  "irregular Students" : ["student3", "student4"],
+  "irregular item": ["skill1", "skill3"],
+  "item performance": [ 0.9, 0.9, 0.8, 0.7, 0.5, 0.4],
+  "odd one": ["1,1", "2,4"],
+  "odd zero": ["1,6", "3,5"]
+}
+

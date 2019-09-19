@@ -1,0 +1,181 @@
+.back-section {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin-top: 18rem !important; 
+    transition: all 0.3s;
+}
+.back-section img {
+    margin-right: 1.5rem;
+}
+.back-section:hover {
+    transform: translateY(-0.3rem);
+}
+
+a.back-link:link,
+a.back-link:visited,
+a.back-link:hover,
+a.back-link:active {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+a.download-link:link,
+a.download-link:visited,
+a.download-link:hover,
+a.download-link:active {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+.export-section {
+    margin-top: 4rem;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.export-section img {
+    margin-right: 1.5rem;
+}
+.export-section:hover {
+    transform: translateY(-0.3rem);
+}
+
+
+
+/* Guttman page right panel */
+.right-panel {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    justify-content: space-between;
+}
+
+.guttman-page-left, .guttman-page-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.feedback-container {
+    /* background-image: url("../assets/feedback-panel.svg"); */
+    width: 43.5rem;
+    height: 52.4rem;
+    border: 1px solid rgb(170, 170, 170);
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.35) 5px 5px 5px;
+    background-color: #FFFFFF;
+}
+
+/*color: rgb(0, 0, 255);*/
+.feedback-header {
+    background-color: #015478;
+    font-family: "Arial Negreta cursiva", "Arial Normal", Arial;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    text-align: left;
+    border: 1px solid rgb(170, 170, 170);
+    border-radius: 5px 5px 0px 0px;
+    border-width: 1px;
+    box-shadow: none;
+    height: 2.7rem;
+    
+    display: flex;
+    align-items: center;
+}
+
+.feedback-body {
+    width: 100%;
+    padding: 10px;
+    overflow-wrap: break-word;
+    text-transform: none;
+    border-width: 0px;
+}
+
+.rule-list {
+    list-style: none;
+}
+.rule-list > li {
+    margin-top: 3rem;
+}
+
+.rule-list li span {
+    font-family: "AppleSDGothicNeo-ExtraBold", "Apple SD Gothic Neo ExtraBold", "Apple SD Gothic Neo";
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-decoration: none;
+    color: rgb(0, 0, 255);
+}
+.rule-list li p {
+    font-family: "AppleSDGothicNeo-Regular", "Apple SD Gothic Neo";
+    font-size: 1.3rem;
+    font-weight: 400;
+    text-decoration: none;
+    color: rgb(0, 0, 0);
+}
+
+/* .guttman-page-right img {
+    width: 100%;
+    height: auto;
+    max-width: 74rem;
+    max-height: 55.6rem;
+} */
+@media only screen and (max-width: 68.75rem) {
+    .feedback-container {
+        width: 23rem;
+        height: 52.4rem;
+    }
+
+    .guttman-page-right {
+        overflow: scroll;
+    }
+}
+
+/** guttman chart */
+
+.Tab{ border-collapse:collapse; width: 300px; height:100px;}
+.Tab td{ border:solid 1px #a3c2c2}
+
+table{
+    border:1px solid #000;/*黑色1像素粗边框*/
+    margin: 3px auto;
+    border-radius:5px;
+    overflow:hidden
+}
+td {text-align: center;}
+.border-top {
+    border-top: 2px solid;
+    border-color:#222831;
+}
+.border-left {
+    border-left: 2px solid;
+    border-color:#222831;
+}
+.border-bottom {
+    border-bottom: 2px solid;
+    border-color:#222831;
+}
+
+.border-right {
+    border-right: 2px solid;
+    border-color:#222831;
+}
+.greater-than-0{
+    background-color:#ff5050;
+    color:#b3003b
+}
+
+.irregular-student{
+    background-color:#f9ed69;
+}
+
+.irregular-item{
+    background-color:#95e1d3;
+}
+
