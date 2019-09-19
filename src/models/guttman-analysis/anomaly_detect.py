@@ -2,7 +2,17 @@
 
 USAGE MANUAL/INTERFACE Introduction:
 
-Module usage (interface):
+
+Section I.  Source Code Reading Instructions:
+
+    This anomaly_detect.py file contains both helper functions(which has no relation with algorithms) and
+    Algorithms implementation functions, as well as interface functions(used by other modules). This file also contains
+    a main function, forinternal testing purpose, which is not meant to be read. Two interfaces functions that should be used
+    by other modulesare 'return_correlation(original_data, is_student, flag)' and
+    'return_irregular_column_index(original_data, is_student)', which will be introduced in further details in the following section.
+
+
+Section II. Module usage (interface):
 1. To get the correlation, for either the student or the items/criteria:
 
 call the function:
@@ -39,6 +49,25 @@ Input Desciption:
 
 Notice: For now I have not implemented the cluster algorithm for detecting unusual behaviour. This will be added in sprint3.
 Current method is to set a threshold value and to see if the value is below the threshold. （阈值）
+
+
+Section III. Helper functions:
+
+    As mentioned in Section I, there are several helper functions only used for data re-formatting and sorting purposes.
+    These functions can be skipped and has no relation with the algorithms implementations.
+    The helper functions include:
+
+    detectDimenstion(matrix)
+    sumStudentScore(matrix)
+    sumItemScore(matrix)
+    sortBasedOnStudent(matrix, studentSum)
+    sortBasedOnItem(matrix, itemSum)
+    cal_median(matrix, summation)
+    cal_average(matrix, summation, number)
+    retrieve_average_per_item(matrix, itemsum)
+    transpose_matrix(matrix)
+
+    The above mentioned functions can be skipped while you read the code.
 '''
 #TODO: The code for calculating similarity can be refactored and improved, to calculate together with correlation. 今天不做了， 明天代码重构写。
 
@@ -60,6 +89,9 @@ from numpy import dot
 from numpy.linalg import norm
 
 
+# The following functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
+# There is no algorithm involved in above functions.
+#######################################################################################################################
 def detectDimenstion(matrix):
     """
     Return a tuple of dimension of the 2-d matrix.
@@ -184,7 +216,9 @@ def transpose_matrix(matrix):
     result = [list(x) for x in zip(*matrix)]
     print(result)
     return result
-
+# Above functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
+# There is no algorithm involved in above functions.
+#######################################################################################################################
 
 def retrieve_correlation_columns(matrix, flag):
     """
