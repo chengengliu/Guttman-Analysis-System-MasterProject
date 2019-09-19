@@ -1,8 +1,9 @@
 import sys
 sys.path.append("..")
+import math
 import pandas as pd
 from pandas import DataFrame
-from excel_processing import exceloutput
+from src.models.excel_processing.exceloutput import exceloutput
 
 
 class importFile:
@@ -68,21 +69,87 @@ class importFile:
                 if count1 < count2:
                     for k in range(len(array)):
                         array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
+        return array
+
+    def get_neighbours(self, radius):
+        """
+        the function is to return all coordinates in a cirle with radius = radius
+        :param radius: radius of a circle (diamond)
+        :return: an array contains all neighbours' coordinates
+        """
+        temp = []
+        for i in range(0, radius + 1):
+            for j in range(0, radius - i + 1):
+                print((i, j))
+                for k in [-1, 1]:
+                    for l in [-1, 1]:
+                        temp.append((i * k, j * l))
+        neighbours = list(dict.fromkeys(temp))
+        while (0, 0) in neighbours:
+            neighbours.remove((0, 0))
+        return neighbours
+
+    def calculate_radius(self, array):
+        """
+        this function is to calculate radius according to an array's size
+        :param array: a 2d array
+        :return: radius that will be used in calculating neighbour values of a certain area
+        """
+        size = len(array) * len(array[0])
+        radius = math.log(size) / 2
+        return round(radius)
+
+    def odd_cells(self, matrix, neighbours):
+        """
+        this function is to find anomalies in a 2d array
+        :param matrix: a 2d array
+        :param neighbours: neighbours of a particular cell, in order to calculate the cell's neighbours value
+        :return: an array of sets of anomalies' coordinates
+        """
+        cells = []
+        threshold = 0.8
+        for i in range(1, len(matrix)):
+            for j in range(1, len(matrix[0])):
+                count_zeros = 0
+                count_ones = 0
+                total_neighbours = 0
+                for (x, y) in neighbours:
+                    if i + x > 0 and i + x < len(matrix) and j + y > 0 and j + y < len(matrix[0]):
+                        total_neighbours += 1
+                        if matrix[i + x][j + y] == 0:
+                            count_zeros += 1
+                        else:
+                            count_ones += 1
+                if matrix[i][j] == 0 and count_ones / total_neighbours > threshold:
+                    cells.append((i, j))
+                elif matrix[i][j] > 0 and count_zeros / total_neighbours > threshold:
+                    cells.append((i, j))
+        return cells
 
 file = importFile('test.xlsx')
 array = importFile.readfile(file)
 # array's column and row are flipped, use transpose function to make it correct
 newarray = importFile.transpose(file, array)
-print(newarray)
-importFile.sort2darray(file, newarray)
-for i in newarray:
-    print(i)
+newarray = importFile.sort2darray(file, newarray)
+"""
+calculate corresponding radius based on the size of a 2d array
+"""
+radius = importFile.calculate_radius(file, newarray)
+"""
+get neighbour coordinates of a particular cell
+"""
+neighbours = importFile.get_neighbours(file,radius)
+"""
+find anomalies in that 2d array
+"""
+cells = importFile.odd_cells(file, newarray, neighbours)
+
 """
 create an instance of exceloutput class
 """
 excel = exceloutput(newarray)
 """
-write 2d array data to 
+write 2d array data to
 """
 exceloutput.writetoExcel(excel)
 """
@@ -103,6 +170,7 @@ store correlation values to the excel, note it's not to array
 """
 exceloutput.addcorrelation(excel, correlation1, 'row')
 exceloutput.addcorrelation(excel,correlation2, 'column')
+exceloutput.addborder(excel,2,4,2,4)
 #####################################################################################
 #the following function is crucial, it's the only way to close the file and export it
 #####################################################################################
