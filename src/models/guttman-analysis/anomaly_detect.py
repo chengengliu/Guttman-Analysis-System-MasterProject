@@ -245,7 +245,7 @@ def transpose_matrix(matrix):
     :return:    The original input data after performing transpose.
     """
     result = [list(x) for x in zip(*matrix)]
-    print(result)
+    # print(result)
     return result
 # Above functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
 # There is no algorithm involved in above functions.
@@ -448,11 +448,11 @@ def detect_item_irregular(similarities, matrix):
     positions = [i for i in range(len(matrix))]
     potential_list = list(zip(similarities, positions))
     potential_list = sorted(potential_list, key=lambda x: x[0])
-    print(potential_list)
-    print(range_irregular)
+    # print(potential_list)
+    # print(range_irregular)
     for i in potential_list[0:range_irregular]:
-        print("i is ",i)
-        if i[0] <0.5:  # 阈值。 之后要检改变。 当前implementation并没有应用cluster
+        print("i is ::::: -> ",i)
+        if abs(i[0]) <0.6:  # 阈值。 之后要检改变。 当前implementation并没有应用cluster
             result.append(i[1])
 
     # average_sim = [(x + y) / 2 for (x, y) in zip(similarity1, similarity2)]
