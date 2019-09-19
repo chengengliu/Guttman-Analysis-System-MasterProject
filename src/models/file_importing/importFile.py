@@ -2,7 +2,7 @@ import sys
 sys.path.append("..")
 import pandas as pd
 from pandas import DataFrame
-from excel_processing import exceloutput
+from src.models.excel_processing.exceloutput import exceloutput
 
 
 class importFile:
@@ -103,6 +103,7 @@ store correlation values to the excel, note it's not to array
 """
 exceloutput.addcorrelation(excel, correlation1, 'row')
 exceloutput.addcorrelation(excel,correlation2, 'column')
+exceloutput.addborder(excel,2,4,2,4)
 #####################################################################################
 #the following function is crucial, it's the only way to close the file and export it
 #####################################################################################

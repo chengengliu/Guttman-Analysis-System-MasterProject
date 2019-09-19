@@ -74,10 +74,28 @@ class exceloutput:
             for j in range(column1, column2):
                 self.worksheet.write(i, j, self.array[i][j], self.cell_format)
 
+    def addborder(self, row1, row2, column1, column2):
+        left_border = self.workbook.add_format({"left": 1})
+        right_border = self.workbook.add_format({"right": 1})
+        top_border = self.workbook.add_format({"top": 1})
+        bottom_border = self.workbook.add_format({"bottom": 1})
+        top_left_border = self.workbook.add_format({"left": 1,"top": 1})
+        top_right_border = self.workbook.add_format({"right": 1,"top": 1})
+        bottom_left_border = self.workbook.add_format({"bottom": 1, "left": 1})
+        bottom_right_border = self.workbook.add_format({"bottom": 1, "right": 1})
+        for i in range(column1, column2):
+            self.worksheet.write(row1, i, self.array[row1][i], top_border)
+        for i in range(column1, column2):
+            self.worksheet.write(row2, i, self.array[row1][i], bottom_border)
+        for i in range(row1, row2):
+            self.worksheet.write(i, column1, self.array[row1][i], left_border)
+        for i in range(row1, row2):
+            self.worksheet.write(i, column2, self.array[row1][i], right_border)
+        self.worksheet.write(row1, column1, self.array[row1][column1], top_left_border)
+        self.worksheet.write(row1, column2, self.array[row1][column2], top_right_border)
+        self.worksheet.write(row2, column1, self.array[row1][column1], bottom_left_border)
+        self.worksheet.write(row2, column2, self.array[row1][column2], bottom_right_border)
 
-
-	def addborder(self, row1, row2, column1, column2):
-		self.worksheet.conditional_format( row1, row2, column1, column2 , { 'type' : 'no_blanks' , 'format' : border_format})
 
     def setColor(self):
         """
