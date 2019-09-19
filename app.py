@@ -29,9 +29,7 @@ def upload():
             'file_url': '/export/' + str(file_id)
         }
         data = file_importing.readfile(path)
-        print(data)
         data = file_importing.transpose(data)
-        print(data)
         file_importing.sort_2d_array(data)
         print(data)
         for j in data:
