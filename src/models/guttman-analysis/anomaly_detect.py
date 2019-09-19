@@ -315,15 +315,14 @@ def retrieve_correlation_similarity(matrix, flag):
 def cal_correlation_items(matrix, current_index, flag, scorerate):
     """
     Calculate the correlation of columns or rows.
-    :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :param current_index: Current index of the column
-    :flag: Specifying either 'Accumulation' -> calculate in accumulative way and use accumulative data or
-    'Correlation' -> calculate in a normal way.
-    :return: A list of correlation calculated.
+    :param matrix:  The input data in 2-d form/nested list. The data should not contain headers. IT can be either row(student),
+    column(criteria) or row(criteria), column(student).
+    :param current_index:   Current index of the element.
+    :param flag:    Flag can be 'Accumulation', 'Correlation', 'Similarity'. Different flags will return different data.
+    :param scorerate:   This is for 'Accumulation' calculation use. This nested list contain the accumulated score rate of
+    the students/criteria (depends on your input)
+    :return:    Depends on flag, returning differnet data.
     """
-    # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    # result = []
-    # print("LENGTH OF MATRIX: ", len(matrix))
     correlation_result = []
     accumulation_correlation_result = []
 
