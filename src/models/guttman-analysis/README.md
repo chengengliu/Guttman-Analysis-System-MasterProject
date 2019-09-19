@@ -43,7 +43,7 @@ Input Description:
 2. To get the irregular columns:
 
 call the function:
-    ```return_irregular_column_index(original_data, is_student)```
+    ```return_irregular_index(original_data, is_student)```
 Input Desciption:
 
     Original_data: where the input is the original data (it is supposed to be nested list)

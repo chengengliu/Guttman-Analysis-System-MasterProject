@@ -42,7 +42,7 @@ be tested using test results.
 2. To get the irregular columns:
 
 call the function:
-    'return_irregular_column_index(original_data, is_student)'
+    'return_irregular_index(original_data, is_student)'
 Input Desciption:
 
     Original_data: where the input is the original data (it is supposed to be nested list)
@@ -251,7 +251,7 @@ def transpose_matrix(matrix):
 # There is no algorithm involved in above functions.
 #######################################################################################################################
 
-def retrieve_correlation_columns(matrix, flag):
+def retrieve_correlation_similarity(matrix, flag):
     """
     Retrieve the correlation between each column. This function utilises cal_correlation_items
     :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
@@ -259,15 +259,20 @@ def retrieve_correlation_columns(matrix, flag):
     """
     accumulation_result = []
     correlation_result = []
+    similarity_result = []
     # Traverse each column/ or row.
     for i in range(len(matrix)):
         accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation'))
-    for i in range(len(matrix)):
         correlation_result.append(cal_correlation_items(matrix, i, 'Correlation'))
+        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity'))
+    # for i in range(len(matrix)):
+    # for i in range(len(matrix)):
     if flag == 'Correlation':
         return [j for i in correlation_result for j in i]
     elif flag == 'Accumulation':
         return [j for i in accumulation_result for j in i]
+    elif flag == 'Similarity':
+        return [j for i in similarity_result for j in i]
     # return [j for i in accumulation_result for j in i]
 
 
@@ -281,10 +286,11 @@ def cal_correlation_items(matrix, current_index, flag):
     :return: A list of correlation calculated.
     """
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    result = []
+    # result = []
     correlation_result = []
     accumulation_correlation_result = []
     accumulate_current = numpy.cumsum(matrix[current_index])
+    similarity_result = []
 
     # Retrieve the square root of number of items (the matrix is in transposed form). This will
     # be the range of calculating the neighbourhood of the column when calculating the correlation.
@@ -295,15 +301,21 @@ def cal_correlation_items(matrix, current_index, flag):
     if current_index == 0:
         temp_correlation = 0.0
         temp_accumulation_correlation = 0.0
+        temp_similarity = 0.0
         for i in range(range_correlation):
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
                 temp_accumulation_correlation += \
                 numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
+
+                temp_similarity += dot(matrix[current_index], matrix[current_index+i+1])/(norm(matrix[current_index]) *
+                                                                                          norm(matrix[current_index+i+1]))
+                # temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
             except:
                 pass
         correlation_result.append(temp_correlation / range_correlation)
-        accumulation_correlation_result.append(temp_correlation / range_correlation)
+        accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
+        similarity_result.append(temp_similarity/range_correlation)
         # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
 
     # If the column is the last column, calculate the correlation within the range but only for the column before it.
@@ -311,26 +323,35 @@ def cal_correlation_items(matrix, current_index, flag):
     elif current_index == len(matrix) - 1:
         temp_correlation = 0.0
         temp_accumulation_correlation = 0.0
+        temp_similarity = 0.0
         for i in range(range_correlation):
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
                 temp_accumulation_correlation += \
                 numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
+
+                temp_similarity += dot(matrix[current_index], matrix[current_index-i-1])/(norm(matrix[current_index])*
+                                                                                          norm(matrix[current_index-i-1]))
             except:
                 pass
         correlation_result.append(temp_correlation / range_correlation)
-        accumulation_correlation_result.append(temp_correlation / range_correlation)
+        accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
+        similarity_result.append(temp_similarity/range_correlation)
         # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
     # When the current column is neither the first column nor the last column(a.k.a the general column),
     # calculate the correlation between the current column and the columns (within the range) before it and after it.
     else:
         temp_correlation = 0.0
         temp_accumulation_correlation = 0.0
+        temp_similarity = 0.0
         for i in range(range_correlation):
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
                 temp_accumulation_correlation += \
                 numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
+
+                temp_similarity += dot(matrix[current_index], matrix[current_index-i-1])/(norm(matrix[current_index])*
+                                                                                          norm(matrix[current_index-i-1]))
             # The index may beyond the range, if the current column is near the tail or the head of the list.
             except:
                 pass
@@ -338,14 +359,20 @@ def cal_correlation_items(matrix, current_index, flag):
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
                 temp_accumulation_correlation += \
                 numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
+
+                temp_similarity += dot(matrix[current_index], matrix[current_index+i+1])/(norm(matrix[current_index])*
+                                                                                          norm(matrix[current_index+i+1]))
             except:
                 pass
         correlation_result.append(temp_correlation / (2 * range_correlation))
         accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
+        similarity_result.append(temp_similarity/(2*range_correlation))
     if flag == 'Accumulation':
         return accumulation_correlation_result
     elif flag == 'Correlation':
         return correlation_result
+    elif flag == 'Similarity':
+        return similarity_result
 
 
 # Diveide by length *2: ->>>>>[0.5222329678670935, 0.44156247593084647, 0.4415624759308465, -0.31100423396407306, 0.0]
@@ -356,59 +383,59 @@ def cal_correlation_items(matrix, current_index, flag):
 # [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
 # [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
 ##### 这部分的代码可以和correlation 合并。 重构代码时候可以直接返回nested lists， 根据需求取出相对应的值。
-def similarity_between_columns(matrix):
-    """
-    Calculate the similarity between one column with the column before it and after it. This calculation is based on cosine,
-    which generated by dot product divided by normalised production.
-    :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :return: A list of similarities of each column/item.
-    """
-    # similarity = []
-    similarity_reuslt = []
-
-    # The range of either the number of student or items/columns
-    range_similarrity = math.floor(math.sqrt(len(matrix)))
-    # Traverse each column/stduent.
-    for i in range(len(matrix)):
-        # If it is the first column
-        temp_result = []
-        if i == 0:
-            temp_similarity = 0.0
-            for j in range(range_similarrity):
-                try:
-                    temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
-                except:
-                    pass
-            temp_result.append(temp_similarity / range_similarrity)
-            # cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
-        elif i == len(matrix) - 1:
-            temp_similarity = 0.0
-            for j in range(range_similarrity):
-                try:
-                    temp_similarity += dot(matrix[i], matrix[i - j - 1]) / (norm(matrix[i]) * norm(matrix[i - j - 1]))
-                except:
-                    pass
-            temp_result.append(temp_similarity / range_similarrity)
-            # cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
-        else:
-            temp_similarity = 0.0
-            for j in range(range_similarrity):
-                try:
-                    temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
-                except:
-                    pass
-                try:
-                    temp_similarity += dot(matrix[i], matrix[i - j - 1]) / (norm(matrix[i]) * norm(matrix[i - j - 1]))
-                except:
-                    pass
-            temp_result.append(temp_similarity / (2 * range_similarrity))
-            # cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
-            # cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
-            # cosine = (cosine1 + cosine2) / 2
-        # similarity.append(cosine)
-        similarity_reuslt.append(temp_result)
-        result = [j for i in similarity_reuslt for j in i]
-    return result
+# def similarity_between_columns(matrix):
+#     """
+#     Calculate the similarity between one column with the column before it and after it. This calculation is based on cosine,
+#     which generated by dot product divided by normalised production.
+#     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+#     :return: A list of similarities of each column/item.
+#     """
+#     # similarity = []
+#     similarity_reuslt = []
+#
+#     # The range of either the number of student or items/columns
+#     range_similarrity = math.floor(math.sqrt(len(matrix)))
+#     # Traverse each column/stduent.
+#     for i in range(len(matrix)):
+#         # If it is the first column
+#         temp_result = []
+#         if i == 0:
+#             temp_similarity = 0.0
+#             for j in range(range_similarrity):
+#                 try:
+#                     temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
+#                 except:
+#                     pass
+#             temp_result.append(temp_similarity / range_similarrity)
+#             # cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
+#         elif i == len(matrix) - 1:
+#             temp_similarity = 0.0
+#             for j in range(range_similarrity):
+#                 try:
+#                     temp_similarity += dot(matrix[i], matrix[i - j - 1]) / (norm(matrix[i]) * norm(matrix[i - j - 1]))
+#                 except:
+#                     pass
+#             temp_result.append(temp_similarity / range_similarrity)
+#             # cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
+#         else:
+#             temp_similarity = 0.0
+#             for j in range(range_similarrity):
+#                 try:
+#                     temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
+#                 except:
+#                     pass
+#                 try:
+#                     temp_similarity += dot(matrix[i], matrix[i - j - 1]) / (norm(matrix[i]) * norm(matrix[i - j - 1]))
+#                 except:
+#                     pass
+#             temp_result.append(temp_similarity / (2 * range_similarrity))
+#             # cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
+#             # cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
+#             # cosine = (cosine1 + cosine2) / 2
+#         # similarity.append(cosine)
+#         similarity_reuslt.append(temp_result)
+#         result = [j for i in similarity_reuslt for j in i]
+#     return result
 
 
 def similarity_between_column_whole(matrix, ave_per_student):
@@ -443,6 +470,7 @@ def detect_item_irregular(similarities, matrix):
     """
     result = []
     # Set the boundary value for the number of irregular detection.
+    # TODO: 这个range是取floor好还是ceil好。
     range_irregular = math.floor(math.log(len(matrix)))
 
     positions = [i for i in range(len(matrix))]
@@ -499,15 +527,15 @@ def return_correlation(original_data, is_student, flag):
 
     # Retrieve the correlation of columns, use transpose
     if not is_student:
-        return retrieve_correlation_columns(transpose, flag)
+        return retrieve_correlation_similarity(transpose, flag)
     elif is_student:
-        return retrieve_correlation_columns(matrix, flag)
+        return retrieve_correlation_similarity(matrix, flag)
 
 
 # Getter for irregular columns
 # The INTERFACE exposed to the outside package
 # Student is a Bool.
-def return_irregular_column_index(original_data,is_student):
+def return_irregular_index(original_data, is_student):
     """
     Return the index of irregular column/ row.
     :param original_data: The original data.
@@ -528,16 +556,36 @@ def return_irregular_column_index(original_data,is_student):
     ave_per_student = retrieve_average_per_item(matrix, student_sum)
 
     if not is_student:
-        columns_similarity = similarity_between_columns(transpose)
+        columns_similarity = retrieve_correlation_similarity(transpose, 'Similarity')
         return detect_item_irregular(columns_similarity, transpose)
     elif is_student:
-        columns_similarity = similarity_between_columns(matrix)
-        return detect_item_irregular(columns_similarity, matrix)
+        student_similarity = retrieve_correlation_similarity(matrix, 'Similarity')
+        return detect_item_irregular(student_similarity, matrix)
     # columns_whole_similarity = similarity_between_column_whole(transpose, ave_per_student)
 
     # irregular_columns = detect_item_irregular()
     # print("Similarity between columns", similarity_between_columns(matrix))
     # return irregular_columns
+# def refactor_irregular_column_index(original_data, is_student):
+#     student_sum = sumStudentScore(original_data)
+#     item_sum = sumItemScore(original_data)
+#     sorted_student = sortBasedOnStudent(original_data, student_sum)
+#     sorted_item = sortBasedOnItem(sorted_student, item_sum)
+#
+#     # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
+#     matrix = sorted_item
+#     transpose = transpose_matrix(matrix)
+#
+#     student_sum.sort()
+#     student_sum = list(reversed(student_sum))
+#     ave_per_student = retrieve_average_per_item(matrix, student_sum)
+#
+#     if not is_student:
+#         columns_similarity = retrieve_correlation_similarity(transpose, 'Similarity')
+#         return detect_item_irregular(columns_similarity, transpose)
+#     elif is_student:
+#         columns_similarity = retrieve_correlation_similarity(matrix, 'Similarity')
+#         return detect_item_irregular(columns_similarity, matrix)
 
 
 ###############################################################################
@@ -600,8 +648,9 @@ def main():
     # columns_whole_similarity = similarity_between_column_whole(items_in_matrix, ave_per_student)
     # print("Columns whole similarity", columns_whole_similarity)
     # print("columns_similarity", columns_similarity)
-    print(return_correlation(Matrix, True, 'Accumulation'))
-    print(return_correlation(Matrix, False, 'Accumulation'))
+
+    # print(return_correlation(Matrix, True, 'Accumulation'))
+    # print(return_correlation(Matrix, False, 'Accumulation'))
 
     #####################################################################################
     # This list should be returned to the server, a list of irregular columns.
@@ -609,7 +658,7 @@ def main():
     # irregular_column_items = detect_item_irregular(columns_similarity, columns_whole_similarity, items_in_matrix)
     # print("Irregular Column index: ", return_irregular_column_index(Matrix, True))
 
-    clean_input("hello")
+    # clean_input("hello")
 
 
 
