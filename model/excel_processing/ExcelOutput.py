@@ -61,7 +61,7 @@ class ExcelOutput:
             for i in range(1, len(self.array)):
                 self.worksheet.write(i, len(self.array[0]) + 1, array[i - 1], cell_format)
         if types == 'column':
-            self.worksheet.write(len(self.array) + 1, 0, 'correlation', cell_format)
+            self.worksheet.write(len(self.array) + 1, 0, 'item_performance', cell_format)
             for i in range(1, len(self.array[0])):
                 self.worksheet.write(len(self.array) + 1, i, array[i - 1], cell_format)
 

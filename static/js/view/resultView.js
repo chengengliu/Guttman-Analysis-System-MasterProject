@@ -102,7 +102,7 @@ const renderFeedback = data => {
             <div class="feedback-body">
                 <ul class="rule-list">
                     <li>
-                        <span>Irregular Student Patterns</span>
+                        <span>Irregular Students Pattern</span>
                         <p>Irregular students are marked with yellow color, which are ${data["irregular_student"]}.</p>
                         <p> An irregular row of ones and zeros indicates that the student has not engaged fully in the assessment.
                          The pattern is a reflection of the student’s attention to the task, rather than their skills. Therefore,
@@ -112,8 +112,8 @@ const renderFeedback = data => {
                     </li>
 
                     <li>
-                        <span>Irregular students pattern</span>
-                        <p>Irregular students are marked with blue color, which are ${data["irregular_item"]}.</p>
+                        <span>Irregular Items Pattern</span>
+                        <p>Irregular items are marked with blue color, which are ${data["irregular_item"]}.</p>
                         <p>If there is an irregular mixture of ones and zeros within
                             a column, it shows the item is not an indicator of a student’s ability in the underlying construct. This may be
                             due to ambiguity in the item, inconsistent marking, or
