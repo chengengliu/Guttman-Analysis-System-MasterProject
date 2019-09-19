@@ -3,6 +3,7 @@
 # This file should be placed under the same directory, with the file 'anomaly_detect.py'
 
 import anomaly_detect as ad
+import numpy as np
 
 
 
@@ -18,8 +19,8 @@ def test_return_correlation(original_data):
     matrix = sorted_item
     transpose = ad.transpose_matrix(matrix)
     # For student== true and 'Correlation'
-    print(ad.retrieve_correlation_similarity(transpose,'Correlation'))
-    print(ad.retrieve_correlation_similarity(transpose, 'Accumulation'))
+    # print(ad.retrieve_correlation_similarity(transpose,'Correlation'))
+    # print(ad.retrieve_correlation_similarity(transpose, 'Accumulation'))
     print(ad.retrieve_correlation_similarity(matrix, 'Correlation'))
     print(ad.retrieve_correlation_similarity(matrix,'Accumulation'))
 
@@ -115,7 +116,25 @@ def refactor_similarity_test(original_data, is_student):
         return ad.detect_item_irregular(similarity, matrix)
 
 
+def test_detect_full_score(transposed):
+    return ad.detect_full_score(transposed)
 
+
+def test_cal_scorerate_accumulated_matrix(original_data):
+    student_sum = ad.sumStudentScore(original_data)
+    item_sum = ad.sumItemScore(original_data)
+    sorted_student = ad.sortBasedOnStudent(original_data, student_sum)
+    sorted_item = ad.sortBasedOnItem(sorted_student, item_sum)
+
+    matrix = sorted_item
+    transpose = ad.transpose_matrix(matrix)
+
+    student_sum.sort()
+    student_sum = list(reversed(student_sum))
+    ave_per_student = ad.retrieve_average_per_item(matrix, student_sum)
+
+    print(matrix)
+    ad.cal_scorerate_accumulated_matrix(matrix)
 
 
 def main():
@@ -127,8 +146,13 @@ def main():
                     [1, 1, 0, 0, 1, 1, 1, 1], [1, 1, 1, 0, 1, 1, 0, 1]]
 
     original_input = [[0, 1, 1, 1], [1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 0, 0], [1, 2, 0, 0]]
-    test_return_correlation(original_input)
-    test_return_correlation(sample_input)
+    # test_return_correlation(original_input)
+    # test_return_correlation(sample_input)
+    np.seterr(divide='ignore', invalid='ignore')
+
+
+
+    real_input = [[3, 2, 3, 2, 0, 2, 2], [3, 2, 3, 2, 0, 2, 2], [3, 2, 3, 2, 0, 2, 2], [3, 2, 3, 1, 0, 2, 2], [3, 2, 3, 2, 0, 0, 2], [3, 2, 2, 1, 2, 0, 0], [3, 2, 2, 1, 2, 0, 0], [3, 2, 2, 1, 0, 0, 2], [1, 2, 3, 2, 0, 2, 0], [3, 2, 0, 0, 1, 2, 1], [3, 2, 1, 1, 2, 0, 0], [3, 2, 1, 1, 2, 0, 0], [3, 2, 1, 1, 1, 0, 1], [3, 2, 2, 1, 1, 0, 0], [3, 0, 2, 1, 2, 0, 0], [3, 2, 1, 1, 1, 0, 0], [3, 2, 0, 1, 1, 0, 1], [3, 2, 2, 1, 0, 0, 0], [3, 2, 2, 1, 0, 0, 0], [3, 2, 1, 1, 1, 0, 0], [3, 1, 2, 1, 1, 0, 0], [3, 2, 1, 1, 1, 0, 0], [1, 1, 2, 1, 1, 0, 1], [3, 2, 1, 1, 0, 0, 0], [0, 2, 3, 1, 1, 0, 0], [3, 2, 1, 1, 0, 0, 0], [0, 2, 3, 1, 1, 0, 0], [3, 1, 0, 1, 1, 0, 0], [0, 1, 2, 2, 1, 0, 0], [0, 2, 1, 1, 2, 0, 0], [1, 1, 1, 1, 1, 0, 0], [3, 2, 0, 0, 0, 0, 0], [3, 2, 0, 0, 0, 0, 0], [3, 1, 1, 0, 0, 0, 0], [1, 2, 1, 1, 0, 0, 0], [0, 2, 1, 1, 0, 0, 0], [0, 1, 0, 1, 1, 0, 1], [3, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0]]
 
     # print("Student Irregular  Original: ", test_return_irregualr_column_index(original_input,True))
     # print("Column Irregular Original:  ", test_return_irregualr_column_index(original_input, False))
@@ -146,12 +170,35 @@ def main():
     # i is ::::: ->  (0.5447172541558802, 6)
     # i is ::::: ->  (0.6823964588860406, 4)
     # Column Irregular Sample Input:  []
-    print(" NEW TEST: ")
-    print()
-    print("Student Irregular  Original: ", refactor_similarity_test(original_input,True))
-    print("Column Irregular Original:  ", refactor_similarity_test(original_input, False))
-    print("Student Irregular Sample Input: ", refactor_similarity_test(sample_input, True))
-    print("Column Irregular Sample Input: ",refactor_similarity_test(sample_input, False))
+    # print(" NEW TEST: ")
+    # print()
+    # print("Student Irregular  Original: ", refactor_similarity_test(real_input,True))
+    # print("Column Irregular Original:  ", refactor_similarity_test(real_input, False))
+    # print("Student Irregular Sample Input: ", refactor_similarity_test(real_input, True))
+    # print("Column Irregular Sample Input: ",refactor_similarity_test(real_input, False))
+
+
+    test_return_correlation(real_input)
+
+
+
+    student_sum = ad.sumStudentScore(original_input)
+    item_sum = ad.sumItemScore(original_input)
+    sorted_student = ad.sortBasedOnStudent(original_input, student_sum)
+    sorted_item = ad.sortBasedOnItem(sorted_student, item_sum)
+
+    matrix = sorted_item
+    transpose = ad.transpose_matrix(matrix)
+
+    student_sum.sort()
+    student_sum = list(reversed(student_sum))
+    ave_per_student = ad.retrieve_average_per_item(matrix, student_sum)
+
+
+    # print(test_detect_full_score(transpose))
+    #
+    # print(test_cal_scorerate_accumulated_matrix(original_input))
+
 
 
 
