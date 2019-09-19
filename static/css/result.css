@@ -55,10 +55,19 @@ a.download-link:active {
     justify-content: space-between;
 }
 
-.guttman-page-left, .guttman-page-right {
+.guttman-page-left {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
+}
+
+.guttman-page-right {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    max-width: 80rem;
+    overflow: auto;
 }
 
 .feedback-container {
@@ -85,7 +94,7 @@ a.download-link:active {
     border-width: 1px;
     box-shadow: none;
     height: 2.7rem;
-    
+
     display: flex;
     align-items: center;
 }
@@ -133,21 +142,29 @@ a.download-link:active {
     }
 
     .guttman-page-right {
-        overflow: scroll;
+        height: 100%;
+        overflow: auto;
     }
 }
 
 /** guttman chart */
 
-.Tab{ border-collapse:collapse; width: 300px; height:100px;}
-.Tab td{ border:solid 1px #a3c2c2}
+.Tab {
+    border-collapse:collapse;
+    width: 300px;
+    height:100px;
+}
+.Tab td {
+    border: solid 1px #a3c2c2;
+}
 
 table{
-    border:1px solid #000;/*黑色1像素粗边框*/
-    margin: 3px auto;
+    border:1px solid #000;
+    /* margin: 3px auto; */
     border-radius:5px;
-    overflow:hidden
 }
+
+
 td {text-align: center;}
 .border-top {
     border-top: 2px solid;
@@ -178,4 +195,3 @@ td {text-align: center;}
 .irregular-item{
     background-color:#95e1d3;
 }
-

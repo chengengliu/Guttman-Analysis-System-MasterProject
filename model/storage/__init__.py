@@ -38,11 +38,7 @@ def get_file_list():
     for file_id in os.listdir('upload/'):
         for file in os.listdir('upload/' + file_id + '/ori/'):
             if file.endswith(".xls") or file.endswith(".xlsx"):
-                file_list.append({
-                    'file_id': int(file_id),
-                    'file_name': file,
-                    'export_url': '/export/' + file_id
-                })
+                file_list.append(get_result(file_id))
     return file_list
 
 

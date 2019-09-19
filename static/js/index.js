@@ -4,12 +4,12 @@ import * as fileView from './view/fileView.js';
 // initial query to server asking for processed files
 const init = async () => {
 
-    localStorage.clear();
+    //localStorage.clear();
 
     const jsonData = await initFetch(); // data should be an array of processed files
 
     jsonData.file_list.forEach(json => {
-        localStorage[json.id] = JSON.stringify(json);
+        localStorage[json.file_id] = JSON.stringify(json);
     });
 
     // render inital processed files
