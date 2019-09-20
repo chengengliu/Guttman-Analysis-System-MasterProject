@@ -288,12 +288,32 @@ def retrieve_correlation_similarity(matrix, flag):
 
     scorerate = cal_scorerate_accumulated_matrix(matrix)
 
+    # A list of zero standard deviation items. So called dangerous list.
+    zero_stddiv_list = get_0staddv_index(matrix)
+    zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
+
+    # Test if the accumulated zero standard deviation list is empty.
+    # If it is empty, do not perform the boundary check.
+    if not zero_stddiv_accumulated_list:
+        is_empty = True
+    else:
+        is_empty = False
+
     # Traverse each column/ or row.
     for i in range(len(matrix)):
         # print("I is ::::", i)
-        accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate))
-        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate))
-        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate))
+        if in_danger_list(zero_stddiv_list, i):
+            print("SKIP!!!!!")
+            continue
+        if in_danger_list(zero_stddiv_accumulated_list, i) and not is_empty:
+            print("SKip the current element due to accumulation ->", i)
+            continue
+        accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate,
+                                                         zero_stddiv_accumulated_list, is_empty))
+        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
+                                                        zero_stddiv_accumulated_list, is_empty))
+        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+                                                       zero_stddiv_accumulated_list, is_empty))
     # for i in range(len(matrix)):
     # for i in range(len(matrix)):
     if flag == 'Correlation':
@@ -305,7 +325,7 @@ def retrieve_correlation_similarity(matrix, flag):
     # return [j for i in accumulation_result for j in i]
 
 
-def cal_correlation_items(matrix, current_index, flag, scorerate):
+def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
     """
     Calculate the correlation of columns or rows.
     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
@@ -328,13 +348,19 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
     # be the range of calculating the neighbourhood of the column when calculating the correlation.
     range_correlation = math.floor(math.sqrt(len(matrix)))
 
+
     # If the column is the first column, calculate the correlation within the range but only for the column after it.
     # Try-except is to prevent extreme cases, but generally it will not be used.
     if current_index == 0:
         temp_correlation = 0.0
         temp_accumulation_correlation = 0.0
         temp_similarity = 0.0
+        # if not is_empty and in_danger_list(danger_accumulated_list, current_index):
+
         for i in range(range_correlation):
+            if not is_empty and in_danger_list(danger_accumulated_list, current_index+i+1):
+                print("SKIP")
+                continue
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
                 # Change the way of calculating score_rate
@@ -360,6 +386,9 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
         temp_accumulation_correlation = 0.0
         temp_similarity = 0.0
         for i in range(range_correlation):
+            if not is_empty and in_danger_list(danger_accumulated_list, current_index-i-1):
+                print("SKIP LAST")
+                continue
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
 
@@ -391,6 +420,8 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
             #     continue
             # 向左到头， 只往右加
             if current_index - i < 0:
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
 
@@ -409,6 +440,8 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                     pass
             # 向右到头， 只往左减
             if (current_index + i) > (len(matrix) - 1):
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
 
@@ -430,6 +463,9 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                     print("ENTER THE EXCEPTION")
                     pass
             else:
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+                    print()
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
 
@@ -448,6 +484,8 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                 except:
                     # print("ENTER THE EXCEPTION")
                     pass
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
 
