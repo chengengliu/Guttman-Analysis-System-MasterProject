@@ -44,9 +44,9 @@ def upload():
         excel.write_excel()
 
         for col in irregular_item:
-            excel.highlight_area(0, len(data) - 1, col + 1, col + 1, 'lime')
+            excel.highlight_area(0, len(data) - 1, 0, 0, '#95e1d3')
         for row in irregular_student:
-            excel.highlight_area(row + 1, row + 1, 0, len(data[0]) - 1, 'yellow')
+            excel.highlight_area(0, 0, 0, len(data[0]) - 1, '#f9ed69')
 
         excel.add_total_score()
 
