@@ -271,6 +271,33 @@ def cal_scorerate_accumulated_matrix(matrix):
 
     return scorerate_accumulated
 
+def get_0staddv_index(matrix):
+    """
+    Return the positions of item that has a zero standard deviation.
+    :param matrix:
+    :return:
+    """
+    staddv_list = []
+    for i in range(len(matrix)):
+        if numpy.std(matrix[i]) == 0:
+            staddv_list.append(i)
+    return staddv_list
+
+
+def in_danger_list(danger_list, current_index):
+    """
+    Return True if the number is in the zero standard deviation list.
+    Return False if the number is not in the list.
+    :param danger_list:
+    :param current_index:
+    :return:
+    """
+    for index in danger_list:
+        if index == current_index:
+            # print("current index data has zero standard deviation. Skip the data. ")
+            return True
+    return False
+
 
 # Above functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
 # There is no algorithm involved in above functions.
