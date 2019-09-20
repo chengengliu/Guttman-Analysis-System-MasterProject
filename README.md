@@ -9,6 +9,6 @@ Instructions:
 
 `cd swen90014-2019-rv-quoll`
 
-`pip3 install Flask, pandas, xlsxwriter, xlrd`
+`pip3 install Flask pandas xlsxwriter xlrd`
 
 `flask run`
