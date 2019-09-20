@@ -75,8 +75,7 @@ Section III. Helper functions:
 
     The above mentioned functions can be skipped while you read the code.
 '''
-#TODO: The code for calculating similarity can be refactored and improved, to calculate together with correlation. 今天不做了， 明天代码重构写。
-
+# TODO: The code for calculating similarity can be refactored and improved, to calculate together with correlation. 今天不做了， 明天代码重构写。
 
 
 # Detect the anomaly, able to detect either row/ column.
@@ -249,6 +248,7 @@ def detect_full_score(matrix):
         full_score.append(max(criteria))
     return full_score
 
+
 # Receive a student matrix. Wants to accumulate the score rate accumulated matrix.
 # Assume the input is cleaned and sorted. No more sorting needed.
 def cal_scorerate_accumulated_matrix(matrix):
@@ -266,7 +266,7 @@ def cal_scorerate_accumulated_matrix(matrix):
     for item in accumulated_score:
         temp = []
         for i in range(len(item)):
-            temp.append(item[i]/full_marks_accumulated[i])
+            temp.append(item[i] / full_marks_accumulated[i])
         scorerate_accumulated.append(temp)
 
     return scorerate_accumulated
@@ -288,12 +288,32 @@ def retrieve_correlation_similarity(matrix, flag):
 
     scorerate = cal_scorerate_accumulated_matrix(matrix)
 
+    # A list of zero standard deviation items. So called dangerous list.
+    zero_stddiv_list = get_0staddv_index(matrix)
+    zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
+
+    # Test if the accumulated zero standard deviation list is empty.
+    # If it is empty, do not perform the boundary check.
+    if not zero_stddiv_accumulated_list:
+        is_empty = True
+    else:
+        is_empty = False
+
     # Traverse each column/ or row.
     for i in range(len(matrix)):
         # print("I is ::::", i)
-        accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate))
-        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate))
-        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate))
+        if in_danger_list(zero_stddiv_list, i):
+            print("SKIP!!!!!")
+            continue
+        if in_danger_list(zero_stddiv_accumulated_list, i) and not is_empty:
+            print("SKip the current element due to accumulation ->", i)
+            continue
+        accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate,
+                                                         zero_stddiv_accumulated_list, is_empty))
+        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
+                                                        zero_stddiv_accumulated_list, is_empty))
+        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+                                                       zero_stddiv_accumulated_list, is_empty))
     # for i in range(len(matrix)):
     # for i in range(len(matrix)):
     if flag == 'Correlation':
@@ -305,7 +325,7 @@ def retrieve_correlation_similarity(matrix, flag):
     # return [j for i in accumulation_result for j in i]
 
 
-def cal_correlation_items(matrix, current_index, flag, scorerate):
+def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
     """
     Calculate the correlation of columns or rows.
     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
@@ -328,27 +348,35 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
     # be the range of calculating the neighbourhood of the column when calculating the correlation.
     range_correlation = math.floor(math.sqrt(len(matrix)))
 
+
     # If the column is the first column, calculate the correlation within the range but only for the column after it.
     # Try-except is to prevent extreme cases, but generally it will not be used.
     if current_index == 0:
         temp_correlation = 0.0
         temp_accumulation_correlation = 0.0
         temp_similarity = 0.0
+        # if not is_empty and in_danger_list(danger_accumulated_list, current_index):
+
         for i in range(range_correlation):
+            if not is_empty and in_danger_list(danger_accumulated_list, current_index+i+1):
+                print("SKIP")
+                continue
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
                 # Change the way of calculating score_rate
                 # temp_accumulation_correlation += \
                 # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                temp_accumulation_correlation += numpy.corrcoef(scorerate[current_index], scorerate[current_index+i+1])[0,1]
+                temp_accumulation_correlation += \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
 
-                temp_similarity += dot(matrix[current_index], matrix[current_index+i+1])/(norm(matrix[current_index]) *
-                                                                                          norm(matrix[current_index+i+1]))
+                temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                            norm(matrix[current_index]) *
+                            norm(matrix[current_index + i + 1]))
             except:
                 pass
         correlation_result.append(temp_correlation / range_correlation)
         accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
-        similarity_result.append(temp_similarity/range_correlation)
+        similarity_result.append(temp_similarity / range_correlation)
         # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
 
     # If the column is the last column, calculate the correlation within the range but only for the column before it.
@@ -358,6 +386,9 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
         temp_accumulation_correlation = 0.0
         temp_similarity = 0.0
         for i in range(range_correlation):
+            if not is_empty and in_danger_list(danger_accumulated_list, current_index-i-1):
+                print("SKIP LAST")
+                continue
             try:
                 temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
 
@@ -365,15 +396,17 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                 # temp_accumulation_correlation += \
                 # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
 
-                temp_accumulation_correlation += numpy.corrcoef(scorerate[current_index], scorerate[current_index-i-1])[0,1]
+                temp_accumulation_correlation += \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
 
-                temp_similarity += dot(matrix[current_index], matrix[current_index-i-1])/(norm(matrix[current_index])*
-                                                                                          norm(matrix[current_index-i-1]))
+                temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                            norm(matrix[current_index]) *
+                            norm(matrix[current_index - i - 1]))
             except:
                 pass
         correlation_result.append(temp_correlation / range_correlation)
         accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
-        similarity_result.append(temp_similarity/range_correlation)
+        similarity_result.append(temp_similarity / range_correlation)
         # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
     # When the current column is neither the first column nor the last column(a.k.a the general column),
     # calculate the correlation between the current column and the columns (within the range) before it and after it.
@@ -386,7 +419,9 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
             # if current_index - i < 0 or (current_index + i) >= (len(matrix)-1):
             #     continue
             # 向左到头， 只往右加
-            if current_index - i <0:
+            if current_index - i < 0:
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
 
@@ -394,17 +429,19 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                     # temp_accumulation_correlation += \
                     #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
                     temp_accumulation_correlation += \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                        numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
 
                     temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index + i + 1]))
+                            norm(matrix[current_index]) *
+                            norm(matrix[current_index + i + 1]))
                     continue
                 except:
                     print("ENTER THE EXCEPTION")
                     pass
             # 向右到头， 只往左减
-            if (current_index +i) >(len(matrix)-1):
+            if (current_index + i) > (len(matrix) - 1):
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
 
@@ -412,20 +449,23 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                     # temp_accumulation_correlation += \
                     #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
                     temp_accumulation_correlation += \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
 
                     # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation,
                     #       current_index, "------", matrix[current_index - i - 1])
 
                     temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index - i - 1]))
+                            norm(matrix[current_index]) *
+                            norm(matrix[current_index - i - 1]))
                     continue
                 # The index may beyond the range, if the current column is near the tail or the head of the list.
                 except:
                     print("ENTER THE EXCEPTION")
                     pass
             else:
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+                    print()
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
 
@@ -433,17 +473,19 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                     # temp_accumulation_correlation += \
                     # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
                     temp_accumulation_correlation += \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
 
                     # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation, current_index, "------", matrix[current_index - i - 1])
 
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index-i-1])/(norm(matrix[current_index])*
-                                                                                              norm(matrix[current_index-i-1]))
+                    temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                                norm(matrix[current_index]) *
+                                norm(matrix[current_index - i - 1]))
                 # The index may beyond the range, if the current column is near the tail or the head of the list.
                 except:
                     # print("ENTER THE EXCEPTION")
                     pass
+                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+                    continue
                 try:
                     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
 
@@ -451,19 +493,19 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
                     # temp_accumulation_correlation += \
                     # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
                     temp_accumulation_correlation += \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                        numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
 
                     # print("Temp Accumulation , Current Index:  and +++++++", temp_accumulation_correlation, current_index)
 
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index+i+1])/(norm(matrix[current_index])*
-                                                                                              norm(matrix[current_index+i+1]))
+                    temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                                norm(matrix[current_index]) *
+                                norm(matrix[current_index + i + 1]))
                 except:
                     # print("ENTER THE EXCEPTION")
                     pass
         correlation_result.append(temp_correlation / (2 * range_correlation))
         accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
-        similarity_result.append(temp_similarity/(2*range_correlation))
+        similarity_result.append(temp_similarity / (2 * range_correlation))
     # print("Accumulation Result: @@@@@@@@", accumulation_correlation_result)
     if flag == 'Accumulation':
         return accumulation_correlation_result
@@ -471,69 +513,6 @@ def cal_correlation_items(matrix, current_index, flag, scorerate):
         return correlation_result
     elif flag == 'Similarity':
         return similarity_result
-
-
-# Diveide by length *2: ->>>>>[0.5222329678670935, 0.44156247593084647, 0.4415624759308465, -0.31100423396407306, 0.0]
-# Newer: This is the Student Correlation: ------>  [0.5222329678670935, 0.8831249518616929, 0.883124951861693, -0.6220084679281461, 0.0]
-# Original : This is the Student Correlation: ------>  [0.5222329678670935, 0.7611164839335467, 0.33333333333333337, -0.4553418012614795, -0.5773502691896257]
-
-
-# [0.8838834764831843, 0.7306168728364051, 0.5773502691896258, 0.5773502691896258]
-# [0.9503288904374105, 0.8696263565463042, 0.8215838362577491, 0.4743416490252569]
-##### 这部分的代码可以和correlation 合并。 重构代码时候可以直接返回nested lists， 根据需求取出相对应的值。
-# def similarity_between_columns(matrix):
-#     """
-#     Calculate the similarity between one column with the column before it and after it. This calculation is based on cosine,
-#     which generated by dot product divided by normalised production.
-#     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-#     :return: A list of similarities of each column/item.
-#     """
-#     # similarity = []
-#     similarity_reuslt = []
-#
-#     # The range of either the number of student or items/columns
-#     range_similarrity = math.floor(math.sqrt(len(matrix)))
-#     # Traverse each column/stduent.
-#     for i in range(len(matrix)):
-#         # If it is the first column
-#         temp_result = []
-#         if i == 0:
-#             temp_similarity = 0.0
-#             for j in range(range_similarrity):
-#                 try:
-#                     temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
-#                 except:
-#                     pass
-#             temp_result.append(temp_similarity / range_similarrity)
-#             # cosine = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
-#         elif i == len(matrix) - 1:
-#             temp_similarity = 0.0
-#             for j in range(range_similarrity):
-#                 try:
-#                     temp_similarity += dot(matrix[i], matrix[i - j - 1]) / (norm(matrix[i]) * norm(matrix[i - j - 1]))
-#                 except:
-#                     pass
-#             temp_result.append(temp_similarity / range_similarrity)
-#             # cosine = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
-#         else:
-#             temp_similarity = 0.0
-#             for j in range(range_similarrity):
-#                 try:
-#                     temp_similarity += dot(matrix[i], matrix[i + j + 1]) / (norm(matrix[i]) * norm(matrix[i + j + 1]))
-#                 except:
-#                     pass
-#                 try:
-#                     temp_similarity += dot(matrix[i], matrix[i - j - 1]) / (norm(matrix[i]) * norm(matrix[i - j - 1]))
-#                 except:
-#                     pass
-#             temp_result.append(temp_similarity / (2 * range_similarrity))
-#             # cosine1 = dot(matrix[i], matrix[i + 1]) / (norm(matrix[i]) * norm(matrix[i + 1]))
-#             # cosine2 = dot(matrix[i], matrix[i - 1]) / (norm(matrix[i]) * norm(matrix[i - 1]))
-#             # cosine = (cosine1 + cosine2) / 2
-#         # similarity.append(cosine)
-#         similarity_reuslt.append(temp_result)
-#         result = [j for i in similarity_reuslt for j in i]
-#     return result
 
 
 def similarity_between_column_whole(matrix, ave_per_student):
@@ -588,19 +567,6 @@ def detect_item_irregular(similarities, matrix):
     #         result.append(i)
     return result
 
-
-# TODO: 根据栗百宫的建议， column anomaly detection 可以分为两类， 1. 计算column correlation 2. 计算column similarity
-# 更具体的来说： 1. Correlation的计算： 当前完成了： 计算当前列的前面和后面的列，得出两个correlation，进行加权返回。
-# 但是更合理的方法是： （1）计算当前列(的累加值）， 与当前列的累加值(top1 student, top2 student....until top 50 student)进行correlation计算。
-#                   （2）计算当前列， 与前后 根号下（列数） 的列进行correlation计算。
-#                   得到两个correlation list以后， 取根号下（列数）个top 异常值， 高于阈值的都输出即可。此处不需要Clustering, 只需要一个精度不大的阈值即可。
-#             2. Similarity 的计算： 当前完成了当前column与前，后column的similarity计算， 以及当前列和整体similarity的计算。
-# 更合理的方法是：    （1）取根号下列个数长度，检测前后长度区间内的similarity。 然后用clustering（sprint3）筛选top异常值。
-
-# TODO: RoadMap : We can treate the problem as a anomaly detection problem and apply outelier detection algorithms, including
-# TODO: 基于密度异常点检测 / 基于邻近度异常点检测等等。 Isolation Forest看起来是个不错的选择。 而且Isolation Forest 在sklearn有实现，调包可完成。
-
-# 'Four Partition' is not used anymore. Detect odd zero or odd ones will be implemented as a nested-loop.
 
 # Getter for correlations
 # The INTERFACE exposed to the outside package.
@@ -697,6 +663,7 @@ def irregular_box(matrix):
         result.append((col1, col2, best_j_k))
     return result
 
+
 def get_neighbours(radius):
     """
     the function is to return all coordinates in a cirle with radius = radius
@@ -715,6 +682,7 @@ def get_neighbours(radius):
         neighbours.remove((0, 0))
     return neighbours
 
+
 def calculate_radius(array):
     """
     this function is to calculate radius according to an array's size
@@ -724,6 +692,7 @@ def calculate_radius(array):
     size = len(array) * len(array[0])
     radius = math.log(size) / 2
     return round(radius)
+
 
 def odd_cells(matrix):
     """
@@ -757,4 +726,3 @@ def odd_cells(matrix):
                 # print(i, j, count_zeros, count_ones, total_neighbours)
                 cells.append((i, j))
     return cells
-
