@@ -44,9 +44,9 @@ def upload():
         excel.write_excel()
 
         for col in irregular_item:
-            excel.highlight_area(0, len(data) - 1, 0, 0, '#95e1d3')
+            excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3')
         for row in irregular_student:
-            excel.highlight_area(0, 0, 0, len(data[0]) - 1, '#f9ed69')
+            excel.highlight_area(row + 1, row + 1, 0, 0, '#f9ed69')
 
         excel.add_total_score()
 
@@ -77,7 +77,7 @@ def upload():
         odd_cells = guttman_analysis.odd_cells(matrix)
         odd_cells_str_tuple = []
         for (r, c) in odd_cells:
-            excel.highlight_area(r + 1, r + 1, c + 1, c + 1, 'orange')
+            excel.highlight_area(r + 1, r + 1, c + 1, c + 1, 'yellow')
             odd_cells_str_tuple.append("(%d, %d)" % (c, r))
 
         json = {
