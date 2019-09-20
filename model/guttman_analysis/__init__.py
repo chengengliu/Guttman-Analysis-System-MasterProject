@@ -329,6 +329,8 @@ def retrieve_correlation_similarity(matrix, flag):
     # Traverse each column/ or row.
     for i in range(len(matrix)):
         # print("I is ::::", i)
+        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+                                                       zero_stddiv_accumulated_list, is_empty))
         if in_danger_list(zero_stddiv_list, i):
             print("SKIP!!!!!")
             continue
@@ -339,8 +341,6 @@ def retrieve_correlation_similarity(matrix, flag):
                                                          zero_stddiv_accumulated_list, is_empty))
         correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
                                                         zero_stddiv_accumulated_list, is_empty))
-        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-                                                       zero_stddiv_accumulated_list, is_empty))
     # for i in range(len(matrix)):
     # for i in range(len(matrix)):
     if flag == 'Correlation':
