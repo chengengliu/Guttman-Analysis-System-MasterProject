@@ -77,7 +77,7 @@ def upload():
         odd_cells = guttman_analysis.odd_cells(matrix)
         odd_cells_str_tuple = []
         for (r, c) in odd_cells:
-            excel.highlight_area(r + 1, r + 1, c + 1, c + 1, 'yellow')
+            excel.highlight_area(r + 1, r + 1, c + 1, c + 1, '#b063c5')
             odd_cells_str_tuple.append("(%d, %d)" % (c, r))
 
         json = {
