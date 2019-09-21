@@ -10,6 +10,7 @@ const parseJSON = data => {
     let irregularStudent = data.irregular_student;
     let irregularItem = data.irregular_item;
     let boxs = data.boxes;
+    let odd_cells = data.odd_cells;
     let j = 0;
     let temp = "";
 
@@ -24,7 +25,7 @@ const parseJSON = data => {
         "<tbody  class = \"test\">";
 
     for (let l = 0; l < data.content.length; l++) {
-        let stu = Object.keys(data.content[l]).toString()
+        let stu = Object.keys(data.content[l]).toString();
         j++;
         temp += "<tr>";
         if (irregularStudent.Exists(stu)) {
@@ -46,7 +47,9 @@ const parseJSON = data => {
                     }
                 }
 
+
                 if (i >= boxs[k]["column_range"][0] - 1 && i < boxs[k]["column_range"][1]) {
+
                     if (j === boxs[k]["row_range"][0] + 1) {
                         class_ += " border-top";
                     }
@@ -56,11 +59,22 @@ const parseJSON = data => {
                 }
             }
 
+            let coordinate = ("(" + (i) + ", " + (j-2) + ")");
             if (l > 0 && data.content[l][stu][i] > 0 && (i !== data.content[l][stu].length - 1) && (stu !== "total")) {
-                class_ += " greater-than-0";
+                if(odd_cells.Exists(coordinate)){
+                    class_ += " odd-cells";
+                }
+                else{
+                    class_ += " greater-than-0";
+                }
             }
             else if (irregularItem.Exists(data.content[l][stu][i])) {
                 class_ += " irregular-item"
+            }
+            else{
+                if(odd_cells.Exists(coordinate)){
+                    class_ += " odd-cells";
+                }
             }
 
             temp += "<td class = \" " + class_ + "\" >" + data.content[l][stu][i] + "</td>";
@@ -129,7 +143,7 @@ const renderFeedback = data => {
 
                     <li>
                         <span>odd cells</span>
-                        <p>odd cells are shown as a list of tuples. For example, [(1,2),(3,4)] means skill1, student2 and skill3, student4 are odd cells.</p>
+                        <p>odd cells are marked with purple color</p>
                         <p>odd cells in this graph are ${data["odd_cells"]}.</p>
                         <p>An unexpected greater-then-zero odd cell after the pattern has broken down
                             should also be disregarded. It is an indication of lucky
