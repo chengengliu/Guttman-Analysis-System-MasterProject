@@ -20,7 +20,7 @@ const parseJSON = data => {
     else{
         font_size = "middle";
     }
-    temp += "<table table cellspacing=\"0\" style=\"font-size: "+ font_size +"\">\n" +
+    temp += "<table table cellspacing=\"0\" style=\"font-size: "+ font_size +"\"width= 90%>\n" +
         "<tbody  class = \"test\">";
 
     for (let l = 0; l < data.content.length; l++) {
