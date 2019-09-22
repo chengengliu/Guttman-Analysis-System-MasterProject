@@ -111,7 +111,7 @@ def clean_input(original_data):
     removed_header = original_data[1:]
     for i in range(len(removed_header)):
         removed_header[i] = removed_header[i][1:]
-    print(removed_header)
+    # print(removed_header)
     return removed_header
 
 
