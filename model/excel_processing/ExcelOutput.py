@@ -22,6 +22,8 @@ class ExcelOutput:
             self.formats.append([])
             for j in range(len(self.array[0])):
                 cell_format = self.workbook.add_format(self.base_format)
+                if type(self.array[i][j]).__name__ == 'int' and self.array[i][j] > 0:
+                    cell_format.set_bg_color('#ff5050')
                 self.formats[i].append(cell_format)
                 self.worksheet.write(i, j, self.array[i][j], self.formats[i][j])
 

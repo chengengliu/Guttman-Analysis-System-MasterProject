@@ -59,21 +59,3 @@ If you are going to use your own test data, please notice that the format of the
 5. Starting from column B and row 2, mark data **MUST** present.
 6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.
 
-# Code Commit and Branch Policy
-## Branch Policy:
-    1. Every team member should keep one branch at least, under their control, for which they should develop the project and add features. 
-    2. The 'master' branch is under the control of Baigong Li. Every pull requests made by other team members must be 
-    reviewed by him, before the pull request is closed. 
-    3. There is no need to create one branch for each feature that the team member developed. However, if you do feel 
-    like it is better to do so, feel free to add branch that named with the feature name. The naming should be clear 
-    and in-confusing, so that other team members an easily get the ideas of the branch. 
-    4. After sprint finished, branches can be closed, in order to reduce confusion in later sprint 3. 
-<br />
-
-## Commit Policy:
-    1. Every team member who wants to commit to the project, must not push their code directly to the master branch. 
-    2. Every team member who submits the pull request, must have another team member's review, if your current work has 
-    modified his/her code. 
-    3. Every team member who modified other team member's code, must inform him/her. 
-    4. Every team member who wants to merge own branch to the master branch/create pull requests to master branch, must 
-    be review by Baigong Li before closing pull requests, since he is in charge of combining front-end and back-end together. 

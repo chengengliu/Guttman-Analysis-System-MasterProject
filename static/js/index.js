@@ -53,13 +53,12 @@ const validateFile = element => {
 };
 
 const uploadFile = file => {
-    /** <-- this should be replaced */
+
     const url = '/upload';
-
     const formData = new FormData();
-    formData.append('file', file, file.name);
-
     const xhr = new XMLHttpRequest();
+
+    formData.append('file', file, file.name);
 
     xhr.upload.onloadstart = () => {
         fileView.clearNode('.file-container.new');
