@@ -23,7 +23,7 @@ class StorageTestCase(unittest.TestCase):
     def test_get_export_path(self):
         file_dir, file = st.get_export_path(1)
         self.assertEquals(file_dir, st.get_base_dir(1) + 'mod/')
-        self.assertEquals(file,'SampleAssessmentResult.xlsx')
+        self.assertEquals(file, 'SampleAssessmentResult.xlsx')
 
     def test_get_base_dir(self):
         self.assertEquals(st.get_base_dir(1), 'upload/1/')
