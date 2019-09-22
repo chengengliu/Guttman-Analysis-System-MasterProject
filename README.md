@@ -57,8 +57,8 @@ If you are going to use your own test data, please notice that the format of the
 3. Column A of that worksheet **MUST** be student name (or id).
 4. Row 1 **MUST** be item name (or id).
 5. Starting from column B and row 2, mark data **MUST** present.
-6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.
-
+6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.<br/>
+To run all unit tests: `python3 test.py` 
 # Code Commit and Branch Policy
 ## Branch Policy:
     1. Every team member should keep one branch at least, under their control, for which they should develop the project and add features. 
