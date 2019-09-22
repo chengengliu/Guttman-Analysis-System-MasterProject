@@ -3,7 +3,7 @@ import model.guttman_analysis as ad
 import model.file_importing as fi
 
 
-class AnomalyDetectionTestCase(unittest.TestCase):
+class GuttmanAnalysisTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data = fi.readfile("./testdata/SampleAssessmentResult.xlsx")
