@@ -5,7 +5,7 @@
 
 ### Section I. Source Code Reading Instructions:
 
-       This anomaly_detect.py file contains both helper functions(which has no relation with algorithms) and
+       This __init__.py file contains both helper functions(which has no relation with algorithms) and
     Algorithms implementation functions, as well as interface functions(used by other modules). This file also contains
     a main function, forinternal testing purpose, which is not meant to be read. Two interfaces functions that should be used
     by other modulesare 'return_correlation(original_data, is_student, flag)' and
@@ -15,8 +15,10 @@
 
 Special notice:
 
-    The function clean_input(original_data) must be used, if Yi Wang's package gives me the inputs with both
-    columns name and rows name. This is to be confirmed, whether he or I should make the data format conherent.
+    The function clean_input(original_data) must be used, since Yi Wang's package gives me the inputs with both
+    columns name and rows name. 
+    However, every function that relates with 'Sorting', is not useful anymore. In Yi Want's excel module, 
+    he has sorted the data from easy questions to hard questions and from high competency student to low competency student.
 
 1. To get the correlation, for either the student or the items/criteria:
 
@@ -24,6 +26,7 @@ call the function:
     ```
     return_correlation(original_data, is_student, flag)
     ```
+<br/>
 Input Description:
 
     Original_data: where the input is the original data (it is supposed to be nested list)
@@ -43,7 +46,7 @@ Input Description:
 2. To get the irregular columns:
 
 call the function:
-    ```return_irregular_index(original_data, is_student)```
+    ```return_irregular_index(original_data, is_student)```<br/>
 Input Desciption:
 
     Original_data: where the input is the original data (it is supposed to be nested list)
@@ -71,3 +74,8 @@ Input Desciption:
     retrieve_average_per_item(matrix, itemsum)
     transpose_matrix(matrix)
 The above mentioned functions can be skipped while you read the code.
+
+### Section IV. Furthrer Notice
+The algorithms are tested (for now) under `test_anomaly_detect.py` file. 
+Current(end of sprint 2) build has not received any useful test data to validate the algorithms. 
+The tests performed are more like a format/math check, but not a effectiveness check. 
