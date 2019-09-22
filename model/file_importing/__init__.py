@@ -48,14 +48,15 @@ def readfile(file_name):
     # read an excel file and store it in a 2d array
     :return: a 2d array containing all information from that excel file
     """
-    df = pd.read_excel(open(file_name, 'rb'))
-    excel_dict = df.to_dict(orient='dict')
-    array = []
-    for key in excel_dict.keys():
-        temp_array = [str(key)]
-        for index in excel_dict[key]:
-            temp_array.append(excel_dict[key][index])
-        array.append(temp_array)
-    for i in range(len(array[0])):
-        array[0][i] = str(array[0][i])
+    with open(file_name, 'rb') as f:
+        df = pd.read_excel(f)
+        excel_dict = df.to_dict(orient='dict')
+        array = []
+        for key in excel_dict.keys():
+            temp_array = [str(key)]
+            for index in excel_dict[key]:
+                temp_array.append(excel_dict[key][index])
+            array.append(temp_array)
+        for i in range(len(array[0])):
+            array[0][i] = str(array[0][i])
     return array

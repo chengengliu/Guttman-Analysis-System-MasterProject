@@ -54,7 +54,7 @@ If you are going to use your own test data, please notice that the format of the
 
 1. File extension **MUST** be .xls or .xlsx
 2. Marked data **MUST** exist in the first worksheet
-3. Column A of that worksheet MUST be student name (or id).
+3. Column A of that worksheet **MUST** be student name (or id).
 4. Row 1 **MUST** be item name (or id).
 5. Starting from column B and row 2, mark data **MUST** present.
 6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.

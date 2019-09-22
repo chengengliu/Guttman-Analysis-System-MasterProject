@@ -20,7 +20,8 @@ def get_base_dir(file_id):
 def make_new_path(name):
     last_id = 0
     for file in os.listdir('upload/'):
-        last_id = int(file) if int(file) > last_id else last_id
+        if file.isnumeric():
+            last_id = int(file) if int(file) > last_id else last_id
     new_id = last_id + 1
     os.mkdir('upload/' + str(new_id))
     os.mkdir('upload/' + str(new_id) + '/ori/')
