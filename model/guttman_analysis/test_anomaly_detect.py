@@ -2,7 +2,7 @@
 # Test the performance of the functions and algorithms.
 # This file should be placed under the same directory, with the file 'anomaly_detect.py'
 
-import module_test as ad
+import __init__ as ad
 import numpy as np
 import file_import as fi
 
