@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/index.css">
+    <title>Guttman Analysis System</title>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <img class="header-logo" src="./assets/uni-logo.jpg" alt="uni logo">
+            <span class="heading">Rubric Checker: For High Quality Rubrics!</span>
+        </div>
+
+        <div class="body-container">
+            <div class="left-panel">
+                <div class="user-section">
+                    <img src="./assets/user.svg" alt="user">
+                    <p class="user-name">Hi! Deftrose</p>
+                </div>
+                <div class="link-section">
+                    <a>Guttman Analysis</a>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="file-container new">
+                    <form class="form1" enctype="multipart/form-data" method="POST">
+                        <img class="upload" src="./assets/plus.svg" alt="add-file">
+                        <br>
+                        <span class="text label-new">New</span>
+                        <input class="import" type="file" name="file" accept=".xls, .xlsx" />
+                    </form>
+                    <img class="black-line" src="./assets/black-line.svg" alt="black-line">
+                    <form class="form2" enctype="multipart/form-data" method="POST">
+                        <img class="upload" src="./assets/upload.svg" alt="upload-file">
+                        <span class="text label-import">Import</span>
+                        <input class="import" type="file" name="file" accept=".xls, .xlsx" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/index.js" type="module"></script>
+</body>
+
+</html>
