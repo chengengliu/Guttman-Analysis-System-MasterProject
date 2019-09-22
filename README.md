@@ -45,8 +45,9 @@ The server should be listening on http://127.0.0.1:5000 (defualt setting of flas
 
 
 ### Step5. Test
+To run all back-end unit tests: `python3 test.py` 
 
-You could use **[repo_root_path]/testdata/SampleAssessmentResult.xlsx** as test data.
+For mannual test, you could use **[repo_root_path]/testdata/SampleAssessmentResult.xlsx** as test data.
 
 **Note:**
 In this sprint, we have not handled possible errors or exceptions yet. 
@@ -58,7 +59,6 @@ If you are going to use your own test data, please notice that the format of the
 4. Row 1 **MUST** be item name (or id).
 5. Starting from column B and row 2, mark data **MUST** present.
 6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.<br/>
-7. To run all back-end unit tests: `python3 test.py` 
 
 # Code Commit and Branch Policy
 ## Branch Policy:
