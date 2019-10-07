@@ -1,4 +1,26 @@
-export const renderPopupWindow = fileName => {
+export const renderPopupWindow = (fileName, flag) => {
+
+    let content;
+
+    switch (flag) {
+        case 'INVALID_EXTENSION':
+            content = `
+                <p class="text">The selected file <span>${fileName}</span> is invalid.</p>
+                <p class="text">Please submit <span>.xls</span> or <span>.xlsx</span> file.</p>
+            `;
+            break;
+        case 'INVALID_FORMAT':
+            content = `
+                <p class="text">The selected file <span>${fileName}</span> is invalid.</p>
+                <p class="text">Please submit <span>Guttman Chart format</span> file.</p>
+            `;
+            break;
+        default:
+            content = `
+                <p class="text">Sorry, upexpected error.</p>
+            `;
+    }
+
     const markup = `
         <div class="window">
             <div class="pop-up">
@@ -7,8 +29,7 @@ export const renderPopupWindow = fileName => {
                     <p class="text">WARNING</p>
                 </div>
                 <div class="pop-up-text">
-                    <p class="text">The selected file <span>${fileName}</span> is invalid.</p>
-                    <p class="text">Please submit <span>.xls</span> or <span>.xlsx</span> file.</p>
+                    ${content}
                 </div>
                 <div class="pop-up-button">
                     <button>Okay</button>
@@ -17,6 +38,9 @@ export const renderPopupWindow = fileName => {
         </div>
     `
     document.querySelector('body').insertAdjacentHTML('afterbegin', markup);
+
+    // close the dialog window
+    document.querySelector('.pop-up-button').addEventListener('click', () => clearNode('.window'));
 };
 
 export const renderFileProcessing = () => {
@@ -28,7 +52,7 @@ export const renderFileProcessing = () => {
             <img class="black-line" src="./assets/black-line.svg" alt="black-line">
             <div class="form2">
                 <span class="text label-process">Processing...</span>
-                <img src="./assets/close-window.svg" alt="close-icon">
+                <img class="processing-delete" src="./assets/close-window.svg" alt="close-icon">
             </div>
         </div>
     `;
@@ -95,17 +119,17 @@ export const clearNode = className => {
 
 export const setInvisible = className => {
     document.querySelector(className).style.display = 'none';
-};  
+};
 
 export const setVisible = className => {
     document.querySelector(className).style.display = '';
 };
 
-const limitFileName =  fileName => {
-	if (!fileName) return;
+const limitFileName = fileName => {
+    if (!fileName) return;
 
-	const len = fileName.length;
+    const len = fileName.length;
 
-	return len > 18 ? `${fileName.substring(0, 10)}.xlsx` : fileName;
+    return len > 18 ? `${fileName.substring(0, 10)}.xlsx` : fileName;
 };
 

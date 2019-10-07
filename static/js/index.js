@@ -1,24 +1,20 @@
 import * as fileView from './view/fileView.js';
 
 
+const INVALID_EXTENSION = 'INVALID_EXTENSION';
+const INVALID_FORMAT = 'INVALID_FORMAT';
+
 // initial query to server asking for processed files
 const init = async () => {
 
-    //localStorage.clear();
+    localStorage.clear();
 
     const jsonData = await initFetch(); // data should be an array of processed files
 
-    jsonData.file_list.forEach(json => {
-        localStorage[json.file_id] = JSON.stringify(json);
-    });
-
     // render inital processed files
-    for (let i = 0; i < localStorage.length; i++) {
-        const value = localStorage.getItem(localStorage.key(i));
-        const json = JSON.parse(value);
-
+    jsonData.file_list.forEach(json => {
         fileView.renderProcessDone(json.file_id, json.file_name, json.export_url);
-    }
+    });
 };
 
 const initFetch = async () => {
@@ -43,9 +39,7 @@ const validateFile = element => {
 
     // if not a valid file, popup warning
     if (!allowedExtensions.exec(filePath)) {
-        fileView.renderPopupWindow(file.name);
-        // close the dialog window
-        document.querySelector('.pop-up-button').addEventListener('click', () => fileView.clearNode('.window'));
+        fileView.renderPopupWindow(file.name, INVALID_EXTENSION);
     } else {
         // send the file to server
         uploadFile(file);
@@ -63,18 +57,33 @@ const uploadFile = file => {
     xhr.upload.onloadstart = () => {
         fileView.clearNode('.file-container.new');
         fileView.renderFileProcessing();
+
+        document.querySelector('.processing-delete').addEventListener('click', () => {
+            xhr.abort();
+            fileView.clearNode('.file-container.processing');
+            fileView.renderNewFileUpload();
+        });
     };
 
     xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 400) {
 
-            const fileID = JSON.parse(xhr.responseText).file_id;
-            const downloadURL = JSON.parse(xhr.responseText).export_url;
+            // const isFormatValid = JSON.parse(xhr.responseText).file_format;   <------- TODO
+            const isFormatValid = true;
 
-            fileView.clearNode('.file-container.processing');
-            fileView.renderProcessDone(fileID, file.name, downloadURL);
-            fileView.renderNewFileUpload();
-
+            // if file format is valid
+            if (isFormatValid === true) {
+                const fileID = JSON.parse(xhr.responseText).file_id;
+                const downloadURL = JSON.parse(xhr.responseText).export_url;
+    
+                fileView.clearNode('.file-container.processing');
+                fileView.renderProcessDone(fileID, file.name, downloadURL);
+                fileView.renderNewFileUpload();
+            } else {
+                fileView.renderPopupWindow(file.name, INVALID_FORMAT);
+                fileView.clearNode('.file-container.processing');
+                fileView.renderNewFileUpload();
+            }
         } else {
             console.error(`error ${xhr.response}`);
         }
@@ -98,7 +107,6 @@ const deleteFile = (fileID, element) => {
         .catch(error => console.error(`Delete error: ${error}`));
 
     // remove data and node
-    if (localStorage.getItem(fileID)) localStorage.removeItem(fileID);
     if (element.dataset.fileId == fileID) element.remove();
 };
 

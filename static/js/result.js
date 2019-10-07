@@ -15,15 +15,7 @@ const renderResult = async () => {
     const query = decodeURIComponent(window.location.search);
     const index = query.indexOf('=');
     const fileID = query.substring(index + 1);
-    let processedData;
-
-    // if the request file has not been processed before
-    if (!localStorage.getItem(fileID)) {
-        processedData = await getProcessedResult(fileID);  // should be a JSON object
-        localStorage[fileID] = JSON.stringify(processedData);
-    } else {
-        processedData = JSON.parse(localStorage.getItem(fileID));
-    }
+    const processedData = await getProcessedResult(fileID);  // should be a JSON object
 
     resultView.renderParsedResult(processedData);
 };
