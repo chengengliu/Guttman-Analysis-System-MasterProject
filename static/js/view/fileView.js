@@ -117,14 +117,6 @@ export const clearNode = className => {
     }
 }
 
-export const setInvisible = className => {
-    document.querySelector(className).style.display = 'none';
-};
-
-export const setVisible = className => {
-    document.querySelector(className).style.display = '';
-};
-
 const limitFileName = fileName => {
     if (!fileName) return;
 
