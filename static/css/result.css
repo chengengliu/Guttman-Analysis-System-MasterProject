@@ -196,3 +196,9 @@ td {text-align: center;}
 .irregular-item{
     background-color:#95e1d3;
 }
+
+.odd-cells{
+    background-color: #b063c5;
+    color: white;
+}
+
