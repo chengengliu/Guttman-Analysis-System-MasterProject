@@ -31,7 +31,7 @@ def upload():
             file_name.save(path)
             data = file_importing.readfile(path)
             data = file_importing.transpose(data)
-            file_importing.sort_2d_array(data)
+            file_importing.sort_2d_array_mark(data)
 
             matrix = guttman_analysis.clean_input(data)
 
