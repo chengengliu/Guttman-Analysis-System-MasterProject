@@ -1,3 +1,11 @@
+const limitFileName = fileName => {
+    if (!fileName) return;
+
+    const len = fileName.length;
+
+    return len > 18 ? `${fileName.substring(0, 10)}.xlsx` : fileName;
+};
+
 export const renderPopupWindow = (fileName, flag) => {
 
     let content;
@@ -15,6 +23,18 @@ export const renderPopupWindow = (fileName, flag) => {
                 <p class="text">Please submit <span>Guttman Chart format</span> file.</p>
             `;
             break;
+        case 'INSTRUCTION':
+            content =  `
+                <p class="text">Please ensure that the selected file follows the following rules:</p>
+                <p class="text">1. File extension MUST be <span>.xls</span> or <span>.xlsx</span></p>
+                <p class="text">2. Marked data MUST exist in the <span>first</span> worksheet</p>
+                <p class="text">3. Column A of that worksheet MUST be <span>student name (or id)</span>.</p>
+                <p class="text">4. Row 1 MUST be item <span>name (or id)</span>.</p>
+                <p class="text">5. Starting from column B and row 2, mark data MUST present.</p>
+                <p class="text">6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.</p>
+            `;
+            break;
+
         default:
             content = `
                 <p class="text">Sorry, upexpected error.</p>
@@ -116,12 +136,3 @@ export const clearNode = className => {
         element.parentElement.removeChild(element);
     }
 }
-
-const limitFileName = fileName => {
-    if (!fileName) return;
-
-    const len = fileName.length;
-
-    return len > 18 ? `${fileName.substring(0, 10)}.xlsx` : fileName;
-};
-

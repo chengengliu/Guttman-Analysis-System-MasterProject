@@ -3,11 +3,10 @@ import * as fileView from './view/fileView.js';
 
 const INVALID_EXTENSION = 'INVALID_EXTENSION';
 const INVALID_FORMAT = 'INVALID_FORMAT';
+const INSTRUCTION = 'INSTRUCTION';
 
 // initial query to server asking for processed files
 const init = async () => {
-
-    localStorage.clear();
 
     const jsonData = await initFetch(); // data should be an array of processed files
 
@@ -15,6 +14,9 @@ const init = async () => {
     jsonData.file_list.forEach(json => {
         fileView.renderProcessDone(json.file_id, json.file_name, json.export_url);
     });
+
+    // render instruction
+    fileView.renderPopupWindow(undefined, INSTRUCTION); 
 };
 
 const initFetch = async () => {
@@ -28,7 +30,7 @@ const initFetch = async () => {
 
 window.onload = init;
 
-const openDialog = () => document.querySelector('.import').click();
+// const openDialog = () => document.querySelector('.import').click();
 
 const validateFile = element => {
     const filePath = element.value;
@@ -113,7 +115,7 @@ const deleteFile = (fileID, element) => {
 document.querySelector('.right-panel').addEventListener('click', e => {
 
     if (e.target.matches('.upload, .upload *')) {
-        openDialog();
+        openDialog();      
     } else if (e.target.matches('.delete')) {
         const fileID = e.target.dataset.fileId;
         const element = e.target.closest('.file-container.processed');
@@ -125,4 +127,8 @@ document.querySelector('.right-panel').addEventListener('click', e => {
 document.querySelector('.right-panel').addEventListener('change', e => {
 
     if (e.target.matches('.import, .import *')) validateFile(e.target);
+    // set the target to empty so that 'change' will fire even select the same file
+    e.target.value = '';  
 });
+
+const openDialog = () => document.querySelector('.import').click();
