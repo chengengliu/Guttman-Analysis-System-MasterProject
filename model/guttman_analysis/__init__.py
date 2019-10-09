@@ -731,18 +731,19 @@ def odd_cells(matrix):
     neighbours = get_neighbours(calculate_radius(matrix))
     cells = []
     threshold = 0.8
-    for i in range(1, len(matrix)):
-        for j in range(1, len(matrix[0])):
+    for i in range(0, len(matrix)):
+        for j in range(0, len(matrix[0])):
             count_zeros = 0
             count_ones = 0
             total_neighbours = 0
             for (x, y) in neighbours:
-                if 0 < i + x < len(matrix) and 0 < j + y < len(matrix[0]):
+                if 0 <= i + x < len(matrix) and 0 <= j + y < len(matrix[0]):
                     if matrix[i + x][j + y] == 0:
                         count_zeros += 1
                         total_neighbours += 1
                     else:
-                        count_ones += 1
+                        # substitute with count_ones += matrix[i + x][j + y] if scoring rate is chosen
+                        count_ones += 1     
                         total_neighbours += 1
 
             if matrix[i][j] == 0 and count_ones / total_neighbours > threshold:

@@ -51,8 +51,8 @@ def sort_2d_array_max_mark(array):
             count1 = 0.0
             count2 = 0.0
             for k in range(1, len(array[0])):
-                count1 += float(int(array[j][k])/max_mark[k])
-                count2 += float(int(array[j+1][k])/max_mark[k])
+                count1 += int(array[j][k])
+                count2 += int(array[j+1][k])
             if count1 < count2:
                 array[j], array[j+1] = array[j+1], array[j]
 
