@@ -728,6 +728,16 @@ def odd_cells(matrix):
     :param neighbours: neighbours of a particular cell, in order to calculate the cell's neighbours value
     :return: an array of sets of anomalies' coordinates
     """
+    max_mark = []
+    for i in range(0, len(matrix[0])):
+        # assume the maximum mark of this task is 1
+        max = 1
+        for j in range(0, len(matrix)):
+            if max < int(matrix[j][i]):
+                max = int(matrix[j][i])
+        max_mark.append(max)
+
+
     neighbours = get_neighbours(calculate_radius(matrix))
     cells = []
     threshold = 0.8
@@ -743,7 +753,7 @@ def odd_cells(matrix):
                         total_neighbours += 1
                     else:
                         # substitute with count_ones += matrix[i + x][j + y] if scoring rate is chosen
-                        count_ones += 1     
+                        count_ones += 1
                         total_neighbours += 1
 
             if matrix[i][j] == 0 and count_ones / total_neighbours > threshold:

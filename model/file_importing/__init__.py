@@ -40,7 +40,7 @@ def sort_2d_array_max_mark(array):
     for i in range(1, len(array[0])):
         # assume the maximum mark of this task is 1
         max = 1
-        for j in range(1, len(array) - 1):
+        for j in range(1, len(array)):
             if max < int(array[j][i]):
                 max = int(array[j][i])
         max_mark.append(max)
