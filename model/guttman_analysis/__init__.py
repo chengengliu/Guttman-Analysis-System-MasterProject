@@ -661,17 +661,15 @@ def irregular_box(matrix):
     section_qty = math.floor(math.sqrt(len(matrix[0])))
     box_max_height = math.floor(math.sqrt(len(matrix)))
     item_sum = sumItemScore(matrix)
-    item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
+    max_mark = [max([matrix[j][i] for j in range(len(matrix))]) for i in range(len(matrix[0]))]
+    item_diff = [float(item_sum[i])/max_mark[i] - float(item_sum[i+1])/max_mark[i+1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
-    print(tuple_diff)
     selected_tuple = tuple_diff[:section_qty]
     selected_col = [i for _, i in selected_tuple]
     selected_col.append(-1)
     selected_col.append(len(matrix[0]) - 1)
     selected_col.sort()
-    max_mark = [max([matrix[j][i] for j in range(len(matrix))]) for i in range(len(matrix[0]))]
-    print(max_mark)
     result = []
     for i in range(len(selected_col) - 1):
         best_dis = 1

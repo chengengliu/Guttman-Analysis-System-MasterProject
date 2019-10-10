@@ -92,7 +92,7 @@ def upload():
             }
             storage.save_result(json, file_id)
             excel.close_workbook()
-        except (FileNotFoundError, IOError, ZeroDivisionError):
+        except:
             storage.delete_file(file_id)
 
         return result
@@ -119,5 +119,3 @@ def get_result(file_id):
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
-
-

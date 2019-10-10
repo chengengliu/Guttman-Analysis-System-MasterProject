@@ -35,8 +35,7 @@ def sort_2d_array_max_mark(array):
     :param array: a 2d array
     :return: a sorted 2d array, sort from left to right and also from top to bottom
     """
-    max_mark = []
-    max_mark.append(0)
+    max_mark = [0]
     for i in range(1, len(array[0])):
         # assume the maximum mark of this task is 1
         max = 1
@@ -56,16 +55,17 @@ def sort_2d_array_max_mark(array):
             if count1 < count2:
                 array[j], array[j+1] = array[j+1], array[j]
 
-    for i in range(1, len(array[0]) - 1):
+    for i in range(1, len(array[0])):
         for j in range(1, len(array[0]) - i):
             count1 = 0.0
             count2 = 0.0
-            for k in range(1, len(array) - 1):
-                count1 += float(int(array[k][j])/max_mark[j])
-                count2 += float(int(array[k][j+1])/max_mark[j+1])
+            for k in range(1, len(array)):
+                count1 += float(array[k][j])/max_mark[j]
+                count2 += float(array[k][j+1])/max_mark[j+1]
             if count1 < count2:
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
+                    max_mark[j], max_mark[j+1] = max_mark[j+1], max_mark[j]
 
 
 def transpose(array):
