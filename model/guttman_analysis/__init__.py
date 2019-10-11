@@ -274,14 +274,18 @@ def cal_scorerate_accumulated_matrix(matrix):
 def get_0staddv_index(matrix):
     """
     Return the positions of item that has a zero standard deviation.
-    :param matrix:
-    :return:
+    :param matrix:  The input data after cleaning up.
+    :return:    Indexes of students that have zero standard deviation.
     """
-    staddv_list = []
-    for i in range(len(matrix)):
-        if numpy.std(matrix[i]) == 0:
-            staddv_list.append(i)
-    return staddv_list
+    zero_staddv_index = []
+    try:
+        for i in range(len(matrix)):
+            if numpy.std(matrix[i]) == 0:
+                zero_staddv_index.append(i)
+    except:
+        pass
+
+    return zero_staddv_index
 
 
 def in_danger_list(danger_list, current_index):
@@ -321,26 +325,31 @@ def retrieve_correlation_similarity(matrix, flag):
 
     # Test if the accumulated zero standard deviation list is empty.
     # If it is empty, do not perform the boundary check.
-    if not zero_stddiv_accumulated_list:
-        is_empty = True
+    if zero_stddiv_accumulated_list:
+        accumulation_0stddv_is_empty = False # Exist 0 standard deviation accumulation data
     else:
-        is_empty = False
+        accumulation_0stddv_is_empty = True
+    if zero_stddiv_list:
+        data_0stddv_is_empty = False    # Exist 0 standard deviation data.
+    else:
+        data_0stddv_is_empty = True
 
     # Traverse each column/ or row.
     for i in range(len(matrix)):
-        # print("I is ::::", i)
         similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-                                                       zero_stddiv_accumulated_list, is_empty))
-        if in_danger_list(zero_stddiv_list, i):
-            print("SKIP!!!!!")
-            continue
-        if in_danger_list(zero_stddiv_accumulated_list, i) and not is_empty:
-            print("SKip the current element due to accumulation ->", i)
-            continue
+                                                       zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+        if not data_0stddv_is_empty and in_danger_list(zero_stddiv_list, i):
+            print("SKIP!!!!! There are all zeros data in the dataset. " + str(i))
+            # TODO: 如果试着参与运算呢？
+            # continue
+        if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
+            print("SKIP. There are full scores student!", i)
+            # continue
         accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate,
-                                                         zero_stddiv_accumulated_list, is_empty))
+                                                         zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
         correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
-                                                        zero_stddiv_accumulated_list, is_empty))
+                                                        zero_stddiv_accumulated_list, data_0stddv_is_empty))
+
     # for i in range(len(matrix)):
     # for i in range(len(matrix)):
     if flag == 'Correlation':
@@ -351,6 +360,8 @@ def retrieve_correlation_similarity(matrix, flag):
         return [j for i in similarity_result for j in i]
     # return [j for i in accumulation_result for j in i]
 
+def check_nan(value):
+    return math.isnan(value)
 
 def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
     """
@@ -364,6 +375,11 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
     # If the row you want to check is the first column or the last column, only check the column after it or before it.
     # result = []
     # print("LENGTH OF MATRIX: ", len(matrix))
+
+    numpy.seterr(all='raise')
+    # with numpy.errstate(divide='ignore'):
+    #     numpy.float64(1.0) / 0.0
+    #
     correlation_result = []
     accumulation_correlation_result = []
 
@@ -374,7 +390,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
     # Retrieve the square root of number of items (the matrix is in transposed form). This will
     # be the range of calculating the neighbourhood of the column when calculating the correlation.
     range_correlation = math.floor(math.sqrt(len(matrix)))
-
+    # print(range_correlation)
 
     # If the column is the first column, calculate the correlation within the range but only for the column after it.
     # Try-except is to prevent extreme cases, but generally it will not be used.
@@ -385,22 +401,43 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
         # if not is_empty and in_danger_list(danger_accumulated_list, current_index):
 
         for i in range(range_correlation):
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index+i+1):
+            if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
                 print("SKIP")
                 continue
             try:
-                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                # Change the way of calculating score_rate
-                # temp_accumulation_correlation += \
-                # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                temp_accumulation_correlation += \
+                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                temp_accumulation_correlation_mid = \
                 numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                        norm(matrix[current_index]) *
+                        norm(matrix[current_index + i + 1]))
+                if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+                        temp_similarity_mid)):
+                    temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
 
-                temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index + i + 1]))
+                temp_accumulation_correlation += temp_accumulation_correlation_mid
+                temp_correlation += temp_correlation_mid
+                temp_similarity += temp_similarity_mid
+
+                # if check_nan(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]):
+                #     temp_similarity, temp_accumulation_correlation, temp_correlation = (0.0, 0.0, 0.0)
+                # else:
+                #
+                #     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                #     # Change the way of calculating score_rate
+                #     # temp_accumulation_correlation += \
+                #     # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
+                #     temp_accumulation_correlation += \
+                #         numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                #
+                #     temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                #             norm(matrix[current_index]) *
+                #             norm(matrix[current_index + i + 1]))
             except:
                 pass
+        # if check_nan(temp_accumulation_correlation):
+        #     temp_correlation, temp_accumulation_correlation, temp_similarity = (0,0,0)
+
         correlation_result.append(temp_correlation / range_correlation)
         accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
         similarity_result.append(temp_similarity / range_correlation)
@@ -413,27 +450,52 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
         temp_accumulation_correlation = 0.0
         temp_similarity = 0.0
         for i in range(range_correlation):
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index-i-1):
+            if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
                 print("SKIP LAST")
                 continue
             try:
-                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-
-                # Change the way of calculating score_rate
-                # temp_accumulation_correlation += \
-                # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
-
-                temp_accumulation_correlation += \
+                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                temp_accumulation_correlation_mid = \
                 numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                        norm(matrix[current_index]) *
+                        norm(matrix[current_index - i - 1]))
+                if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+                        temp_similarity_mid)):
+                    temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
 
-                temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index - i - 1]))
+                temp_accumulation_correlation += temp_accumulation_correlation_mid
+                temp_correlation += temp_correlation_mid
+                temp_similarity += temp_similarity_mid
+
+                # if check_nan(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]):
+                #     temp_similarity, temp_accumulation_correlation, temp_correlation = (0.0, 0.0, 0.0)
+                # else:
+                #
+                #     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                #
+                #     # Change the way of calculating score_rate
+                #     # temp_accumulation_correlation += \
+                #     # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
+                #
+                #     temp_accumulation_correlation += \
+                #         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                #
+                #     temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                #             norm(matrix[current_index]) *
+                #             norm(matrix[current_index - i - 1]))
             except:
                 pass
+        # if check_nan(temp_accumulation_correlation):
+        #     temp_correlation, temp_accumulation_correlation, temp_similarity = (0,0,0)
+
         correlation_result.append(temp_correlation / range_correlation)
         accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
         similarity_result.append(temp_similarity / range_correlation)
+
+        # print(temp_similarity, "Last similarity ")
+        # print(temp_correlation, "Last correlation ")
+        # print(temp_accumulation_correlation, "Last one ")
         # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
     # When the current column is neither the first column nor the last column(a.k.a the general column),
     # calculate the correlation between the current column and the columns (within the range) before it and after it.
@@ -446,89 +508,162 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
             # if current_index - i < 0 or (current_index + i) >= (len(matrix)-1):
             #     continue
             # 向左到头， 只往右加
-            if current_index - i < 0:
+            if current_index - i <= 0:
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
                     continue
                 try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                    temp_accumulation_correlation_mid = numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                                norm(matrix[current_index]) *
+                                norm(matrix[current_index + i + 1]))
+                    if(check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(temp_similarity_mid)):
+                        temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
 
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                    temp_accumulation_correlation += temp_accumulation_correlation_mid
+                    temp_correlation += temp_correlation_mid
+                    temp_similarity += temp_similarity_mid
 
-                    temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index + i + 1]))
+
+                    # TODO: 整体修改。
+                    # if check_nan(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]):
+                    #     # temp_similarity, temp_accumulation_correlation, temp_correlation = (0.0, 0.0, 0.0)
+                    #     pass
+                    # else:
+                    #
+                    #     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                    #
+                    #     # Change the way of calculating score_rate
+                    #     # temp_accumulation_correlation += \
+                    #     #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
+                    #     temp_accumulation_correlation += \
+                    #         numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                    #
+                    #     temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    #             norm(matrix[current_index]) *
+                    #             norm(matrix[current_index + i + 1]))
                     continue
                 except:
-                    print("ENTER THE EXCEPTION")
+                    print("ENTER THE EXCEPTION", i, " " , current_index)
                     pass
             # 向右到头， 只往左减
-            if (current_index + i) > (len(matrix) - 1):
+            if (current_index + i) >= (len(matrix) - 1):
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
                     continue
                 try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
-                    temp_accumulation_correlation += \
+                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                    temp_accumulation_correlation_mid = \
                         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-
-                    # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation,
-                    #       current_index, "------", matrix[current_index - i - 1])
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
                             norm(matrix[current_index]) *
                             norm(matrix[current_index - i - 1]))
+                    if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+                            temp_similarity_mid)):
+                        temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+
+                    temp_accumulation_correlation += temp_accumulation_correlation_mid
+                    temp_correlation += temp_correlation_mid
+                    temp_similarity += temp_similarity_mid
+
+                    # TODO：整体修改
+                    # if check_nan(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]):
+                    #     pass
+                    # else:
+                    #     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                    #
+                    #     # Change the way of calculating score_rate
+                    #     # temp_accumulation_correlation += \
+                    #     #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
+                    #     temp_accumulation_correlation += \
+                    #         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                    #
+                    #     # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation,
+                    #     #       current_index, "------", matrix[current_index - i - 1])
+                    #
+                    #     temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    #             norm(matrix[current_index]) *
+                    #             norm(matrix[current_index - i - 1]))
                     continue
                 # The index may beyond the range, if the current column is near the tail or the head of the list.
                 except:
-                    print("ENTER THE EXCEPTION")
+                    print("ENTER THE EXCEPTION", i, " " , current_index)
                     pass
             else:
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
                     print()
                     continue
+                # TODO: REMOVE Except. Remember to put it back (indent)
                 try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                    temp_accumulation_correlation_mid = \
+                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                            norm(matrix[current_index]) *
+                            norm(matrix[current_index - i - 1]))
+                    if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+                            temp_similarity_mid)):
+                        temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
 
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                    temp_accumulation_correlation += temp_accumulation_correlation_mid
+                    temp_correlation += temp_correlation_mid
+                    temp_similarity += temp_similarity_mid
 
-                    # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation, current_index, "------", matrix[current_index - i - 1])
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index - i - 1]))
+                    # if check_nan(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]):
+                    #     temp_similarity, temp_accumulation_correlation, temp_correlation = (0.0, 0.0, 0.0)
+                    # else:
+                    #
+                    #     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                    #
+                    #     # Change the way of calculating score_rate
+                    #     # temp_accumulation_correlation += \
+                    #     # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
+                    #     temp_accumulation_correlation += \
+                    #         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                    #
+                    #     # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation, current_index, "------", matrix[current_index - i - 1])
+                    #
+                    #     temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    #             norm(matrix[current_index]) *
+                    #             norm(matrix[current_index - i - 1]))
                 # The index may beyond the range, if the current column is near the tail or the head of the list.
                 except:
-                    # print("ENTER THE EXCEPTION")
+                    print("ENTER THE EXCEPTION")
                     pass
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
                     continue
+                # TODO: REMOVE Except
                 try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-
-                    # print("Temp Accumulation , Current Index:  and +++++++", temp_accumulation_correlation, current_index)
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                    temp_accumulation_correlation_mid = numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
                                 norm(matrix[current_index]) *
                                 norm(matrix[current_index + i + 1]))
+                    if(check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(temp_similarity_mid)):
+                        temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+
+                    temp_accumulation_correlation += temp_accumulation_correlation_mid
+                    temp_correlation += temp_correlation_mid
+                    temp_similarity += temp_similarity_mid
+
+                    # if check_nan(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]):
+                    #     temp_similarity, temp_accumulation_correlation, temp_correlation = (0.0, 0.0, 0.0)
+                    # else:
+                    #
+                    #     temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                    #
+                    #     # Change the way of calculating score_rate
+                    #     # temp_accumulation_correlation += \
+                    #     # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
+                    #     temp_accumulation_correlation += \
+                    #         numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                    #
+                    #     # print("Temp Accumulation , Current Index:  and +++++++", temp_accumulation_correlation, current_index)
+                    #
+                    #     temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    #             norm(matrix[current_index]) *
+                    #             norm(matrix[current_index + i + 1]))
                 except:
-                    # print("ENTER THE EXCEPTION")
+                    print("ENTER THE EXCEPTION")
                     pass
         correlation_result.append(temp_correlation / (2 * range_correlation))
         accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
@@ -540,7 +675,6 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
         return correlation_result
     elif flag == 'Similarity':
         return similarity_result
-
 
 def similarity_between_column_whole(matrix, ave_per_student):
     """
