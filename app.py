@@ -32,8 +32,9 @@ def upload():
             data = file_importing.readfile(path)
             data = file_importing.transpose(data)
             file_importing.sort_2d_array_max_mark(data)
-
+            print("Uncleaned data: ", data)
             matrix = guttman_analysis.clean_input(data)
+            print("Cleaned data:", matrix)
 
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)

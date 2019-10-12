@@ -92,6 +92,7 @@ import math
 import numpy
 from numpy import dot
 from numpy.linalg import norm
+import numpy.ma as ma
 
 
 # The following functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
@@ -336,8 +337,8 @@ def retrieve_correlation_similarity(matrix, flag):
 
     # Traverse each column/ or row.
     for i in range(len(matrix)):
-        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-                                                       zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+        # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+        #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
         if not data_0stddv_is_empty and in_danger_list(zero_stddiv_list, i):
             print("SKIP!!!!! There are all zeros data in the dataset. " + str(i))
             # TODO: Throw warning to the front end.
@@ -348,11 +349,8 @@ def retrieve_correlation_similarity(matrix, flag):
             # continue
         accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate,
                                                          zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
-                                                        zero_stddiv_accumulated_list, data_0stddv_is_empty))
-
-    # for i in range(len(matrix)):
-    # for i in range(len(matrix)):
+        # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
+        #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
     if flag == 'Correlation':
         return [j for i in correlation_result for j in i]
     elif flag == 'Accumulation':
@@ -452,6 +450,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
                 temp_similarity += temp_similarity_mid
 
             except:
+                print(" Last right boundary check ~~~", current_index, "  ", i )
                 pass
 
         correlation_result.append(temp_correlation / range_correlation)
@@ -467,6 +466,9 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
         for i in range(range_correlation):
             # If the left bound is exceeded
             if current_index - i <= 0:
+                if(current_index == 38):
+                    print("Left bound exceed check entering\n")
+
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
                     continue
                 try:
@@ -484,11 +486,17 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
 
                     continue
                 except:
-                    print("ENTER THE EXCEPTION", i, " " , current_index)
+                    print("ENTER THE EXCEPTION, left bound exception ", i, " " , current_index, "\n")
                     pass
             # If the right bound is exceeded
             if (current_index + i) >= (len(matrix) - 1):
+
+                if(current_index == 38):
+                    print("Right bound exceed check entering   : +", i, "  ", current_index, "\n")
+
+
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+                    print("Right bound skip. :   ", current_index , "   ", i)
                     continue
                 try:
                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
@@ -508,17 +516,18 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
                     continue
                 # The index may beyond the range, if the current column is near the tail or the head of the list.
                 except:
-                    print("ENTER THE EXCEPTION", i, " " , current_index)
+                    print("ENTER THE EXCEPTION, Right bound exception", i, " " , current_index)
+                    continue
                     pass
             # Else it is safe to perform calculation.
             else:
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    print()
+                    print("Left check out of bounds", " Last actions", i, " ", current_index)
                     continue
                 try:
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
                     temp_accumulation_correlation_mid = \
                     numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
                             norm(matrix[current_index]) *
                             norm(matrix[current_index - i - 1]))
@@ -532,9 +541,11 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
 
                 # The index may beyond the range, if the current column is near the tail or the head of the list.
                 except:
-                    print("ENTER THE EXCEPTION")
+                    # print(temp_correlation_mid)
+                    print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index , "   ", i)
                     pass
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+                    print("Right check out of bounds", " Last actions", i, " ", current_index)
                     continue
                 try:
                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
@@ -550,7 +561,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
                     temp_similarity += temp_similarity_mid
 
                 except:
-                    print("ENTER THE EXCEPTION")
+                    print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
                     pass
         correlation_result.append(temp_correlation / (2 * range_correlation))
         accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
@@ -593,13 +604,14 @@ def detect_item_irregular(similarities, matrix):
     :return: the list of index/position that is irregular
     """
     result = []
-    # Set the boundary value for the number of irregular detection. 
+    # Set the boundary value for the number of irregular detection.
     range_irregular = math.floor(math.log(len(matrix)))
 
     positions = [i for i in range(len(matrix))]
     potential_list = list(zip(similarities, positions))
+    print(potential_list, "   Unsorted Potential List")
     potential_list = sorted(potential_list, key=lambda x: x[0])
-    # print(potential_list)
+    print(potential_list, "   Sorted Potential List ")
     # print(range_irregular)
     for i in potential_list[0:range_irregular]:
         if i[0] < 0:
@@ -628,6 +640,7 @@ def return_correlation(original_data, is_student, flag):
 
     matrix = sorted_item
     transpose = transpose_matrix(matrix)
+    print("Item sum is : ", sumStudentScore(transpose))
 
     # Retrieve the correlation of columns, use transpose
     if not is_student:
@@ -651,6 +664,7 @@ def return_irregular_index(original_data, is_student, flag):
     # sorted_student = sortBasedOnStudent(original_data, student_sum)
     # sorted_item = sortBasedOnItem(sorted_student, item_sum)
     sorted_item = original_data
+    print(sorted_item)
 
     # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
     matrix = sorted_item
@@ -733,6 +747,7 @@ def calculate_radius(array):
 
 
 def odd_cells(matrix):
+
     """
     this function is to find anomalies in a 2d array
     :param matrix: a 2d array
@@ -775,3 +790,38 @@ def odd_cells(matrix):
                 # print(i, j, count_zeros, count_ones, total_neighbours)
                 cells.append((i, j))
     return cells
+
+# Main is for local testing purpose.
+def main():
+
+    print("########################## New Test Data Set")
+    # Contain 40 students data. There are two all zero students and one full mark student.
+    # Ideally both invalid_excel and excel_ogdata should have the same output
+    invalid_excel = [[2, 3, 2, 3, 2, 3, 4], [2, 3, 2, 3, 0, 2, 2], [2, 3, 1, 1, 2, 0, 4], [2, 3, 1, 3, 0, 2, 2], [2, 3, 2, 3, 0, 2, 0], [2, 3, 1, 2, 1, 2, 1], [2, 0, 2, 3, 0, 2, 2], [2, 0, 2, 3, 0, 2, 2], [2, 3, 1, 2, 2, 0, 0], [1, 3, 1, 2, 0, 3, 0], [2, 3, 1, 2, 2, 0, 0], [2, 3, 1, 2, 0, 2, 0], [2, 1, 2, 3, 0, 0, 2], [2, 3, 2, 1, 1, 0, 0], [2, 3, 1, 1, 2, 0, 0], [2, 2, 1, 2, 1, 1, 0], [1, 3, 2, 2, 1, 0, 0], [0, 3, 1, 2, 2, 0, 0], [2, 3, 1, 0, 1, 1, 0], [2, 3, 1, 2, 0, 0, 0], [2, 3, 1, 1, 1, 0, 0], [2, 0, 1, 3, 2, 0, 0], [2, 3, 1, 1, 0, 1, 0], [1, 1, 1, 2, 1, 1, 0], [2, 1, 0, 0, 1, 1, 2], [2, 3, 1, 1, 0, 0, 0], [2, 3, 1, 1, 0, 0, 0], [2, 0, 1, 3, 1, 0, 0], [1, 3, 1, 0, 1, 0, 0], [1, 0, 2, 2, 1, 0, 0], [2, 0, 1, 1, 2, 0, 0], [1, 1, 1, 1, 1, 0, 0], [2, 3, 0, 0, 0, 0, 0], [2, 3, 0, 0, 0, 0, 0], [1, 3, 0, 1, 0, 0, 0], [2, 0, 1, 1, 0, 0, 0], [1, 0, 1, 0, 1, 1, 0], [0, 3, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]
+    invalid_excel_item = transpose_matrix(invalid_excel)
+    print("Student sum is: ", sumStudentScore(invalid_excel))
+    print("Item sum is: ", sumStudentScore(invalid_excel_item))
+    print(invalid_excel_item)
+    print(cal_scorerate_accumulated_matrix(invalid_excel_item))
+    print(invalid_excel)
+    print(cal_scorerate_accumulated_matrix(invalid_excel))
+
+
+    print("########################## New Test Data Set")
+    # Contain only 37 studens data. Delete two all zero studens and one full mark student.
+    excel_ogdata = [[2, 3, 2, 3, 0, 2, 2], [2, 1, 1, 3, 2, 0, 4], [2, 3, 1, 3, 0, 2, 2], [2, 3, 2, 3, 0, 2, 0], [2, 2, 1, 3, 1, 2, 1], [2, 3, 2, 0, 0, 2, 2], [2, 3, 2, 0, 0, 2, 2], [2, 2, 1, 3, 2, 0, 0], [1, 2, 1, 3, 0, 3, 0], [2, 2, 1, 3, 2, 0, 0], [2, 2, 1, 3, 0, 2, 0], [2, 3, 2, 1, 0, 0, 2], [2, 1, 2, 3, 1, 0, 0], [2, 1, 1, 3, 2, 0, 0], [2, 2, 1, 2, 1, 1, 0], [1, 2, 2, 3, 1, 0, 0], [0, 2, 1, 3, 2, 0, 0], [2, 0, 1, 3, 1, 1, 0], [2, 2, 1, 3, 0, 0, 0], [2, 1, 1, 3, 1, 0, 0], [2, 3, 1, 0, 2, 0, 0], [2, 1, 1, 3, 0, 1, 0], [1, 2, 1, 1, 1, 1, 0], [2, 0, 0, 1, 1, 1, 2], [2, 1, 1, 3, 0, 0, 0], [2, 1, 1, 3, 0, 0, 0], [2, 3, 1, 0, 1, 0, 0], [1, 0, 1, 3, 1, 0, 0], [1, 2, 2, 0, 1, 0, 0], [2, 1, 1, 0, 2, 0, 0], [1, 1, 1, 1, 1, 0, 0], [2, 0, 0, 3, 0, 0, 0], [2, 0, 0, 3, 0, 0, 0], [1, 1, 0, 3, 0, 0, 0], [2, 1, 1, 0, 0, 0, 0], [1, 0, 1, 0, 1, 1, 0], [0, 0, 0, 3, 0, 0, 0]]
+    excel_ogdata_item = transpose_matrix(excel_ogdata)
+    print("Student sum is: ", sumStudentScore(excel_ogdata))
+    print("Item sum is: ", sumStudentScore(excel_ogdata_item))
+    print(excel_ogdata_item)
+    print(cal_scorerate_accumulated_matrix(excel_ogdata_item))
+    print(excel_ogdata)
+    print(cal_scorerate_accumulated_matrix(excel_ogdata))
+
+
+    print("#########################   Return result, ")
+
+
+
+if __name__ == '__main__':
+    main()
