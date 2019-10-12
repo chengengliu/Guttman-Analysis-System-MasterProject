@@ -400,7 +400,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
 
         for i in range(range_correlation):
             if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                print("SKIP")
+                print("SKIP111")
                 continue
             try:
                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
@@ -432,7 +432,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
         temp_similarity = 0.0
         for i in range(range_correlation):
             if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                print("SKIP LAST")
+                print("SKIP222")
                 continue
             try:
                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
@@ -470,6 +470,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
                     print("Left bound exceed check entering\n")
 
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+                    print("SKIP333")
                     continue
                 try:
                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
@@ -496,7 +497,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
 
 
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    print("Right bound skip. :   ", current_index , "   ", i)
+                    print("Right bound skip. :   ", current_index , "   ", i, " SKIP444")
                     continue
                 try:
                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
@@ -522,7 +523,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
             # Else it is safe to perform calculation.
             else:
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    print("Left check out of bounds", " Last actions", i, " ", current_index)
+                    print("Left check out of bounds", " Last actions", i, " ", current_index, " SKIP555")
                     continue
                 try:
                     temp_accumulation_correlation_mid = \
@@ -545,7 +546,7 @@ def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumul
                     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index , "   ", i)
                     pass
                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                    print("Right check out of bounds", " Last actions", i, " ", current_index)
+                    print("Right check out of bounds", " Last actions", i, " ", current_index, " SKIP666")
                     continue
                 try:
                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
@@ -820,6 +821,19 @@ def main():
 
 
     print("#########################   Return result, ")
+    flag = 'Accumulation'
+    invalid_item = return_irregular_index(invalid_excel,False, flag)
+    invalid_student = return_irregular_index(invalid_excel,True, flag)
+
+    excel_item = return_irregular_index(excel_ogdata, False, flag)
+    excel_student = return_irregular_index(excel_ogdata, True, flag)
+
+    print("Invalid irregular item is: ", invalid_item)
+    print("Invalid irregular student is: ", invalid_student)
+    print("Excel irregular item is:  ", excel_item)
+    print("Excel irregular student is: ", excel_student)
+
+
 
 
 
