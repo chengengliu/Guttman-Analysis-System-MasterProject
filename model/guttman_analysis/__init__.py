@@ -1005,21 +1005,17 @@ def return_correlation(original_data, is_student, flag):
     :param is_student:  A boolean value, specifying if the user wants the row/column detection.
     :return: A list of correlations of each item/column.
     """
-    student_sum = sumStudentScore(original_data)
-    print("Student sum is: ", student_sum)
-    item_sum = sumItemScore(original_data)
-    sorted_student = sortBasedOnStudent(original_data, student_sum)
-    sorted_item = sortBasedOnItem(sorted_student, item_sum)
+    sorted_item = original_data
 
+    # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
     matrix = sorted_item
     transpose = transpose_matrix(matrix)
-    print("Item sum is : ", sumStudentScore(transpose))
 
     # Retrieve the correlation of columns, use transpose
     if not is_student:
-        return return_irregular_index_test2(transpose, flag)
+        return irregular_cal_copy(transpose, flag)
     elif is_student:
-        return return_irregular_index_test2(matrix, flag)
+        return irregular_cal_copy(matrix, flag)
 
 
 # Getter for irregular columns
