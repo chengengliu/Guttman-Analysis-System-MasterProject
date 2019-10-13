@@ -75,7 +75,6 @@ Section III. Helper functions:
 
     The above mentioned functions can be skipped while you read the code.
 '''
-# TODO: The code for calculating similarity can be refactored and improved, to calculate together with correlation. 今天不做了， 明天代码重构写。
 
 
 # Detect the anomaly, able to detect either row/ column.
@@ -94,7 +93,8 @@ from numpy import dot
 from numpy.linalg import norm
 import numpy.ma as ma
 
-
+# TODO: 目前出现的问题，初步与栗判断是问题在Max score， scorerate的处理方式上。 不能简单地直接用transpose将数据颠倒就直接计算。
+# TODO: 学生的前x题的得分率可以这么算，分母是每题最高分的累加值，分子是当前累加的得分。但是注意，对于每个题来讲，不能去算最高分。因为那样就跨题了。 应该计算的是： topn的学生的分数总分为分子，除以topn的题的总分。 max即刚才算学生的时候算出来的总分。
 # The following functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
 # There is no algorithm involved in above functions.
 #######################################################################################################################
@@ -252,23 +252,70 @@ def detect_full_score(matrix):
 
 # Receive a student matrix. Wants to accumulate the score rate accumulated matrix.
 # Assume the input is cleaned and sorted. No more sorting needed.
-def cal_scorerate_accumulated_matrix(matrix):
-    # Accumulated score for all students.
-    transposed = transpose_matrix(matrix)
+def cal_scorerate_accumulated_matrix(matrix, is_student):
+
+    # If the input is student as row, (aka the normal data), do the calculation as usual.
+    if is_student:
+        transposed = transpose_matrix(matrix)
+    else:
+        transposed = matrix
 
     accumulated_score = []
-    full_marks = detect_full_score(transposed)
-    full_marks_accumulated = numpy.cumsum(full_marks).tolist()
-
-    for i in range(len(matrix)):
-        accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
     scorerate_accumulated = []
 
-    for item in accumulated_score:
-        temp = []
-        for i in range(len(item)):
-            temp.append(item[i] / full_marks_accumulated[i])
-        scorerate_accumulated.append(temp)
+    full_marks = detect_full_score(transposed)  # Full mark for each question.
+    print("This is the full mark",full_marks)
+
+    if is_student:
+
+        full_marks_accumulated = numpy.cumsum(full_marks).tolist()
+        print("This is the accumulated full marks, ", full_marks_accumulated)
+
+
+        for i in range(len(matrix)):
+            accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
+        print("This is the accumulated score, ", accumulated_score)
+
+
+        for item in accumulated_score:
+            temp = []
+            for i in range(len(item)):
+                temp.append(item[i] / full_marks_accumulated[i])
+            scorerate_accumulated.append(temp)
+    else:
+        # Repeated full marks for all students. Different from each question.
+        full_marks_duplicate = []
+        # Full marks accumulated.
+        full_marks_accumulated_result = []
+
+        for i in range(len(transposed)):
+            accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
+            print("MAtrix i is: ", matrix[i])
+            temp = []
+            for j in range(len(transposed[0])):
+                temp.append(full_marks[i])
+            full_marks_duplicate.append(temp)
+        # Full marks accumulation.
+        for i in range(len(transposed)):
+            full_marks_accumulated_result.append(numpy.cumsum(full_marks_duplicate[i]).tolist())
+
+        print("Column accumulated score, ", accumulated_score)
+        print("Column accumulated full mark", full_marks_duplicate)
+        print("Column accumulated full mark result, ", full_marks_accumulated_result)
+        for item in zip(accumulated_score, full_marks_accumulated_result):
+            print("Item is , ", item)
+            temp = []
+            for i in range(len(item[0])):
+                temp.append(item[0][i] / item[1][i])
+            scorerate_accumulated.append(temp)
+        print(scorerate_accumulated)
+
+
+        # for score in zip(transposed,full_marks):
+        #     print(score)
+
+
+
     return scorerate_accumulated
 
 def get_0staddv_index(matrix):
@@ -777,9 +824,13 @@ def detect_student_irregular(matrix):
 #         return correlation_result
 #     elif flag == 'Similarity':
 #         return similarity_result
-# TODO: 可不可以做一个 copy， 然后把带零的删掉。
-def irregular_cal_copy(matrix, flag):
-    scorerate = cal_scorerate_accumulated_matrix(matrix)
+def irregular_cal_copy(matrix, flag, is_student):
+
+    # TODO: The calculation of scorerate and max score should be paird attention to.
+    scorerate = cal_scorerate_accumulated_matrix(matrix, is_student)
+    print("This is the full scorerate: ", scorerate)
+
+
     zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
 
     accumulation_result = []
@@ -798,7 +849,7 @@ def irregular_cal_copy(matrix, flag):
     print("After removing: ", matrix_copy)
 
 
-    scorerate = cal_scorerate_accumulated_matrix(matrix_copy)
+    scorerate = cal_scorerate_accumulated_matrix(matrix_copy, is_student)
     for i in range(len(matrix_copy)):
         # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
         #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
@@ -847,11 +898,11 @@ def return_irregular_index_test2(original_data, is_student, flag):
 
 
     if not is_student:
-        columns_similarity = irregular_cal_copy(transpose, flag)
+        columns_similarity = irregular_cal_copy(transpose, flag,is_student)
         print("Columns Similarity for testing purpose: ", columns_similarity)
         return detect_item_irregular(columns_similarity, transpose)
     elif is_student:
-        student_similarity = irregular_cal_copy(matrix, flag)
+        student_similarity = irregular_cal_copy(matrix, flag, is_student)
         print("Student Similarity for testing purpose: ", student_similarity)
         return detect_item_irregular(student_similarity, matrix)
 
@@ -987,8 +1038,8 @@ def detect_item_irregular(similarities, matrix):
 
 
     for i in potential_list[0:range_irregular]:
-        if i[0] < 0:
-            result.append(i[1])
+        # if i[0] < 0:
+        result.append(i[1])
 
     return result
 
@@ -1013,9 +1064,9 @@ def return_correlation(original_data, is_student, flag):
 
     # Retrieve the correlation of columns, use transpose
     if not is_student:
-        return irregular_cal_copy(transpose, flag)
+        return irregular_cal_copy(transpose, flag, is_student)
     elif is_student:
-        return irregular_cal_copy(matrix, flag)
+        return irregular_cal_copy(matrix, flag, is_student)
 
 
 # Getter for irregular columns
@@ -1216,8 +1267,10 @@ def main():
     # 这一版本： irregular_cal_copy是直接把全0或者满分数据删掉了，应该是没有问题的了，但是结果还是一样的。
     #################################3
     print("#########################   DEEP COPY Version , ")
-    print("TEST student  ", irregular_cal_copy(invalid_excel, flag))
-    print("TEST item   ", irregular_cal_copy(invalid_excel_item, flag))
+
+    print("TEST student  ", irregular_cal_copy(invalid_excel, flag, True))
+    print("TEST item   ", irregular_cal_copy(invalid_excel_item, flag, False))
+
 
     #################################
     print("#########################s######## TEST FOR detect_item_irregular")
