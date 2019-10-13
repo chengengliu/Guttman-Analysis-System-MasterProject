@@ -815,7 +815,7 @@ def irregular_cal_copy(matrix, flag):
     # The value is not full. There are values deleted.
     temp = [j for i in accumulation_result for j in i]
     for e in zero_stddiv_accumulated_list:
-        temp.insert(e,0)
+        temp.insert(e,0.0)
 
 
 
@@ -839,20 +839,12 @@ def return_irregular_index_test2(original_data, is_student, flag):
     :param is_student:  A boolean value, specifying if the user wants the row/column detection.
     :return:    A list of irregular pattern.
     """
-    student_sum = sumStudentScore(original_data)
-    item_sum = sumItemScore(original_data)
-    # sorted_student = sortBasedOnStudent(original_data, student_sum)
-    # sorted_item = sortBasedOnItem(sorted_student, item_sum)
     sorted_item = original_data
-    print(sorted_item)
 
     # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
     matrix = sorted_item
     transpose = transpose_matrix(matrix)
 
-    student_sum.sort()
-    student_sum = list(reversed(student_sum))
-    ave_per_student = retrieve_average_per_item(matrix, student_sum)
 
     if not is_student:
         columns_similarity = irregular_cal_copy(transpose, flag)
