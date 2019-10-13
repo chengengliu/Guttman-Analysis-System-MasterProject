@@ -306,258 +306,258 @@ def in_danger_list(danger_list, current_index):
 # There is no algorithm involved in above functions.
 #######################################################################################################################
 
-def retrieve_correlation_similarity(matrix, flag):
-    """
-    Retrieve the correlation between each column. This function utilises cal_correlation_items
-    :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :return:    A list of correlation calculated.
-    """
-    accumulation_result = []
-    correlation_result = []
-    similarity_result = []
-
-    scorerate = cal_scorerate_accumulated_matrix(matrix)
-    # A list of zero standard deviation items. So called dangerous list.
-    zero_stddiv_list = get_0staddv_index(matrix)
-    zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
-
-    # Test if the accumulated zero standard deviation list is empty.
-    # If it is empty, do not perform the boundary check.
-    if zero_stddiv_accumulated_list:
-        accumulation_0stddv_is_empty = False # Exist 0 standard deviation accumulation data
-    else:
-        accumulation_0stddv_is_empty = True
-    if zero_stddiv_list:
-        data_0stddv_is_empty = False    # Exist 0 standard deviation data.
-    else:
-        data_0stddv_is_empty = True
-
-    # Traverse each column/ or row.
-    for i in range(len(matrix)):
-        # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-        #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        if not data_0stddv_is_empty and in_danger_list(zero_stddiv_list, i):
-            print("SKIP!!!!! There are all zeros data in the dataset. " + str(i))
-            # TODO: Throw warning to the front end.
-            continue
-        if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
-            print("SKIP. There are full scores student!", i)
-            # TODO: Throw warning to the front end.
-            continue
-        accumulation_result.append(cal_correlation_irregular(matrix, i, 'Accumulation', scorerate,
-                                                         zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
-        #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
-    if flag == 'Correlation':
-        return [j for i in correlation_result for j in i]
-    elif flag == 'Accumulation':
-        return [j for i in accumulation_result for j in i]
-    elif flag == 'Similarity':
-        return [j for i in similarity_result for j in i]
-
-def check_nan(value):
-    return math.isnan(value)
-# TODO: 理想状态是非法（全零或全满分的学生数据被跳过了，然后相当于把这组数据给删掉了，不参与运算。 但是问题是，目前的测试结果显示极限值的这个处理有问题，没法得到一样的结果。
-# Invalid irregular item is:  [0]
-# Invalid irregular student is:  [17]
-# Excel irregular item is:   [4]
-# Excel irregular student is:  [16, 36, 8]
-def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
-    """
-    Calculate the correlation of columns or rows.
-    :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :param current_index: Current index of the column
-    :flag: Specifying either 'Accumulation' -> calculate in accumulative way and use accumulative data or
-    'Correlation' -> calculate in a normal way.
-    :return: A list of correlation calculated.
-    """
-    # Suppress the warning message
-    # numpy.seterr(all='raise')
-    # with numpy.errstate(divide='ignore'):
-    #     numpy.float64(1.0) / 0.0
-    correlation_result = []
-    accumulation_correlation_result = []
-
-    similarity_result = []
-
-    range_correlation = math.floor(math.sqrt(len(matrix)))
-
-    # If the column is the first column, calculate the correlation within the range but only for the column after it.
-    # Try-except is to prevent extreme cases, but generally it will not be used.
-    if current_index == 0:
-        temp_correlation = 0.0
-        temp_accumulation_correlation = 0.0
-        temp_similarity = 0.0
-
-        for i in range(range_correlation):
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                print("SKIP111")
-                continue
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index + i + 1]))
-                # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                #         temp_similarity_mid)):
-                #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
-
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
-
-            except:
-                pass
-
-        correlation_result.append(temp_correlation / range_correlation)
-        accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
-        similarity_result.append(temp_similarity / range_correlation)
-
-    # If the column is the last column, calculate the correlation within the range but only for the column before it.
-    # Try-except is to prevent extreme cases, but generally it will not be used.
-    elif current_index == len(matrix) - 1:
-        temp_correlation = 0.0
-        temp_accumulation_correlation = 0.0
-        temp_similarity = 0.0
-        for i in range(range_correlation):
-            # Modify the condition
-            if  in_danger_list(danger_accumulated_list, current_index - i - 1):
-                print("SKIP222")
-                continue
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index - i - 1]))
-                # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                #         temp_similarity_mid)):
-                #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
-
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
-
-            except:
-                print(" Last right boundary check ~~~", current_index, "  ", i )
-                pass
-
-        correlation_result.append(temp_correlation / range_correlation)
-        accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
-        similarity_result.append(temp_similarity / range_correlation)
-
-    # When the current column is neither the first column nor the last column(a.k.a the general column),
-    # calculate the correlation between the current column and the columns (within the range) before it and after it.
-    else:
-        temp_correlation = 0.0
-        temp_accumulation_correlation = 0.0
-        temp_similarity = 0.0
-        for i in range(range_correlation):
-            # If the left bound is exceeded
-            if current_index - i <= 0:
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                    print("SKIP333")
-                    continue
-                try:
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                    temp_accumulation_correlation_mid = numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index + i + 1]))
-                    # if(check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(temp_similarity_mid)):
-                    #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
-
-                    temp_accumulation_correlation += temp_accumulation_correlation_mid
-                    temp_correlation += temp_correlation_mid
-                    temp_similarity += temp_similarity_mid
-
-                    continue
-                except:
-                    print("ENTER THE EXCEPTION, left bound exception ", i, " " , current_index, "\n")
-                    pass
-            # If the right bound is exceeded
-            if (current_index + i) >= (len(matrix) - 1):
-
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    print("Right bound skip. :   ", current_index , "   ", i, " SKIP444")
-                    continue
-                try:
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                    temp_accumulation_correlation_mid = \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index - i - 1]))
-                    # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                    #         temp_similarity_mid)):
-                    #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
-
-                    temp_accumulation_correlation += temp_accumulation_correlation_mid
-                    temp_correlation += temp_correlation_mid
-                    temp_similarity += temp_similarity_mid
-
-                    continue
-                # The index may beyond the range, if the current column is near the tail or the head of the list.
-                except:
-                    print("ENTER THE EXCEPTION, Right bound exception", i, " " , current_index)
-                    continue
-                    pass
-            # Else it is safe to perform calculation.
-            else:
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    print("Left check out of bounds", " Last actions", i, " ", current_index, " SKIP555")
-                    continue
-                try:
-                    temp_accumulation_correlation_mid = \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index - i - 1]))
-                    # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                    #         temp_similarity_mid)):
-                    #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
-
-                    temp_accumulation_correlation += temp_accumulation_correlation_mid
-                    temp_correlation += temp_correlation_mid
-                    temp_similarity += temp_similarity_mid
-
-                # The index may beyond the range, if the current column is near the tail or the head of the list.
-                except:
-                    # print(temp_correlation_mid)
-                    print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index , "   ", i)
-                    pass
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                    print("Right check out of bounds", " Last actions", i, " ", current_index, " SKIP666")
-                    continue
-                try:
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                    temp_accumulation_correlation_mid = numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index + i + 1]))
-                    # if(check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(temp_similarity_mid)):
-                    #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
-
-                    temp_accumulation_correlation += temp_accumulation_correlation_mid
-                    temp_correlation += temp_correlation_mid
-                    temp_similarity += temp_similarity_mid
-
-                except:
-                    print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
-                    pass
-        correlation_result.append(temp_correlation / (2 * range_correlation))
-        accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
-        similarity_result.append(temp_similarity / (2 * range_correlation))
-    if flag == 'Accumulation':
-        return accumulation_correlation_result
-    elif flag == 'Correlation':
-        return correlation_result
-    elif flag == 'Similarity':
-        return similarity_result
+# def retrieve_correlation_similarity(matrix, flag):
+#     """
+#     Retrieve the correlation between each column. This function utilises cal_correlation_items
+#     :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+#     :return:    A list of correlation calculated.
+#     """
+#     accumulation_result = []
+#     correlation_result = []
+#     similarity_result = []
+#
+#     scorerate = cal_scorerate_accumulated_matrix(matrix)
+#     # A list of zero standard deviation items. So called dangerous list.
+#     zero_stddiv_list = get_0staddv_index(matrix)
+#     zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
+#
+#     # Test if the accumulated zero standard deviation list is empty.
+#     # If it is empty, do not perform the boundary check.
+#     if zero_stddiv_accumulated_list:
+#         accumulation_0stddv_is_empty = False # Exist 0 standard deviation accumulation data
+#     else:
+#         accumulation_0stddv_is_empty = True
+#     if zero_stddiv_list:
+#         data_0stddv_is_empty = False    # Exist 0 standard deviation data.
+#     else:
+#         data_0stddv_is_empty = True
+#
+#     # Traverse each column/ or row.
+#     for i in range(len(matrix)):
+#         # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+#         #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+#         if not data_0stddv_is_empty and in_danger_list(zero_stddiv_list, i):
+#             print("SKIP!!!!! There are all zeros data in the dataset. " + str(i))
+#             # TODO: Throw warning to the front end.
+#             continue
+#         if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
+#             print("SKIP. There are full scores student!", i)
+#             # TODO: Throw warning to the front end.
+#             continue
+#         accumulation_result.append(cal_correlation_irregular(matrix, i, 'Accumulation', scorerate,
+#                                                          zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+#         # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
+#         #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
+#     if flag == 'Correlation':
+#         return [j for i in correlation_result for j in i]
+#     elif flag == 'Accumulation':
+#         return [j for i in accumulation_result for j in i]
+#     elif flag == 'Similarity':
+#         return [j for i in similarity_result for j in i]
+#
+# def check_nan(value):
+#     return math.isnan(value)
+# # TODO: 理想状态是非法（全零或全满分的学生数据被跳过了，然后相当于把这组数据给删掉了，不参与运算。 但是问题是，目前的测试结果显示极限值的这个处理有问题，没法得到一样的结果。
+# # Invalid irregular item is:  [0]
+# # Invalid irregular student is:  [17]
+# # Excel irregular item is:   [4]
+# # Excel irregular student is:  [16, 36, 8]
+# def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
+#     """
+#     Calculate the correlation of columns or rows.
+#     :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+#     :param current_index: Current index of the column
+#     :flag: Specifying either 'Accumulation' -> calculate in accumulative way and use accumulative data or
+#     'Correlation' -> calculate in a normal way.
+#     :return: A list of correlation calculated.
+#     """
+#     # Suppress the warning message
+#     # numpy.seterr(all='raise')
+#     # with numpy.errstate(divide='ignore'):
+#     #     numpy.float64(1.0) / 0.0
+#     correlation_result = []
+#     accumulation_correlation_result = []
+#
+#     similarity_result = []
+#
+#     range_correlation = math.floor(math.sqrt(len(matrix)))
+#
+#     # If the column is the first column, calculate the correlation within the range but only for the column after it.
+#     # Try-except is to prevent extreme cases, but generally it will not be used.
+#     if current_index == 0:
+#         temp_correlation = 0.0
+#         temp_accumulation_correlation = 0.0
+#         temp_similarity = 0.0
+#
+#         for i in range(range_correlation):
+#             if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+#                 print("SKIP111")
+#                 continue
+#             try:
+#                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+#                 temp_accumulation_correlation_mid = \
+#                     numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+#                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+#                         norm(matrix[current_index]) *
+#                         norm(matrix[current_index + i + 1]))
+#                 # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+#                 #         temp_similarity_mid)):
+#                 #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+#
+#                 temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                 temp_correlation += temp_correlation_mid
+#                 temp_similarity += temp_similarity_mid
+#
+#             except:
+#                 pass
+#
+#         correlation_result.append(temp_correlation / range_correlation)
+#         accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
+#         similarity_result.append(temp_similarity / range_correlation)
+#
+#     # If the column is the last column, calculate the correlation within the range but only for the column before it.
+#     # Try-except is to prevent extreme cases, but generally it will not be used.
+#     elif current_index == len(matrix) - 1:
+#         temp_correlation = 0.0
+#         temp_accumulation_correlation = 0.0
+#         temp_similarity = 0.0
+#         for i in range(range_correlation):
+#             # Modify the condition
+#             if  in_danger_list(danger_accumulated_list, current_index - i - 1):
+#                 print("SKIP222")
+#                 continue
+#             try:
+#                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+#                 temp_accumulation_correlation_mid = \
+#                     numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+#                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+#                         norm(matrix[current_index]) *
+#                         norm(matrix[current_index - i - 1]))
+#                 # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+#                 #         temp_similarity_mid)):
+#                 #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+#
+#                 temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                 temp_correlation += temp_correlation_mid
+#                 temp_similarity += temp_similarity_mid
+#
+#             except:
+#                 print(" Last right boundary check ~~~", current_index, "  ", i )
+#                 pass
+#
+#         correlation_result.append(temp_correlation / range_correlation)
+#         accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
+#         similarity_result.append(temp_similarity / range_correlation)
+#
+#     # When the current column is neither the first column nor the last column(a.k.a the general column),
+#     # calculate the correlation between the current column and the columns (within the range) before it and after it.
+#     else:
+#         temp_correlation = 0.0
+#         temp_accumulation_correlation = 0.0
+#         temp_similarity = 0.0
+#         for i in range(range_correlation):
+#             # If the left bound is exceeded
+#             if current_index - i <= 0:
+#                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+#                     print("SKIP333")
+#                     continue
+#                 try:
+#                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+#                     temp_accumulation_correlation_mid = numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+#                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+#                                 norm(matrix[current_index]) *
+#                                 norm(matrix[current_index + i + 1]))
+#                     # if(check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(temp_similarity_mid)):
+#                     #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+#
+#                     temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                     temp_correlation += temp_correlation_mid
+#                     temp_similarity += temp_similarity_mid
+#
+#                     continue
+#                 except:
+#                     print("ENTER THE EXCEPTION, left bound exception ", i, " " , current_index, "\n")
+#                     pass
+#             # If the right bound is exceeded
+#             if (current_index + i) >= (len(matrix) - 1):
+#
+#                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+#                     print("Right bound skip. :   ", current_index , "   ", i, " SKIP444")
+#                     continue
+#                 try:
+#                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+#                     temp_accumulation_correlation_mid = \
+#                         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+#                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+#                             norm(matrix[current_index]) *
+#                             norm(matrix[current_index - i - 1]))
+#                     # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+#                     #         temp_similarity_mid)):
+#                     #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+#
+#                     temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                     temp_correlation += temp_correlation_mid
+#                     temp_similarity += temp_similarity_mid
+#
+#                     continue
+#                 # The index may beyond the range, if the current column is near the tail or the head of the list.
+#                 except:
+#                     print("ENTER THE EXCEPTION, Right bound exception", i, " " , current_index)
+#                     continue
+#                     pass
+#             # Else it is safe to perform calculation.
+#             else:
+#                 if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+#                     print("Left check out of bounds", " Last actions", i, " ", current_index, " SKIP555")
+#                     continue
+#                 try:
+#                     temp_accumulation_correlation_mid = \
+#                         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+#                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+#                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+#                             norm(matrix[current_index]) *
+#                             norm(matrix[current_index - i - 1]))
+#                     # if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
+#                     #         temp_similarity_mid)):
+#                     #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+#
+#                     temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                     temp_correlation += temp_correlation_mid
+#                     temp_similarity += temp_similarity_mid
+#
+#                 # The index may beyond the range, if the current column is near the tail or the head of the list.
+#                 except:
+#                     # print(temp_correlation_mid)
+#                     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index , "   ", i)
+#                     pass
+#                 if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+#                     print("Right check out of bounds", " Last actions", i, " ", current_index, " SKIP666")
+#                     continue
+#                 try:
+#                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+#                     temp_accumulation_correlation_mid = numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+#                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+#                                 norm(matrix[current_index]) *
+#                                 norm(matrix[current_index + i + 1]))
+#                     # if(check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(temp_similarity_mid)):
+#                     #     temp_similarity_mid, temp_accumulation_correlation_mid, temp_correlation_mid = (0.0, 0.0, 0.0)
+#
+#                     temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                     temp_correlation += temp_correlation_mid
+#                     temp_similarity += temp_similarity_mid
+#
+#                 except:
+#                     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
+#                     pass
+#         correlation_result.append(temp_correlation / (2 * range_correlation))
+#         accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
+#         similarity_result.append(temp_similarity / (2 * range_correlation))
+#     if flag == 'Accumulation':
+#         return accumulation_correlation_result
+#     elif flag == 'Correlation':
+#         return correlation_result
+#     elif flag == 'Similarity':
+#         return similarity_result
 
 def similarity_between_column_whole(matrix, ave_per_student):
     """
@@ -579,204 +579,204 @@ def detect_student_irregular(matrix):
     print("hello")
 
 
-def return_irregular_index_test(original_data, is_student, flag):
-    """
-    Return the index of irregular column/ row.
-    :param original_data: The original data.
-    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
-    :return:    A list of irregular pattern.
-    """
-    student_sum = sumStudentScore(original_data)
-    item_sum = sumItemScore(original_data)
-    # sorted_student = sortBasedOnStudent(original_data, student_sum)
-    # sorted_item = sortBasedOnItem(sorted_student, item_sum)
-    sorted_item = original_data
-    print(sorted_item)
-
-    # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
-    matrix = sorted_item
-    transpose = transpose_matrix(matrix)
-
-    student_sum.sort()
-    student_sum = list(reversed(student_sum))
-    ave_per_student = retrieve_average_per_item(matrix, student_sum)
-
-    if not is_student:
-        columns_similarity = retrieve_correlation_similarity_test(transpose, flag)
-        return detect_item_irregular(columns_similarity, transpose)
-    elif is_student:
-        student_similarity = retrieve_correlation_similarity_test(matrix, flag)
-        return detect_item_irregular(student_similarity, matrix)
-
-
-
-def retrieve_correlation_similarity_test(matrix, flag):
-    """
-    Retrieve the correlation between each column. This function utilises cal_correlation_items
-    :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :return:    A list of correlation calculated.
-    """
-    accumulation_result = []
-    correlation_result = []
-    similarity_result = []
-
-    scorerate = cal_scorerate_accumulated_matrix(matrix)
-    # A list of zero standard deviation items. So called dangerous list.
-    zero_stddiv_list = get_0staddv_index(matrix)
-    zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
-
-    # Test if the accumulated zero standard deviation list is empty.
-    # If it is empty, do not perform the boundary check.
-    if zero_stddiv_accumulated_list:
-        accumulation_0stddv_is_empty = False # Exist 0 standard deviation accumulation data
-    else:
-        accumulation_0stddv_is_empty = True
-    if zero_stddiv_list:
-        data_0stddv_is_empty = False    # Exist 0 standard deviation data.
-    else:
-        data_0stddv_is_empty = True
-
-    # Traverse each column/ or row.
-    for i in range(len(matrix)):
-        # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-        #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        if not data_0stddv_is_empty and in_danger_list(zero_stddiv_list, i):
-            print("SKIP!!!!! There are all zeros data in the dataset. " + str(i))
-            # TODO: Throw warning to the front end.
-            continue
-        if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
-            print("SKIP. There are full scores student!", i)
-            # TODO: Throw warning to the front end.
-            continue
-        accumulation_result.append(cal_correlation_irregular(matrix, i, 'Accumulation', scorerate,
-                                                         zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
-        #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
-    print("ACCUMULATION RESULT", accumulation_result)
-    if flag == 'Correlation':
-        return [j for i in correlation_result for j in i]
-    elif flag == 'Accumulation':
-        return [j for i in accumulation_result for j in i]
-    elif flag == 'Similarity':
-        return [j for i in similarity_result for j in i]
-
-
-
-def cal_correlation_irregular(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
-    correlation_result = []
-    accumulation_correlation_result = []
-    similarity_result = []
-    range_correlation = math.floor(math.sqrt(len(matrix)))
-
-    temp_correlation = 0.0
-    temp_accumulation_correlation = 0.0
-    temp_similarity = 0.0
-    calculation_counter = 0
-    for i in range(range_correlation):
-        # Left exceeds boundary, go to the right.
-        if current_index -i <=0:
-            # If the right is
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                print("skip111")
-                continue
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index + i + 1]))
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
-                calculation_counter +=1
-                # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
-            except:
-                print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
-                pass
-
-        # Right exceeds boundary, go to the left
-        elif (current_index +i) >= (len(matrix)-1):
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                print("skip222")
-                continue
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index - i - 1]))
-
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
-
-                calculation_counter +=1
-
-                # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
-            except:
-                print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
-                pass
-        else:
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                print("Left check out of bounds", " Last actions", i, " ", current_index, " SKIP555")
-                # 不知道需不需要跳过
-                pass
-            else:
-                try:
-                    temp_accumulation_correlation_mid = \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index - i - 1]))
-
-                    temp_accumulation_correlation += temp_accumulation_correlation_mid
-                    temp_correlation += temp_correlation_mid
-                    temp_similarity += temp_similarity_mid
-
-                    calculation_counter +=1
-
-                except:
-                    print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
-                    pass
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                print("Right check out of bounds", " Last actions", i, " ", current_index, " SKIP666")
-                # 不知道需不需要跳过
-                pass
-            else:
-                try:
-                    temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                    temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                    temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index + i + 1]))
-
-                    temp_accumulation_correlation += temp_accumulation_correlation_mid
-                    temp_correlation += temp_correlation_mid
-                    temp_similarity += temp_similarity_mid
-
-                    calculation_counter +=1
-
-                except:
-                    print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
-                    pass
-        # correlation_result.append(temp_correlation / (2 * range_correlation))
-        # accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
-        # similarity_result.append(temp_similarity / (2 * range_correlation))
-    correlation_result.append(temp_correlation / calculation_counter)
-    accumulation_correlation_result.append(temp_accumulation_correlation / calculation_counter)
-    similarity_result.append(temp_similarity / calculation_counter)
-
-
-    if flag == 'Accumulation':
-        return accumulation_correlation_result
-    elif flag == 'Correlation':
-        return correlation_result
-    elif flag == 'Similarity':
-        return similarity_result
+# def return_irregular_index_test(original_data, is_student, flag):
+#     """
+#     Return the index of irregular column/ row.
+#     :param original_data: The original data.
+#     :param is_student:  A boolean value, specifying if the user wants the row/column detection.
+#     :return:    A list of irregular pattern.
+#     """
+#     student_sum = sumStudentScore(original_data)
+#     item_sum = sumItemScore(original_data)
+#     # sorted_student = sortBasedOnStudent(original_data, student_sum)
+#     # sorted_item = sortBasedOnItem(sorted_student, item_sum)
+#     sorted_item = original_data
+#     print(sorted_item)
+#
+#     # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
+#     matrix = sorted_item
+#     transpose = transpose_matrix(matrix)
+#
+#     student_sum.sort()
+#     student_sum = list(reversed(student_sum))
+#     ave_per_student = retrieve_average_per_item(matrix, student_sum)
+#
+#     if not is_student:
+#         columns_similarity = retrieve_correlation_similarity_test(transpose, flag)
+#         return detect_item_irregular(columns_similarity, transpose)
+#     elif is_student:
+#         student_similarity = retrieve_correlation_similarity_test(matrix, flag)
+#         return detect_item_irregular(student_similarity, matrix)
+#
+#
+#
+# def retrieve_correlation_similarity_test(matrix, flag):
+#     """
+#     Retrieve the correlation between each column. This function utilises cal_correlation_items
+#     :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
+#     :return:    A list of correlation calculated.
+#     """
+#     accumulation_result = []
+#     correlation_result = []
+#     similarity_result = []
+#
+#     scorerate = cal_scorerate_accumulated_matrix(matrix)
+#     # A list of zero standard deviation items. So called dangerous list.
+#     zero_stddiv_list = get_0staddv_index(matrix)
+#     zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
+#
+#     # Test if the accumulated zero standard deviation list is empty.
+#     # If it is empty, do not perform the boundary check.
+#     if zero_stddiv_accumulated_list:
+#         accumulation_0stddv_is_empty = False # Exist 0 standard deviation accumulation data
+#     else:
+#         accumulation_0stddv_is_empty = True
+#     if zero_stddiv_list:
+#         data_0stddv_is_empty = False    # Exist 0 standard deviation data.
+#     else:
+#         data_0stddv_is_empty = True
+#
+#     # Traverse each column/ or row.
+#     for i in range(len(matrix)):
+#         # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+#         #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+#         if not data_0stddv_is_empty and in_danger_list(zero_stddiv_list, i):
+#             print("SKIP!!!!! There are all zeros data in the dataset. " + str(i))
+#             # TODO: Throw warning to the front end.
+#             continue
+#         if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
+#             print("SKIP. There are full scores student!", i)
+#             # TODO: Throw warning to the front end.
+#             continue
+#         accumulation_result.append(cal_correlation_irregular(matrix, i, 'Accumulation', scorerate,
+#                                                          zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+#         # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
+#         #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
+#     print("ACCUMULATION RESULT", accumulation_result)
+#     if flag == 'Correlation':
+#         return [j for i in correlation_result for j in i]
+#     elif flag == 'Accumulation':
+#         return [j for i in accumulation_result for j in i]
+#     elif flag == 'Similarity':
+#         return [j for i in similarity_result for j in i]
+#
+#
+#
+# def cal_correlation_irregular(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
+#     correlation_result = []
+#     accumulation_correlation_result = []
+#     similarity_result = []
+#     range_correlation = math.floor(math.sqrt(len(matrix)))
+#
+#     temp_correlation = 0.0
+#     temp_accumulation_correlation = 0.0
+#     temp_similarity = 0.0
+#     calculation_counter = 0
+#     for i in range(range_correlation):
+#         # Left exceeds boundary, go to the right.
+#         if current_index -i <=0:
+#             # If the right is
+#             if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+#                 print("skip111")
+#                 continue
+#             try:
+#                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+#                 temp_accumulation_correlation_mid = \
+#                 numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+#                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+#                         norm(matrix[current_index]) *
+#                         norm(matrix[current_index + i + 1]))
+#                 temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                 temp_correlation += temp_correlation_mid
+#                 temp_similarity += temp_similarity_mid
+#                 calculation_counter +=1
+#                 # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
+#             except:
+#                 print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
+#                 pass
+#
+#         # Right exceeds boundary, go to the left
+#         elif (current_index +i) >= (len(matrix)-1):
+#             if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+#                 print("skip222")
+#                 continue
+#             try:
+#                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+#                 temp_accumulation_correlation_mid = \
+#                 numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+#                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+#                         norm(matrix[current_index]) *
+#                         norm(matrix[current_index - i - 1]))
+#
+#                 temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                 temp_correlation += temp_correlation_mid
+#                 temp_similarity += temp_similarity_mid
+#
+#                 calculation_counter +=1
+#
+#                 # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
+#             except:
+#                 print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
+#                 pass
+#         else:
+#             if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
+#                 print("Left check out of bounds", " Last actions", i, " ", current_index, " SKIP555")
+#                 # 不知道需不需要跳过
+#                 pass
+#             else:
+#                 try:
+#                     temp_accumulation_correlation_mid = \
+#                         numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+#                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+#                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+#                             norm(matrix[current_index]) *
+#                             norm(matrix[current_index - i - 1]))
+#
+#                     temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                     temp_correlation += temp_correlation_mid
+#                     temp_similarity += temp_similarity_mid
+#
+#                     calculation_counter +=1
+#
+#                 except:
+#                     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
+#                     pass
+#             if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
+#                 print("Right check out of bounds", " Last actions", i, " ", current_index, " SKIP666")
+#                 # 不知道需不需要跳过
+#                 pass
+#             else:
+#                 try:
+#                     temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+#                     temp_accumulation_correlation_mid = \
+#                     numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+#                     temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+#                             norm(matrix[current_index]) *
+#                             norm(matrix[current_index + i + 1]))
+#
+#                     temp_accumulation_correlation += temp_accumulation_correlation_mid
+#                     temp_correlation += temp_correlation_mid
+#                     temp_similarity += temp_similarity_mid
+#
+#                     calculation_counter +=1
+#
+#                 except:
+#                     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
+#                     pass
+#         # correlation_result.append(temp_correlation / (2 * range_correlation))
+#         # accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
+#         # similarity_result.append(temp_similarity / (2 * range_correlation))
+#     correlation_result.append(temp_correlation / calculation_counter)
+#     accumulation_correlation_result.append(temp_accumulation_correlation / calculation_counter)
+#     similarity_result.append(temp_similarity / calculation_counter)
+#
+#
+#     if flag == 'Accumulation':
+#         return accumulation_correlation_result
+#     elif flag == 'Correlation':
+#         return correlation_result
+#     elif flag == 'Similarity':
+#         return similarity_result
 # TODO: 可不可以做一个 copy， 然后把带零的删掉。
 def irregular_cal_copy(matrix, flag):
     scorerate = cal_scorerate_accumulated_matrix(matrix)
@@ -860,90 +860,87 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
     correlation_result = []
     accumulation_correlation_result = []
     similarity_result = []
-    range_correlation = math.floor(math.sqrt(len(matrix)))
+    range_correlation = math.floor(math.sqrt(len(matrix)))-1
 
     temp_correlation = 0.0
     temp_accumulation_correlation = 0.0
     temp_similarity = 0.0
     calculation_counter = 0
     for i in range(range_correlation):
-        if current_index -i<=0:
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index + i + 1]))
+        if (current_index - i - 1) <= 0:
+            # try:
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index + i + 1]))
 
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
-                calculation_counter +=1
-                # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
+            calculation_counter +=1
 
-            except:
-                print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
-                pass
-        elif (current_index +i) >= (len(matrix)-1):
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index - i - 1]))
+            # except:
+            #     print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
+            #     pass
+        elif (current_index +i+i) >= (len(matrix)-1):
+            # try:
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index - i - 1]))
 
 
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
 
-                calculation_counter +=1
+            calculation_counter +=1
 
-                # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
-
-            except:
-                print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
-                pass
+            # except:
+            #     print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
+            #     pass
         else:
-            try:
-                temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index - i - 1]))
+            # try:
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index - i - 1]))
 
 
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
 
-                calculation_counter += 1
+            calculation_counter += 1
 
-            except:
-                print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
-                pass
-            try:
-                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                temp_accumulation_correlation_mid = \
-                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                        norm(matrix[current_index]) *
-                        norm(matrix[current_index + i + 1]))
+            # except:
+            #     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
+            #     pass
+            # try:
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index + i + 1]))
 
 
 
-                temp_accumulation_correlation += temp_accumulation_correlation_mid
-                temp_correlation += temp_correlation_mid
-                temp_similarity += temp_similarity_mid
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
 
-                calculation_counter += 1
+            calculation_counter += 1
 
-            except:
-                print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
-                pass
+            # except:
+            #     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
+            #     pass
     # print(calculation_counter)
 
     correlation_result.append(temp_correlation / calculation_counter)
@@ -1020,44 +1017,44 @@ def return_correlation(original_data, is_student, flag):
 
     # Retrieve the correlation of columns, use transpose
     if not is_student:
-        return retrieve_correlation_similarity(transpose, flag)
+        return return_irregular_index_test2(transpose, flag)
     elif is_student:
-        return retrieve_correlation_similarity(matrix, flag)
+        return return_irregular_index_test2(matrix, flag)
 
 
 # Getter for irregular columns
 # The INTERFACE exposed to the outside package
 # Student is a Bool.
-def return_irregular_index(original_data, is_student, flag):
-    """
-    Return the index of irregular column/ row.
-    :param original_data: The original data.
-    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
-    :return:    A list of irregular pattern.
-    """
-    student_sum = sumStudentScore(original_data)
-    item_sum = sumItemScore(original_data)
-    # sorted_student = sortBasedOnStudent(original_data, student_sum)
-    # sorted_item = sortBasedOnItem(sorted_student, item_sum)
-    sorted_item = original_data
-    print(sorted_item)
-
-    # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
-    matrix = sorted_item
-    transpose = transpose_matrix(matrix)
-
-    student_sum.sort()
-    student_sum = list(reversed(student_sum))
-    ave_per_student = retrieve_average_per_item(matrix, student_sum)
-
-    if not is_student:
-        columns_similarity = retrieve_correlation_similarity(transpose, flag)
-        print("Columns similarity, for testing purpose: ", columns_similarity)
-        return detect_item_irregular(columns_similarity, transpose)
-    elif is_student:
-        student_similarity = retrieve_correlation_similarity(matrix, flag)
-        print("Student similarity, for testing purpose: ", student_similarity)
-        return detect_item_irregular(student_similarity, matrix)
+# def return_irregular_index(original_data, is_student, flag):
+#     """
+#     Return the index of irregular column/ row.
+#     :param original_data: The original data.
+#     :param is_student:  A boolean value, specifying if the user wants the row/column detection.
+#     :return:    A list of irregular pattern.
+#     """
+#     student_sum = sumStudentScore(original_data)
+#     item_sum = sumItemScore(original_data)
+#     # sorted_student = sortBasedOnStudent(original_data, student_sum)
+#     # sorted_item = sortBasedOnItem(sorted_student, item_sum)
+#     sorted_item = original_data
+#     print(sorted_item)
+#
+#     # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
+#     matrix = sorted_item
+#     transpose = transpose_matrix(matrix)
+#
+#     student_sum.sort()
+#     student_sum = list(reversed(student_sum))
+#     ave_per_student = retrieve_average_per_item(matrix, student_sum)
+#
+#     if not is_student:
+#         columns_similarity = retrieve_correlation_similarity(transpose, flag)
+#         print("Columns similarity, for testing purpose: ", columns_similarity)
+#         return detect_item_irregular(columns_similarity, transpose)
+#     elif is_student:
+#         student_similarity = retrieve_correlation_similarity(matrix, flag)
+#         print("Student similarity, for testing purpose: ", student_similarity)
+#         return detect_item_irregular(student_similarity, matrix)
 
 
 def irregular_box(matrix):
@@ -1199,26 +1196,26 @@ def main():
 
     print("#########################   Return result, ")
     flag = 'Accumulation'
-    invalid_student = return_irregular_index(invalid_excel,True, flag)
-    invalid_item = return_irregular_index(invalid_excel,False, flag)
+    # invalid_student = return_irregular_index(invalid_excel,True, flag)
+    # invalid_item = return_irregular_index(invalid_excel,False, flag)
+    #
+    # excel_item = return_irregular_index(excel_ogdata, False, flag)
+    # excel_student = return_irregular_index(excel_ogdata, True, flag)
 
-    excel_item = return_irregular_index(excel_ogdata, False, flag)
-    excel_student = return_irregular_index(excel_ogdata, True, flag)
-
-    print("Invalid irregular item is: ", invalid_item)
-    print("Invalid irregular student is: ", invalid_student)
-    print("Excel irregular item is:  ", excel_item)
-    print("Excel irregular student is: ", excel_student)
+    # print("Invalid irregular item is: ", invalid_item)
+    # print("Invalid irregular student is: ", invalid_student)
+    # print("Excel irregular item is:  ", excel_item)
+    # print("Excel irregular student is: ", excel_student)
     ##################
     print("#########################   Debug Test, ")
-    print("Invalid irregular item is: ", return_irregular_index_test(invalid_excel, False,flag))
-    print("Invalid irregular student is: ", return_irregular_index_test(invalid_excel, True,flag))
-    print("Excel irregular item is:  ", return_irregular_index_test(excel_ogdata, False,flag))
-    print("Excel irregular student is: ", return_irregular_index_test(excel_ogdata, True,flag))
-
-    print("Invalid irregular student is: ", return_irregular_index_test(invalid_excel, True,flag))
-    print("Invalid irregular item is : ", return_irregular_index_test(invalid_excel,False, flag))
-
+    # print("Invalid irregular item is: ", return_irregular_index_test(invalid_excel, False,flag))
+    # print("Invalid irregular student is: ", return_irregular_index_test(invalid_excel, True,flag))
+    # print("Excel irregular item is:  ", return_irregular_index_test(excel_ogdata, False,flag))
+    # print("Excel irregular student is: ", return_irregular_index_test(excel_ogdata, True,flag))
+    #
+    # print("Invalid irregular student is: ", return_irregular_index_test(invalid_excel, True,flag))
+    # print("Invalid irregular item is : ", return_irregular_index_test(invalid_excel,False, flag))
+    #
 
     # 这一版本： irregular_cal_copy是直接把全0或者满分数据删掉了，应该是没有问题的了，但是结果还是一样的。
     #################################3
