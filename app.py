@@ -1,3 +1,5 @@
+import sys
+
 from flask import Flask, send_from_directory, request
 from .model.excel_processing.ExcelOutput import ExcelOutput
 from .model import storage, file_importing, guttman_analysis
@@ -93,6 +95,7 @@ def upload():
             storage.save_result(json, file_id)
             excel.close_workbook()
         except:
+            print(sys.exc_info())
             storage.delete_file(file_id)
 
         return result
