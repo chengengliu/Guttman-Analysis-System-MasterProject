@@ -61,12 +61,12 @@ def sort_2d_array_max_mark(array):
     for i in range(1, len(array)):
         if array[i][1:] == tmp_max_mark[1:]:
             max_mark_cnt += 1
-    print(max_mark_cnt)
+    #print(max_mark_cnt)
     max_mark = [0] + [sorted([array[j][i]
                       for j in range(1, len(array))], reverse=True)[max_mark_cnt]
                       for i in range(1, len(array[0]))
                       ]
-    print(max_mark)
+    #print(max_mark)
     for i in range(1, len(array[0])):
         for j in range(1, len(array[0]) - i):
             count1 = (1 - float(tmp_max_mark[j]) / max_mark[j]) * max_mark_cnt
@@ -74,10 +74,13 @@ def sort_2d_array_max_mark(array):
             for k in range(1, len(array)):
                 count1 += float(array[k][j])/max_mark[j]
                 count2 += float(array[k][j+1])/max_mark[j+1]
+            #print(array[0][j], count1, array[0][j+1], count2)
             if count1 < count2:
+                max_mark[j], max_mark[j+1] = max_mark[j+1], max_mark[j]
+                tmp_max_mark[j], tmp_max_mark[j+1] = tmp_max_mark[j+1], tmp_max_mark[j]
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
-                    max_mark[j], max_mark[j+1] = max_mark[j+1], max_mark[j]
+                    
 
 
 def transpose(array):
