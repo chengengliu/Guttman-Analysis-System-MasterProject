@@ -28,6 +28,29 @@ def sort_2d_array_mark(array):
             if count1 < count2:
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
+                    
+def get_max_mark(array, dirty):
+    init = 1 if dirty else 0
+    tmp_max_mark = [0] if dirty else []
+    for i in range(init, len(array[0])):
+        # assume the maximum mark of this task is 1
+        tmp_max = 1
+        for j in range(init, len(array)):
+            if tmp_max < int(array[j][i]):
+                tmp_max = int(array[j][i])
+        tmp_max_mark.append(tmp_max)
+
+    max_mark_cnt = 0
+    for i in range(init, len(array)):
+        if array[i][init:] == tmp_max_mark[init:]:
+            max_mark_cnt += 1
+    #print(max_mark_cnt)
+    max_mark = ([0] if dirty else []) + [sorted([array[j][i]
+           for j in range(init, len(array))], reverse=True)[max_mark_cnt]
+           for i in range(init, len(array[0]))
+          ]
+    #print(max_mark)
+    return tmp_max_mark, max_mark_cnt, max_mark
 
 
 def sort_2d_array_max_mark(array):
@@ -48,25 +71,7 @@ def sort_2d_array_max_mark(array):
             if count1 < count2:
                 array[j], array[j+1] = array[j+1], array[j]
 
-    tmp_max_mark = [0]
-    for i in range(1, len(array[0])):
-        # assume the maximum mark of this task is 1
-        tmp_max = 1
-        for j in range(1, len(array)):
-            if tmp_max < int(array[j][i]):
-                tmp_max = int(array[j][i])
-        tmp_max_mark.append(tmp_max)
-
-    max_mark_cnt = 0
-    for i in range(1, len(array)):
-        if array[i][1:] == tmp_max_mark[1:]:
-            max_mark_cnt += 1
-    #print(max_mark_cnt)
-    max_mark = [0] + [sorted([array[j][i]
-                      for j in range(1, len(array))], reverse=True)[max_mark_cnt]
-                      for i in range(1, len(array[0]))
-                      ]
-    #print(max_mark)
+    tmp_max_mark, max_mark_cnt, max_mark = get_max_mark(array, True)
     for i in range(1, len(array[0])):
         for j in range(1, len(array[0]) - i):
             count1 = (1 - float(tmp_max_mark[j]) / max_mark[j]) * max_mark_cnt

@@ -655,13 +655,15 @@ def return_irregular_index(original_data, is_student, flag):
         return detect_item_irregular(student_similarity, matrix)
 
 
-def irregular_box(matrix):
+def irregular_box(matrix, max_mark_info):
     if len(matrix[0]) < 2:
         return []
+    tmp_max_mark, max_mark_cnt, max_mark = max_mark_info
     section_qty = math.floor(math.sqrt(len(matrix[0])))
     box_max_height = math.floor(math.sqrt(len(matrix)))
     item_sum = sumItemScore(matrix)
-    max_mark = [max([matrix[j][i] for j in range(len(matrix))]) for i in range(len(matrix[0]))]
+    for i in range(len(item_sum)):
+        item_sum[i] -= tmp_max_mark[i] * max_mark_cnt
     item_diff = [float(item_sum[i])/max_mark[i] - float(item_sum[i+1])/max_mark[i+1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
