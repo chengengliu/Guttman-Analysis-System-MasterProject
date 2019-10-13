@@ -795,7 +795,8 @@ def irregular_cal_copy(matrix, flag):
     matrix_copy = copy.deepcopy(matrix)
     for e in reversed(zero_stddiv_accumulated_list):
         matrix_copy.pop(e)
-    print(matrix_copy)
+    print("After removing: ", matrix_copy)
+
 
     scorerate = cal_scorerate_accumulated_matrix(matrix_copy)
     for i in range(len(matrix_copy)):
@@ -811,8 +812,11 @@ def irregular_cal_copy(matrix, flag):
         #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
     # Data needs to be put back.
     print("ACCUMULATION RESULT  ", accumulation_result)
-    # for index in zero_stddiv_accumulated_list:
-    #     accumulation_result.insert(index, 0.0)
+    # The value is not full. There are values deleted.
+    temp = [j for i in accumulation_result for j in i]
+    for e in zero_stddiv_accumulated_list:
+        temp.insert(e,0)
+
 
 
 
@@ -820,9 +824,46 @@ def irregular_cal_copy(matrix, flag):
     if flag == 'Correlation':
         return [j for i in correlation_result for j in i]
     elif flag == 'Accumulation':
-        return [j for i in accumulation_result for j in i]
+        return temp
     elif flag == 'Similarity':
         return [j for i in similarity_result for j in i]
+########################################################
+########################################################
+########################################################
+########################################################
+########################################################目前考虑使用的实现方式。 deepcopy版本。
+def return_irregular_index_test2(original_data, is_student, flag):
+    """
+    Return the index of irregular column/ row.
+    :param original_data: The original data.
+    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
+    :return:    A list of irregular pattern.
+    """
+    student_sum = sumStudentScore(original_data)
+    item_sum = sumItemScore(original_data)
+    # sorted_student = sortBasedOnStudent(original_data, student_sum)
+    # sorted_item = sortBasedOnItem(sorted_student, item_sum)
+    sorted_item = original_data
+    print(sorted_item)
+
+    # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
+    matrix = sorted_item
+    transpose = transpose_matrix(matrix)
+
+    student_sum.sort()
+    student_sum = list(reversed(student_sum))
+    ave_per_student = retrieve_average_per_item(matrix, student_sum)
+
+    if not is_student:
+        columns_similarity = irregular_cal_copy(transpose, flag)
+        print("Columns Similarity for testing purpose: ", columns_similarity)
+        return detect_item_irregular(columns_similarity, transpose)
+    elif is_student:
+        student_similarity = irregular_cal_copy(matrix, flag)
+        print("Student Similarity for testing purpose: ", student_similarity)
+        return detect_item_irregular(student_similarity, matrix)
+
+
 def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
     correlation_result = []
     accumulation_correlation_result = []
@@ -834,7 +875,7 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
     temp_similarity = 0.0
     calculation_counter = 0
     for i in range(range_correlation):
-        if current_index -i-1 <=0:
+        if current_index -i<=0:
             try:
                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
                 temp_accumulation_correlation_mid = \
@@ -842,26 +883,17 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
                         norm(matrix[current_index]) *
                         norm(matrix[current_index + i + 1]))
-                if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                        temp_similarity_mid)):
-                    if(check_nan(temp_accumulation_correlation_mid)):
-                        print("Acc")
-                        print(i)
-                        print(numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1])
-                    if(check_nan(temp_correlation_mid)):
-                        print("Corr")
-
 
                 temp_accumulation_correlation += temp_accumulation_correlation_mid
                 temp_correlation += temp_correlation_mid
                 temp_similarity += temp_similarity_mid
                 calculation_counter +=1
                 # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
-                continue
+
             except:
                 print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
                 pass
-        elif (current_index +i+1) >= (len(matrix)-1):
+        elif (current_index +i) >= (len(matrix)-1):
             try:
                 temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
                 temp_accumulation_correlation_mid = \
@@ -869,9 +901,6 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
                         norm(matrix[current_index]) *
                         norm(matrix[current_index - i - 1]))
-                if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                        temp_similarity_mid)):
-                    print("Second")
 
 
                 temp_accumulation_correlation += temp_accumulation_correlation_mid
@@ -881,7 +910,7 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
                 calculation_counter +=1
 
                 # TODO: 为什么这里要continue? 感觉就是已经越界了，剩下的也不需要看了。 可是还可以往右加不是么
-                continue
+
             except:
                 print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
                 pass
@@ -893,9 +922,6 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
                 temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
                         norm(matrix[current_index]) *
                         norm(matrix[current_index - i - 1]))
-                if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                        temp_similarity_mid)):
-                    print("Third")
 
 
                 temp_accumulation_correlation += temp_accumulation_correlation_mid
@@ -915,9 +941,6 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
                         norm(matrix[current_index]) *
                         norm(matrix[current_index + i + 1]))
 
-                if (check_nan(temp_accumulation_correlation_mid) or check_nan(temp_correlation_mid) or check_nan(
-                        temp_similarity_mid)):
-                    print("Fourth")
 
 
                 temp_accumulation_correlation += temp_accumulation_correlation_mid
@@ -966,9 +989,17 @@ def detect_item_irregular(similarities, matrix):
     print(potential_list, "   Unsorted Potential List")
     potential_list = sorted(potential_list, key=lambda x: x[0])
     print(potential_list, "   Sorted Potential List ")
-    # print(range_irregular)
+
+    # TODO: 需要将非常规的0.0数值丢到最后面。
+    for i in range(len(potential_list)):
+        if math.isclose(potential_list[i][0], 0.0, abs_tol=0.000001):
+            temp = potential_list.pop(i)
+            potential_list.append(temp)
+
+
     for i in potential_list[0:range_irregular]:
-        result.append(i[1])
+        if i[0] < 0:
+            result.append(i[1])
 
     return result
 
@@ -1029,9 +1060,11 @@ def return_irregular_index(original_data, is_student, flag):
 
     if not is_student:
         columns_similarity = retrieve_correlation_similarity(transpose, flag)
+        print("Columns similarity, for testing purpose: ", columns_similarity)
         return detect_item_irregular(columns_similarity, transpose)
     elif is_student:
         student_similarity = retrieve_correlation_similarity(matrix, flag)
+        print("Student similarity, for testing purpose: ", student_similarity)
         return detect_item_irregular(student_similarity, matrix)
 
 
@@ -1201,6 +1234,10 @@ def main():
     print("TEST student  ", irregular_cal_copy(invalid_excel, flag))
     print("TEST item   ", irregular_cal_copy(invalid_excel_item, flag))
 
+    #################################
+    print("#########################s######## TEST FOR detect_item_irregular")
+    # print(detect_item_irregular())
+    print()
 
 
 
