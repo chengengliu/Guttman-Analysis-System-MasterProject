@@ -50,6 +50,10 @@ def get_max_mark(array, dirty):
            for i in range(init, len(array[0]))
           ]
     #print(max_mark)
+    for i in range(len(max_mark)):
+        if max_mark[i] == 0:
+            max_mark[i] = 1
+            tmp_max_mark[i] = 1
     return tmp_max_mark, max_mark_cnt, max_mark
 
 
