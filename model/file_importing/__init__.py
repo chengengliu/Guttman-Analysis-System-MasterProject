@@ -25,7 +25,7 @@ def sort_2d_array_mark(array):
             count2 = 0
             for k in range(2, len(array) - 1):
                 count1 += int(array[k][j])
-                count2 += int(array[k][j+1])
+                count2 += int(array[k][j + 1])
             if count1 < count2:
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]

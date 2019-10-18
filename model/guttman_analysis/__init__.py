@@ -75,16 +75,6 @@ Section III. Helper functions:
 
     The above mentioned functions can be skipped while you read the code.
 '''
-# TODO: The code for calculating similarity can be refactored and improved, to calculate together with correlation. 今天不做了， 明天代码重构写。
-
-
-# Detect the anomaly, able to detect either row/ column.
-# The input is assumed to be sorted, with both row sorted(from good performance student to poor performance studet)
-# and column sorted (good performance item and poor performance item).
-# input: The input format is assumed to be a 2-d matrix/ array, with each cell representing the score (0/1/2/3..)
-
-# For testing purpose, the 2-d matrix will be a 4*4 matrix, initialised with ones and zeros.
-# The element of the inner array is the result of a student.
 
 import pandas as pd
 import copy
@@ -92,11 +82,8 @@ import math
 import numpy
 from numpy import dot
 from numpy.linalg import norm
+import numpy.ma as ma
 
-
-# The following functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
-# There is no algorithm involved in above functions.
-#######################################################################################################################
 
 # This function will be used if Yi Wang's module returns the follwing data to me:
 
@@ -107,6 +94,8 @@ from numpy.linalg import norm
 # ['student11', 1, 1, 1, 0, 1, 1, 0, 1]]
 # It is necessary to clean the original_data to get the desired format like [[...], [...]],
 # without any names of columns/rows.
+
+
 def clean_input(original_data):
     removed_header = original_data[2:]
     for i in range(len(removed_header)):
@@ -122,7 +111,7 @@ def detectDimenstion(matrix):
     :param matrix: the 2-d matrix of Guttman Chart
     :return: A tuple containing the number of student and numebr of items.
     """
-    return (matrix.__len__(), matrix[0].__len__())
+    return len(matrix), len(matrix[0])
 
 
 # Calculate the summation of student score.
@@ -251,37 +240,82 @@ def detect_full_score(matrix):
 
 # Receive a student matrix. Wants to accumulate the score rate accumulated matrix.
 # Assume the input is cleaned and sorted. No more sorting needed.
-def cal_scorerate_accumulated_matrix(matrix):
-    # Accumulated score for all students.
-    transposed = transpose_matrix(matrix)
+def cal_scorerate_accumulated_matrix(matrix, is_student):
+    # If the input is student as row, (aka the normal data), do the calculation as usual.
+    if is_student:
+        transposed = transpose_matrix(matrix)
+    else:
+        transposed = matrix
 
     accumulated_score = []
-    full_marks = detect_full_score(transposed)
-    full_marks_accumulated = numpy.cumsum(full_marks).tolist()
-
-    for i in range(len(matrix)):
-        accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
     scorerate_accumulated = []
 
-    for item in accumulated_score:
-        temp = []
-        for i in range(len(item)):
-            temp.append(item[i] / full_marks_accumulated[i])
-        scorerate_accumulated.append(temp)
+    full_marks = detect_full_score(transposed)  # Full mark for each question.
+    print("This is the full mark", full_marks)
+
+    if is_student:
+
+        full_marks_accumulated = numpy.cumsum(full_marks).tolist()
+        print("This is the accumulated full marks, ", full_marks_accumulated)
+
+        for i in range(len(matrix)):
+            accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
+        print("This is the accumulated score, ", accumulated_score)
+
+        for item in accumulated_score:
+            temp = []
+            for i in range(len(item)):
+                temp.append(item[i] / full_marks_accumulated[i])
+            scorerate_accumulated.append(temp)
+    else:
+        # Repeated full marks for all students. Different from each question.
+        full_marks_duplicate = []
+        # Full marks accumulated.
+        full_marks_accumulated_result = []
+
+        for i in range(len(transposed)):
+            accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
+            print("MAtrix i is: ", matrix[i])
+            temp = []
+            for j in range(len(transposed[0])):
+                temp.append(full_marks[i])
+            full_marks_duplicate.append(temp)
+        # Full marks accumulation.
+        for i in range(len(transposed)):
+            full_marks_accumulated_result.append(numpy.cumsum(full_marks_duplicate[i]).tolist())
+
+        print("Column accumulated score, ", accumulated_score)
+        print("Column accumulated full mark", full_marks_duplicate)
+        print("Column accumulated full mark result, ", full_marks_accumulated_result)
+        for item in zip(accumulated_score, full_marks_accumulated_result):
+            print("Item is , ", item)
+            temp = []
+            for i in range(len(item[0])):
+                temp.append(item[0][i] / item[1][i])
+            scorerate_accumulated.append(temp)
+        print(scorerate_accumulated)
+
+        # for score in zip(transposed,full_marks):
+        #     print(score)
 
     return scorerate_accumulated
+
 
 def get_0staddv_index(matrix):
     """
     Return the positions of item that has a zero standard deviation.
-    :param matrix:
-    :return:
+    :param matrix:  The input data after cleaning up.
+    :return:    Indexes of students that have zero standard deviation.
     """
-    staddv_list = []
-    for i in range(len(matrix)):
-        if numpy.std(matrix[i]) == 0:
-            staddv_list.append(i)
-    return staddv_list
+    zero_staddv_index = []
+    try:
+        for i in range(len(matrix)):
+            if numpy.std(matrix[i]) == 0:
+                zero_staddv_index.append(i)
+    except:
+        pass
+
+    return zero_staddv_index
 
 
 def in_danger_list(danger_list, current_index):
@@ -294,252 +328,8 @@ def in_danger_list(danger_list, current_index):
     """
     for index in danger_list:
         if index == current_index:
-            # print("current index data has zero standard deviation. Skip the data. ")
             return True
     return False
-
-
-# Above functions are helper functions that deal with data. Either clean/sort/manipulate the input data.
-# There is no algorithm involved in above functions.
-#######################################################################################################################
-
-def retrieve_correlation_similarity(matrix, flag):
-    """
-    Retrieve the correlation between each column. This function utilises cal_correlation_items
-    :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :return:    A list of correlation calculated.
-    """
-    accumulation_result = []
-    correlation_result = []
-    similarity_result = []
-
-    scorerate = cal_scorerate_accumulated_matrix(matrix)
-
-    # A list of zero standard deviation items. So called dangerous list.
-    zero_stddiv_list = get_0staddv_index(matrix)
-    zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
-
-    # Test if the accumulated zero standard deviation list is empty.
-    # If it is empty, do not perform the boundary check.
-    if not zero_stddiv_accumulated_list:
-        is_empty = True
-    else:
-        is_empty = False
-
-    # Traverse each column/ or row.
-    for i in range(len(matrix)):
-        # print("I is ::::", i)
-        similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-                                                       zero_stddiv_accumulated_list, is_empty))
-        if in_danger_list(zero_stddiv_list, i):
-            print("SKIP!!!!!")
-            continue
-        if in_danger_list(zero_stddiv_accumulated_list, i) and not is_empty:
-            print("SKip the current element due to accumulation ->", i)
-            continue
-        accumulation_result.append(cal_correlation_items(matrix, i, 'Accumulation', scorerate,
-                                                         zero_stddiv_accumulated_list, is_empty))
-        correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
-                                                        zero_stddiv_accumulated_list, is_empty))
-    # for i in range(len(matrix)):
-    # for i in range(len(matrix)):
-    if flag == 'Correlation':
-        return [j for i in correlation_result for j in i]
-    elif flag == 'Accumulation':
-        return [j for i in accumulation_result for j in i]
-    elif flag == 'Similarity':
-        return [j for i in similarity_result for j in i]
-    # return [j for i in accumulation_result for j in i]
-
-
-def cal_correlation_items(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
-    """
-    Calculate the correlation of columns or rows.
-    :param matrix: The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :param current_index: Current index of the column
-    :flag: Specifying either 'Accumulation' -> calculate in accumulative way and use accumulative data or
-    'Correlation' -> calculate in a normal way.
-    :return: A list of correlation calculated.
-    """
-    # If the row you want to check is the first column or the last column, only check the column after it or before it.
-    # result = []
-    # print("LENGTH OF MATRIX: ", len(matrix))
-    correlation_result = []
-    accumulation_correlation_result = []
-
-    accumulate_current = numpy.cumsum(matrix[current_index])
-    # print("ACCUMULATE_CURRENT and matrix[current_index]", accumulate_current, matrix[current_index])
-    similarity_result = []
-
-    # Retrieve the square root of number of items (the matrix is in transposed form). This will
-    # be the range of calculating the neighbourhood of the column when calculating the correlation.
-    range_correlation = math.floor(math.sqrt(len(matrix)))
-
-
-    # If the column is the first column, calculate the correlation within the range but only for the column after it.
-    # Try-except is to prevent extreme cases, but generally it will not be used.
-    if current_index == 0:
-        temp_correlation = 0.0
-        temp_accumulation_correlation = 0.0
-        temp_similarity = 0.0
-        # if not is_empty and in_danger_list(danger_accumulated_list, current_index):
-
-        for i in range(range_correlation):
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index+i+1):
-                print("SKIP")
-                continue
-            try:
-                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-                # Change the way of calculating score_rate
-                # temp_accumulation_correlation += \
-                # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                temp_accumulation_correlation += \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-
-                temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index + i + 1]))
-            except:
-                pass
-        correlation_result.append(temp_correlation / range_correlation)
-        accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
-        similarity_result.append(temp_similarity / range_correlation)
-        # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index + 1])[0, 1])
-
-    # If the column is the last column, calculate the correlation within the range but only for the column before it.
-    # Try-except is to prevent extreme cases, but generally it will not be used.
-    elif current_index == len(matrix) - 1:
-        temp_correlation = 0.0
-        temp_accumulation_correlation = 0.0
-        temp_similarity = 0.0
-        for i in range(range_correlation):
-            if not is_empty and in_danger_list(danger_accumulated_list, current_index-i-1):
-                print("SKIP LAST")
-                continue
-            try:
-                temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-
-                # Change the way of calculating score_rate
-                # temp_accumulation_correlation += \
-                # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
-
-                temp_accumulation_correlation += \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-
-                temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index - i - 1]))
-            except:
-                pass
-        correlation_result.append(temp_correlation / range_correlation)
-        accumulation_correlation_result.append(temp_accumulation_correlation / range_correlation)
-        similarity_result.append(temp_similarity / range_correlation)
-        # result.append(numpy.corrcoef(matrix[current_index], matrix[current_index - 1])[0, 1])
-    # When the current column is neither the first column nor the last column(a.k.a the general column),
-    # calculate the correlation between the current column and the columns (within the range) before it and after it.
-    else:
-        temp_correlation = 0.0
-        temp_accumulation_correlation = 0.0
-        temp_similarity = 0.0
-        for i in range(range_correlation):
-            # print("range of CORRELATION", range_correlation)
-            # if current_index - i < 0 or (current_index + i) >= (len(matrix)-1):
-            #     continue
-            # 向左到头， 只往右加
-            if current_index - i < 0:
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                    continue
-                try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index + i + 1]))
-                    continue
-                except:
-                    print("ENTER THE EXCEPTION")
-                    pass
-            # 向右到头， 只往左减
-            if (current_index + i) > (len(matrix) - 1):
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    continue
-                try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    #     numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-
-                    # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation,
-                    #       current_index, "------", matrix[current_index - i - 1])
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                            norm(matrix[current_index]) *
-                            norm(matrix[current_index - i - 1]))
-                    continue
-                # The index may beyond the range, if the current column is near the tail or the head of the list.
-                except:
-                    print("ENTER THE EXCEPTION")
-                    pass
-            else:
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index - i - 1):
-                    print()
-                    continue
-                try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index - i - 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-
-                    # print("Temp Accumulation , Current Index:  and ------ ", temp_accumulation_correlation, current_index, "------", matrix[current_index - i - 1])
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index - i - 1]))
-                # The index may beyond the range, if the current column is near the tail or the head of the list.
-                except:
-                    # print("ENTER THE EXCEPTION")
-                    pass
-                if not is_empty and in_danger_list(danger_accumulated_list, current_index + i + 1):
-                    continue
-                try:
-                    temp_correlation += numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-
-                    # Change the way of calculating score_rate
-                    # temp_accumulation_correlation += \
-                    # numpy.corrcoef(accumulate_current, numpy.cumsum(matrix[current_index + i + 1]))[0, 1]
-                    temp_accumulation_correlation += \
-                        numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-
-                    # print("Temp Accumulation , Current Index:  and +++++++", temp_accumulation_correlation, current_index)
-
-                    temp_similarity += dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                                norm(matrix[current_index]) *
-                                norm(matrix[current_index + i + 1]))
-                except:
-                    # print("ENTER THE EXCEPTION")
-                    pass
-        correlation_result.append(temp_correlation / (2 * range_correlation))
-        accumulation_correlation_result.append(temp_accumulation_correlation / (2 * range_correlation))
-        similarity_result.append(temp_similarity / (2 * range_correlation))
-    # print("Accumulation Result: @@@@@@@@", accumulation_correlation_result)
-    if flag == 'Accumulation':
-        return accumulation_correlation_result
-    elif flag == 'Correlation':
-        return correlation_result
-    elif flag == 'Similarity':
-        return similarity_result
 
 
 def similarity_between_column_whole(matrix, ave_per_student):
@@ -557,9 +347,171 @@ def similarity_between_column_whole(matrix, ave_per_student):
     return similarity
 
 
-# Not implemented yet.
-def detect_student_irregular(matrix):
-    print("hello")
+def irregular_cal_copy(matrix, flag, is_student):
+    # TODO: The calculation of scorerate and max score should be paird attention to.
+    scorerate = cal_scorerate_accumulated_matrix(matrix, is_student)
+    print("This is the full scorerate: ", scorerate)
+
+    zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
+
+    accumulation_result = []
+    similarity_result = []
+    correlation_result = []
+
+    if zero_stddiv_accumulated_list:
+        accumulation_0stddv_is_empty = False  # Exist 0 standard deviation accumulation data
+    else:
+        accumulation_0stddv_is_empty = True
+
+    # Remove the element that contains zero standard deviation.
+    matrix_copy = copy.deepcopy(matrix)
+    for e in reversed(zero_stddiv_accumulated_list):
+        matrix_copy.pop(e)
+    print("After removing: ", matrix_copy)
+
+    scorerate = cal_scorerate_accumulated_matrix(matrix_copy, is_student)
+    for i in range(len(matrix_copy)):
+        # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
+        #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+        # if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
+        #     print("SKIP. There are full scores student!", i)
+        #     # TODO: Throw warning to the front end.
+        #     continue
+        accumulation_result.append(irregular_cal(matrix_copy, i, 'Accumulation', scorerate,
+                                                 zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+        # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
+        #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
+    # Data needs to be put back.
+    print("ACCUMULATION RESULT  ", accumulation_result)
+    # The value is not full. There are values deleted.
+    temp = [j for i in accumulation_result for j in i]
+    for e in zero_stddiv_accumulated_list:
+        temp.insert(e, 0.0)
+
+    if flag == 'Correlation':
+        return [j for i in correlation_result for j in i]
+    elif flag == 'Accumulation':
+        return temp
+    elif flag == 'Similarity':
+        return [j for i in similarity_result for j in i]
+
+
+def return_irregular_index_test2(original_data, is_student, flag):
+    """
+    Return the index of irregular column/ row.
+    :param original_data: The original data.
+    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
+    :return:    A list of irregular pattern.
+    """
+    sorted_item = original_data
+
+    # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
+    matrix = sorted_item
+    transpose = transpose_matrix(matrix)
+
+    if not is_student:
+        columns_similarity = irregular_cal_copy(transpose, flag, is_student)
+        print("Columns Similarity for testing purpose: ", columns_similarity)
+        return detect_item_irregular(columns_similarity, transpose)
+    elif is_student:
+        student_similarity = irregular_cal_copy(matrix, flag, is_student)
+        print("Student Similarity for testing purpose: ", student_similarity)
+        return detect_item_irregular(student_similarity, matrix)
+
+
+def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
+    correlation_result = []
+    accumulation_correlation_result = []
+    similarity_result = []
+    range_correlation = math.floor(math.sqrt(len(matrix))) - 1
+
+    temp_correlation = 0.0
+    temp_accumulation_correlation = 0.0
+    temp_similarity = 0.0
+    calculation_counter = 0
+    for i in range(range_correlation):
+        if (current_index - i - 1) <= 0:
+            # try:
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index + i + 1]))
+
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
+            calculation_counter += 1
+
+            # except:
+            #     print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
+            #     pass
+        elif (current_index + i + i) >= (len(matrix) - 1):
+            # try:
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index - i - 1]))
+
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
+
+            calculation_counter += 1
+
+            # except:
+            #     print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
+            #     pass
+        else:
+            # try:
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index - i - 1]))
+
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
+
+            calculation_counter += 1
+
+            # except:
+            #     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
+            #     pass
+            # try:
+            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+            temp_accumulation_correlation_mid = \
+                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+            temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                    norm(matrix[current_index]) *
+                    norm(matrix[current_index + i + 1]))
+
+            temp_accumulation_correlation += temp_accumulation_correlation_mid
+            temp_correlation += temp_correlation_mid
+            temp_similarity += temp_similarity_mid
+
+            calculation_counter += 1
+
+            # except:
+            #     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
+            #     pass
+    # print(calculation_counter)
+
+    correlation_result.append(temp_correlation / calculation_counter)
+    accumulation_correlation_result.append(temp_accumulation_correlation / calculation_counter)
+    similarity_result.append(temp_similarity / calculation_counter)
+
+    if flag == 'Accumulation':
+        return accumulation_correlation_result
+    elif flag == 'Correlation':
+        return correlation_result
+    elif flag == 'Similarity':
+        return similarity_result
 
 
 def detect_item_irregular(similarities, matrix):
@@ -574,31 +526,31 @@ def detect_item_irregular(similarities, matrix):
     """
     result = []
     # Set the boundary value for the number of irregular detection.
-    # TODO: 这个range是取floor好还是ceil好。
     range_irregular = math.floor(math.log(len(matrix)))
 
     positions = [i for i in range(len(matrix))]
     potential_list = list(zip(similarities, positions))
+    print(potential_list, "   Unsorted Potential List")
     potential_list = sorted(potential_list, key=lambda x: x[0])
-    # print(potential_list)
-    # print(range_irregular)
-    for i in potential_list[0:range_irregular]:
-        # print("i is ::::: -> ",i, "RAnge of irregular: ", range_irregular)
-        if i[0] < 0:  # 阈值。 之后要检改变。 当前implementation并没有应用cluster
-            result.append(i[1])
+    print(potential_list, "   Sorted Potential List ")
 
-    # average_sim = [(x + y) / 2 for (x, y) in zip(similarity1, similarity2)]
-    # result = []
-    # for i in range(len(average_sim)):
-    #     if average_sim[i] < 0.5:
-    #         result.append(i)
+    # TODO: 需要将非常规的0.0数值丢到最后面。
+    for i in range(len(potential_list)):
+        if math.isclose(potential_list[i][0], 0.0, abs_tol=0.000001):
+            temp = potential_list.pop(i)
+            potential_list.append(temp)
+
+    for i in potential_list[0:range_irregular]:
+        # if i[0] < 0:
+        result.append(i[1])
+
     return result
 
 
 # Getter for correlations
 # The INTERFACE exposed to the outside package.
-### Notice that the second arg is a Bool, the thrid arg is a string
-###
+# Notice that the second arg is a Bool, the thrid arg is a string
+#
 def return_correlation(original_data, is_student, flag):
     """
     Return the correlations of each column. This is the interface exposed to other modules.
@@ -607,87 +559,70 @@ def return_correlation(original_data, is_student, flag):
     :param is_student:  A boolean value, specifying if the user wants the row/column detection.
     :return: A list of correlations of each item/column.
     """
-    student_sum = sumStudentScore(original_data)
-    print("Student sum is: ", student_sum)
-    item_sum = sumItemScore(original_data)
-    sorted_student = sortBasedOnStudent(original_data, student_sum)
-    sorted_item = sortBasedOnItem(sorted_student, item_sum)
-
-    matrix = sorted_item
-    transpose = transpose_matrix(matrix)
-
-    # Retrieve the correlation of columns, use transpose
-    if not is_student:
-        return retrieve_correlation_similarity(transpose, flag)
-    elif is_student:
-        return retrieve_correlation_similarity(matrix, flag)
-
-
-# Getter for irregular columns
-# The INTERFACE exposed to the outside package
-# Student is a Bool.
-def return_irregular_index(original_data, is_student, flag):
-    """
-    Return the index of irregular column/ row.
-    :param original_data: The original data.
-    :param is_student:  A boolean value, specifying if the user wants the row/column detection.
-    :return:    A list of irregular pattern.
-    """
-    student_sum = sumStudentScore(original_data)
-    item_sum = sumItemScore(original_data)
-    # sorted_student = sortBasedOnStudent(original_data, student_sum)
-    # sorted_item = sortBasedOnItem(sorted_student, item_sum)
     sorted_item = original_data
 
     # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
     matrix = sorted_item
     transpose = transpose_matrix(matrix)
 
-    student_sum.sort()
-    student_sum = list(reversed(student_sum))
-    ave_per_student = retrieve_average_per_item(matrix, student_sum)
-
+    # Retrieve the correlation of columns, use transpose
     if not is_student:
-        columns_similarity = retrieve_correlation_similarity(transpose, flag)
-        return detect_item_irregular(columns_similarity, transpose)
+        return irregular_cal_copy(transpose, flag, is_student)
     elif is_student:
-        student_similarity = retrieve_correlation_similarity(matrix, flag)
-        return detect_item_irregular(student_similarity, matrix)
+        return irregular_cal_copy(matrix, flag, is_student)
 
 
 def irregular_box(matrix):
-    if len(matrix[0]) < 2:
+    if len(matrix[0]) < 2 or len(matrix) < 4:
         return []
-    section_qty = math.floor(math.sqrt(len(matrix[0])))
-    box_max_height = math.floor(math.sqrt(len(matrix)))
+    section_qty = min(math.floor(math.sqrt(len(matrix[0]))), 5)
+    min_height = math.ceil(math.sqrt(len(matrix)))
+
     item_sum = sumItemScore(matrix)
     item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
-    print(tuple_diff)
-    selected_tuple = tuple_diff[:section_qty]
+    selected_tuple = tuple_diff[:section_qty-1]
     selected_col = [i for _, i in selected_tuple]
     selected_col.append(-1)
     selected_col.append(len(matrix[0]) - 1)
     selected_col.sort()
-    max_mark = [max([matrix[j][i] for j in range(len(matrix))]) for i in range(len(matrix[0]))]
-    print(max_mark)
     result = []
     for i in range(len(selected_col) - 1):
-        best_dis = 1
+        best = 99999999
         best_j_k = (-1, -1)
         col1, col2 = selected_col[i] + 1, selected_col[i + 1]
-        for j in range(len(matrix)):
-            for k in range(j, min(j + box_max_height, len(matrix))):
+        for j in [0] + list(range(math.ceil(min_height/2), len(matrix))):
+            for k in range(j + min_height - 1, len(matrix)):
                 box_sum = 0
-                max_mark_sum = 0.01 + (k - j + 1) * sum(max_mark[col1: col2 + 1])
                 for n in range(j, k + 1):
                     box_sum += sum(matrix[n][col1: col2 + 1])
-                dis = abs((max_mark_sum - box_sum) / max_mark_sum - 0.5)
-                if dis < best_dis:
-                    best_dis = dis
+                box_correct_rate = box_sum / ((k - j + 1) * (col2 - col1 + 1))
+                pre_box_sum = 0
+                for n in range(j):
+                    pre_box_sum += sum(matrix[n][col1: col2 + 1])
+
+                pre_box_sample = [row[col1: col2 + 1] for row in matrix[:min_height]]
+                pre_box_correct_rate = sum(map(sum, pre_box_sample))/(min_height * (col2 - col1 + 1)) \
+                    if j == 0 else pre_box_sum / (j * (col2 - col1 + 1))
+                post_box_sum = 0
+                for n in range(k + 1, len(matrix)):
+                    post_box_sum += sum(matrix[n][col1: col2 + 1])
+                post_box_sample = [row[col1: col2 + 1] for row in matrix[-min_height:]]
+                post_box_correct_rate = sum(map(sum, post_box_sample))/(min_height * (col2 - col1 + 1)) \
+                    if k + 1 == len(matrix) \
+                    else post_box_sum / ((len(matrix) - k - 1) * (col2 - col1 + 1))
+
+                dis = (abs(pre_box_correct_rate - box_correct_rate) ** 2) + \
+                    (abs(box_correct_rate - 0.5) ** 2) * 3 + \
+                    (abs(post_box_correct_rate - box_correct_rate) ** 2)
+                dis /= (k - j) + len(matrix) * min_height
+
+                if dis < best:
+                    best = dis
                     best_j_k = (j, k)
         result.append((col1, col2, best_j_k))
+    print("BOXES: ", result)
     return result
 
 
@@ -718,7 +653,7 @@ def calculate_radius(array):
     """
     size = len(array) * len(array[0])
     radius = math.log(size) / 2
-    return round(radius)
+    return round(radius) + 1
 
 
 def odd_cells(matrix):
@@ -737,10 +672,9 @@ def odd_cells(matrix):
                 max = int(matrix[j][i])
         max_mark.append(max)
 
-
     neighbours = get_neighbours(calculate_radius(matrix))
     cells = []
-    threshold = 0.8
+    threshold = 0.90
     for i in range(0, len(matrix)):
         for j in range(0, len(matrix[0])):
             count_zeros = 0

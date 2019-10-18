@@ -1,3 +1,5 @@
+import sys
+
 from flask import Flask, send_from_directory, request
 from .model.excel_processing.ExcelOutput import ExcelOutput
 from .model import storage, file_importing, guttman_analysis
@@ -40,8 +42,8 @@ def upload():
                 print(i)
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)
-            irregular_item = guttman_analysis.return_irregular_index(matrix, False, flag)
-            irregular_student = guttman_analysis.return_irregular_index(matrix, True, flag)
+            irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
+            irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
 
             excel = ExcelOutput(new_data, mod_path)
             excel.write_excel()
@@ -49,7 +51,7 @@ def upload():
             for col in irregular_item:
                 excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3')
             for row in irregular_student:
-                excel.highlight_area(row + 1, row + 1, 0, 0, '#f9ed69')
+                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69')
             excel.add_total_score()
             print(corr_item)
             excel.add_correlation(corr_item, 'column')
@@ -95,9 +97,9 @@ def upload():
             }
             storage.save_result(json, file_id)
             excel.close_workbook()
-        except (FileNotFoundError, IOError, ZeroDivisionError):
+        except Exception as e:
             storage.delete_file(file_id)
-
+            return {'err_msg': str(e)}
         return result
     else:
         return {'err_msg': 'Illegal file extension'}
@@ -122,5 +124,3 @@ def get_result(file_id):
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
-
-
