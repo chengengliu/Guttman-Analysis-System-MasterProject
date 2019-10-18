@@ -635,7 +635,7 @@ def calculate_radius(array):
     """
     size = len(array) * len(array[0])
     radius = math.log(size) / 2
-    return round(radius)
+    return round(radius) + 1
 
 
 def odd_cells(matrix):
@@ -656,7 +656,7 @@ def odd_cells(matrix):
 
     neighbours = get_neighbours(calculate_radius(matrix))
     cells = []
-    threshold = 0.8
+    threshold = 0.90
     for i in range(0, len(matrix)):
         for j in range(0, len(matrix[0])):
             count_zeros = 0
