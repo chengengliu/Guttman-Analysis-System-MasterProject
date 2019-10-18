@@ -29,26 +29,29 @@ def upload():
 
         try:
             file_name.save(path)
-            data = file_importing.readfile(path)
+            data, index = file_importing.readfile(path)
             data = file_importing.transpose(data)
-            file_importing.sort_2d_array_mark(data)
-
-            matrix = guttman_analysis.clean_input(data)
-
+            new_data = file_importing.break_down_marks(data, index)
+            file_importing.sort_2d_array_mark(new_data)
+            # print(new_data)
+            matrix = guttman_analysis.clean_input(new_data)
+            print("this is the matrix !!!!!!!!!!!!!")
+            for i in matrix:
+                print(i)
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)
             irregular_item = guttman_analysis.return_irregular_index(matrix, False, flag)
             irregular_student = guttman_analysis.return_irregular_index(matrix, True, flag)
 
-            excel = ExcelOutput(data, mod_path)
+            excel = ExcelOutput(new_data, mod_path)
             excel.write_excel()
 
             for col in irregular_item:
                 excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3')
             for row in irregular_student:
                 excel.highlight_area(row + 1, row + 1, 0, 0, '#f9ed69')
-
             excel.add_total_score()
+            print(corr_item)
             excel.add_correlation(corr_item, 'column')
 
             boxes = guttman_analysis.irregular_box(matrix)
@@ -56,9 +59,9 @@ def upload():
             for i in boxes:
                 col1, col2, rows = i
                 row1, row2 = rows
-                excel.add_border(row1 + 1, row2 + 1, col1 + 1, col2 + 1)
+                excel.add_border(row1 + 2, row2 + 2, col1 + 1, col2 + 1)
                 boxes_json.append({
-                    'row_range': [row1 + 1, row2 + 1],
+                    'row_range': [row1 + 2, row2 + 2],
                     'column_range': [col1 + 1, col2 + 1]
                 })
 
@@ -76,7 +79,7 @@ def upload():
             odd_cells = guttman_analysis.odd_cells(matrix)
             odd_cells_str_tuple = []
             for (r, c) in odd_cells:
-                excel.highlight_area(r + 1, r + 1, c + 1, c + 1, '#b063c5')
+                excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5')
                 odd_cells_str_tuple.append("(%d, %d)" % (c, r))
 
             json = {

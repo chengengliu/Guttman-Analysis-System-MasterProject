@@ -1,5 +1,5 @@
 import xlsxwriter
-
+import math
 
 class ExcelOutput:
     def __init__(self, array, file_name):
@@ -37,7 +37,7 @@ class ExcelOutput:
         # total score of rows
         self.worksheet.write(0, len(self.array[0]), 'total score', cell_format)
         self.worksheet.write(len(self.array), 0, 'total score', cell_format)
-        for i in range(1, len(self.array)):
+        for i in range(2, len(self.array)):
             count = 0
             for j in range(1, len(self.array[0])):
                 count += self.array[i][j]
@@ -45,7 +45,7 @@ class ExcelOutput:
         # total score of columns
         for i in range(1, len(self.array[0])):
             count = 0
-            for j in range(1, len(self.array)):
+            for j in range(2, len(self.array)):
                 count += self.array[j][i]
             self.worksheet.write(len(self.array), i, count, cell_format)
 
@@ -59,13 +59,19 @@ class ExcelOutput:
         cell_format = self.workbook.add_format(self.base_format)
         # cell_format.set_bg_color('yellow')
         if types == 'row':
-            self.worksheet.write(0, len(self.array[0]) + 1, 'correlation', cell_format)
-            for i in range(1, len(self.array)):
+            self.worksheet.write(1, len(self.array[0]) + 1, 'correlation', cell_format)
+            for i in range(2, len(self.array)):
                 self.worksheet.write(i, len(self.array[0]) + 1, array[i - 1], cell_format)
         if types == 'column':
             self.worksheet.write(len(self.array) + 1, 0, 'item_performance', cell_format)
-            for i in range(1, len(self.array[0])):
-                self.worksheet.write(len(self.array) + 1, i, array[i - 1], cell_format)
+            for i in range(1, len(array) + 1):
+                # print(len(self.array[0]))
+                # print(len(array))
+                # print(array[i - 1])
+                if math.isnan(array[i - 1]):
+                    self.worksheet.write(len(self.array) + 1, i, "nan", cell_format)
+                else:
+                    self.worksheet.write(len(self.array) + 1, i, array[i - 1], cell_format)
 
     def highlight_area(self, row1, row2, col1, col2, color):
         """

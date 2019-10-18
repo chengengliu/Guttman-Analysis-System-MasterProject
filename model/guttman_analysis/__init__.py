@@ -108,7 +108,7 @@ from numpy.linalg import norm
 # It is necessary to clean the original_data to get the desired format like [[...], [...]],
 # without any names of columns/rows.
 def clean_input(original_data):
-    removed_header = original_data[1:]
+    removed_header = original_data[2:]
     for i in range(len(removed_header)):
         removed_header[i] = removed_header[i][1:]
     # print(removed_header)
