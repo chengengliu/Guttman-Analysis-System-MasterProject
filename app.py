@@ -94,10 +94,9 @@ def upload():
             }
             storage.save_result(json, file_id)
             excel.close_workbook()
-        except:
-            print(sys.exc_info())
+        except Exception as e:
             storage.delete_file(file_id)
-
+            return {'err_msg': str(e)}
         return result
     else:
         return {'err_msg': 'Illegal file extension'}
