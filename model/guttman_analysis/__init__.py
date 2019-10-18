@@ -573,14 +573,16 @@ def return_correlation(original_data, is_student, flag):
 
 
 def irregular_box(matrix):
-    if len(matrix[0]) < 2:
+    if len(matrix[0]) < 2 or len(matrix) < 4:
         return []
     section_qty = min(math.floor(math.sqrt(len(matrix[0]))), 5)
+    min_height = math.ceil(math.sqrt(len(matrix)))
+
     item_sum = sumItemScore(matrix)
     item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
-    selected_tuple = tuple_diff[:section_qty]
+    selected_tuple = tuple_diff[:section_qty-1]
     selected_col = [i for _, i in selected_tuple]
     selected_col.append(-1)
     selected_col.append(len(matrix[0]) - 1)
@@ -590,8 +592,8 @@ def irregular_box(matrix):
         best = 99999999
         best_j_k = (-1, -1)
         col1, col2 = selected_col[i] + 1, selected_col[i + 1]
-        for j in range(len(matrix)):
-            for k in range(j, len(matrix)):
+        for j in [0] + list(range(math.ceil(min_height/2), len(matrix))):
+            for k in range(j + min_height - 1, len(matrix)):
                 box_sum = 0
                 for n in range(j, k + 1):
                     box_sum += sum(matrix[n][col1: col2 + 1])
@@ -599,19 +601,22 @@ def irregular_box(matrix):
                 pre_box_sum = 0
                 for n in range(j):
                     pre_box_sum += sum(matrix[n][col1: col2 + 1])
-                pre_box_correct_rate = (matrix[0][col1: col2 + 1])/(col2 - col1 + 1) \
+
+                pre_box_sample = [row[col1: col2 + 1] for row in matrix[:min_height]]
+                pre_box_correct_rate = sum(map(sum, pre_box_sample))/(min_height * (col2 - col1 + 1)) \
                     if j == 0 else pre_box_sum / (j * (col2 - col1 + 1))
                 post_box_sum = 0
                 for n in range(k + 1, len(matrix)):
                     post_box_sum += sum(matrix[n][col1: col2 + 1])
-                post_box_correct_rate = sum(matrix[-1][col1: col2 + 1])/(col2 - col1 + 1) \
+                post_box_sample = [row[col1: col2 + 1] for row in matrix[-min_height:]]
+                post_box_correct_rate = sum(map(sum, post_box_sample))/(min_height * (col2 - col1 + 1)) \
                     if k + 1 == len(matrix) \
                     else post_box_sum / ((len(matrix) - k - 1) * (col2 - col1 + 1))
 
-                dis = (abs(pre_box_correct_rate - box_correct_rate)) + \
-                    abs(box_correct_rate - 0.5) * 2 + \
-                    (abs(post_box_correct_rate - box_correct_rate))
-                dis /= k - j + len(matrix)
+                dis = (abs(pre_box_correct_rate - box_correct_rate) ** 2) + \
+                    (abs(box_correct_rate - 0.5) ** 2) * 3 + \
+                    (abs(post_box_correct_rate - box_correct_rate) ** 2)
+                dis /= (k - j) + len(matrix) * min_height
 
                 if dis < best:
                     best = dis
