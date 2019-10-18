@@ -53,7 +53,7 @@ def upload():
             excel.add_total_score()
             excel.add_correlation(corr_item, 'column')
 
-            boxes = guttman_analysis.irregular_box(matrix, file_importing.get_max_mark(matrix, False))
+            boxes = guttman_analysis.irregular_box(matrix)
             boxes_json = []
             for i in boxes:
                 col1, col2, rows = i

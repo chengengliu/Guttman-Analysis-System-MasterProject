@@ -28,7 +28,8 @@ def sort_2d_array_mark(array):
             if count1 < count2:
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
-                    
+
+
 def get_max_mark(array, dirty):
     init = 1 if dirty else 0
     tmp_max_mark = [0] if dirty else []
@@ -44,18 +45,17 @@ def get_max_mark(array, dirty):
     for i in range(init, len(array)):
         if array[i][init:] == tmp_max_mark[init:]:
             max_mark_cnt += 1
-    #print(max_mark_cnt)
+    # print(max_mark_cnt)
     max_mark = ([0] if dirty else []) + [sorted([array[j][i]
            for j in range(init, len(array))], reverse=True)[max_mark_cnt]
            for i in range(init, len(array[0]))
           ]
-    #print(max_mark)
+    # print(max_mark)
     for i in range(len(max_mark)):
         if max_mark[i] == 0:
             max_mark[i] = 1
             tmp_max_mark[i] = 1
     return tmp_max_mark, max_mark_cnt, max_mark
-
 
 
 def sort_2d_array_max_mark(array):

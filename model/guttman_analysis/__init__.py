@@ -84,6 +84,7 @@ from numpy import dot
 from numpy.linalg import norm
 import numpy.ma as ma
 
+
 # This function will be used if Yi Wang's module returns the follwing data to me:
 
 # [['file', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'], ['student1', 1, 1, 0, 0, 0, 0, 0,
@@ -571,17 +572,12 @@ def return_correlation(original_data, is_student, flag):
         return irregular_cal_copy(matrix, flag, is_student)
 
 
-def irregular_box(matrix, max_mark_info):
+def irregular_box(matrix):
     if len(matrix[0]) < 2:
         return []
-    tmp_max_mark, max_mark_cnt, max_mark = max_mark_info
-    section_qty = math.floor(math.sqrt(len(matrix[0])))
-    box_max_height = math.floor(math.sqrt(len(matrix)))
+    section_qty = min(math.floor(math.sqrt(len(matrix[0]))), 5)
     item_sum = sumItemScore(matrix)
-    for i in range(len(item_sum)):
-        item_sum[i] -= tmp_max_mark[i] * max_mark_cnt
-    item_diff = [float(item_sum[i]) / max_mark[i] - float(item_sum[i + 1]) / max_mark[i + 1] for i in
-                 range(len(item_sum) - 1)]
+    item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
     selected_tuple = tuple_diff[:section_qty]
@@ -591,20 +587,37 @@ def irregular_box(matrix, max_mark_info):
     selected_col.sort()
     result = []
     for i in range(len(selected_col) - 1):
-        best_dis = 1
+        best = 99999999
         best_j_k = (-1, -1)
         col1, col2 = selected_col[i] + 1, selected_col[i + 1]
         for j in range(len(matrix)):
-            for k in range(j, min(j + box_max_height, len(matrix))):
+            for k in range(j, len(matrix)):
                 box_sum = 0
-                max_mark_sum = 0.01 + (k - j + 1) * sum(max_mark[col1: col2 + 1])
                 for n in range(j, k + 1):
                     box_sum += sum(matrix[n][col1: col2 + 1])
-                dis = abs((max_mark_sum - box_sum) / max_mark_sum - 0.5)
-                if dis < best_dis:
-                    best_dis = dis
+                box_correct_rate = box_sum / ((k - j + 1) * (col2 - col1 + 1))
+                pre_box_sum = 0
+                for n in range(j):
+                    pre_box_sum += sum(matrix[n][col1: col2 + 1])
+                pre_box_correct_rate = (matrix[0][col1: col2 + 1])/(col2 - col1 + 1) \
+                    if j == 0 else pre_box_sum / (j * (col2 - col1 + 1))
+                post_box_sum = 0
+                for n in range(k + 1, len(matrix)):
+                    post_box_sum += sum(matrix[n][col1: col2 + 1])
+                post_box_correct_rate = sum(matrix[-1][col1: col2 + 1])/(col2 - col1 + 1) \
+                    if k + 1 == len(matrix) \
+                    else post_box_sum / ((len(matrix) - k - 1) * (col2 - col1 + 1))
+
+                dis = (abs(pre_box_correct_rate - box_correct_rate)) + \
+                    abs(box_correct_rate - 0.5) * 2 + \
+                    (abs(post_box_correct_rate - box_correct_rate))
+                dis /= k - j + len(matrix)
+
+                if dis < best:
+                    best = dis
                     best_j_k = (j, k)
         result.append((col1, col2, best_j_k))
+    print("BOXES: ", result)
     return result
 
 
