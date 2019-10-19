@@ -89,7 +89,7 @@ export const renderFileProcessing = () => {
 export const renderProcessDone = (fileID, fileName, downloadURL) => {
 
     // const query = `?fileID=${fileID}`;
-    const query = `?fileID=${fileID}&typeID=1`;
+    const query = `?fileID=${fileID}&typeID=0`;
 
     const markup = `
         <div data-file-id=${fileID} class="file-container processed">

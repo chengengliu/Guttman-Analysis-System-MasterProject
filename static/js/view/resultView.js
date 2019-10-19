@@ -88,8 +88,8 @@ const parseJSON = data => {
 const renderLeftPanel = data => {
 
     // const query = `?fileID=${fileID}`;
-    const query1 = `?fileID=${data.file_id}&typeID=1`;
-    const query2 = `?fileID=${data.file_id}&typeID=2`;
+    const query1 = `?fileID=${data.file_id}&typeID=0`;
+    const query2 = `?fileID=${data.file_id}&typeID=1`;
 
     const markup = `
         <div class="back-section">
@@ -124,7 +124,7 @@ const renderFeedback = (typeID, data) => {
 
     let content = '';
 
-    if (typeID === 1) {
+    if (typeID === 0) {
         content = `
             <li>
                 <span>Irregular Students Pattern</span>
@@ -168,7 +168,7 @@ const renderFeedback = (typeID, data) => {
                 </p>
             </li>
         `;
-    } else if (typeID === 2) {
+    } else if (typeID === 1) {
         content = `
             <li>
                 <span>Irregular Items Pattern</span>
