@@ -233,8 +233,11 @@ def transpose_matrix(matrix):
 # The inputs are in transposed form.
 def detect_full_score(matrix):
     full_score = []
+    # for criteria in matrix:
+    #     full_score.append(max(criteria))
+    #
     for criteria in matrix:
-        full_score.append(max(criteria))
+        full_score.append(1)
     return full_score
 
 
@@ -287,13 +290,18 @@ def cal_scorerate_accumulated_matrix(matrix, is_student):
         print("Column accumulated score, ", accumulated_score)
         print("Column accumulated full mark", full_marks_duplicate)
         print("Column accumulated full mark result, ", full_marks_accumulated_result)
-        for item in zip(accumulated_score, full_marks_accumulated_result):
-            print("Item is , ", item)
-            temp = []
-            for i in range(len(item[0])):
-                temp.append(item[0][i] / item[1][i])
-            scorerate_accumulated.append(temp)
-        print(scorerate_accumulated)
+
+        # Need to detect all zeros data.
+        try:
+            for item in zip(accumulated_score, full_marks_accumulated_result):
+                print("Item is , ", item)
+                temp = []
+                for i in range(len(item[0])):
+                    temp.append(item[0][i] / item[1][i])
+                scorerate_accumulated.append(temp)
+        except:
+            print("Exception Occurs")
+        print("This is the final score accumulated: ", scorerate_accumulated)
 
         # for score in zip(transposed,full_marks):
         #     print(score)
@@ -370,6 +378,10 @@ def irregular_cal_copy(matrix, flag, is_student):
     print("After removing: ", matrix_copy)
 
     scorerate = cal_scorerate_accumulated_matrix(matrix_copy, is_student)
+    if is_student:
+        print("Student score rate is : ", scorerate)
+    else:
+        print("Item Score rate is: ", scorerate)
     for i in range(len(matrix_copy)):
         # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
         #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
@@ -431,75 +443,75 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
     calculation_counter = 0
     for i in range(range_correlation):
         if (current_index - i - 1) <= 0:
-            # try:
-            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-            temp_accumulation_correlation_mid = \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-            temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                    norm(matrix[current_index]) *
-                    norm(matrix[current_index + i + 1]))
+            try:
+                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                temp_accumulation_correlation_mid = \
+                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                        norm(matrix[current_index]) *
+                        norm(matrix[current_index + i + 1]))
 
-            temp_accumulation_correlation += temp_accumulation_correlation_mid
-            temp_correlation += temp_correlation_mid
-            temp_similarity += temp_similarity_mid
-            calculation_counter += 1
+                temp_accumulation_correlation += temp_accumulation_correlation_mid
+                temp_correlation += temp_correlation_mid
+                temp_similarity += temp_similarity_mid
+                calculation_counter += 1
 
-            # except:
-            #     print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
-            #     pass
+            except:
+                print("ENTER THE EXCEPTION, left bound exception ", i, " ", current_index, "\n")
+                pass
         elif (current_index + i + i) >= (len(matrix) - 1):
-            # try:
-            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-            temp_accumulation_correlation_mid = \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-            temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                    norm(matrix[current_index]) *
-                    norm(matrix[current_index - i - 1]))
+            try:
+                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                temp_accumulation_correlation_mid = \
+                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                        norm(matrix[current_index]) *
+                        norm(matrix[current_index - i - 1]))
 
-            temp_accumulation_correlation += temp_accumulation_correlation_mid
-            temp_correlation += temp_correlation_mid
-            temp_similarity += temp_similarity_mid
+                temp_accumulation_correlation += temp_accumulation_correlation_mid
+                temp_correlation += temp_correlation_mid
+                temp_similarity += temp_similarity_mid
 
-            calculation_counter += 1
+                calculation_counter += 1
 
-            # except:
-            #     print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
-            #     pass
+            except:
+                print("ENTER THE EXCEPTION, right bound exception ", i, " ", current_index, "\n")
+                pass
         else:
-            # try:
-            temp_accumulation_correlation_mid = \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
-            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
-            temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
-                    norm(matrix[current_index]) *
-                    norm(matrix[current_index - i - 1]))
+            try:
+                temp_accumulation_correlation_mid = \
+                    numpy.corrcoef(scorerate[current_index], scorerate[current_index - i - 1])[0, 1]
+                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index - i - 1])[0, 1]
+                temp_similarity_mid = dot(matrix[current_index], matrix[current_index - i - 1]) / (
+                        norm(matrix[current_index]) *
+                        norm(matrix[current_index - i - 1]))
 
-            temp_accumulation_correlation += temp_accumulation_correlation_mid
-            temp_correlation += temp_correlation_mid
-            temp_similarity += temp_similarity_mid
+                temp_accumulation_correlation += temp_accumulation_correlation_mid
+                temp_correlation += temp_correlation_mid
+                temp_similarity += temp_similarity_mid
 
-            calculation_counter += 1
+                calculation_counter += 1
 
-            # except:
-            #     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
-            #     pass
-            # try:
-            temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
-            temp_accumulation_correlation_mid = \
-                numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
-            temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
-                    norm(matrix[current_index]) *
-                    norm(matrix[current_index + i + 1]))
+            except:
+                print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 1", "  ", current_index, "   ", i)
+                pass
+            try:
+                temp_correlation_mid = numpy.corrcoef(matrix[current_index], matrix[current_index + i + 1])[0, 1]
+                temp_accumulation_correlation_mid = \
+                    numpy.corrcoef(scorerate[current_index], scorerate[current_index + i + 1])[0, 1]
+                temp_similarity_mid = dot(matrix[current_index], matrix[current_index + i + 1]) / (
+                        norm(matrix[current_index]) *
+                        norm(matrix[current_index + i + 1]))
 
-            temp_accumulation_correlation += temp_accumulation_correlation_mid
-            temp_correlation += temp_correlation_mid
-            temp_similarity += temp_similarity_mid
+                temp_accumulation_correlation += temp_accumulation_correlation_mid
+                temp_correlation += temp_correlation_mid
+                temp_similarity += temp_similarity_mid
 
-            calculation_counter += 1
+                calculation_counter += 1
 
-            # except:
-            #     print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
-            #     pass
+            except:
+                print("ENTER THE EXCEPTION", "Safely perform the actions ", "  Part 2")
+                pass
     # print(calculation_counter)
 
     correlation_result.append(temp_correlation / calculation_counter)

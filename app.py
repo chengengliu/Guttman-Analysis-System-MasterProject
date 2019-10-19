@@ -35,8 +35,9 @@ def upload():
             data = file_importing.transpose(data)
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
-            # print(new_data)
+            print("This is the new data", new_data)
             matrix = guttman_analysis.clean_input(new_data)
+            print(matrix)
             print("this is the matrix !!!!!!!!!!!!!")
             for i in matrix:
                 print(i)
