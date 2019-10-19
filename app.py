@@ -103,9 +103,12 @@ def upload():
                 'file_id': file_id,
                 'file_name': filename,
                 'export_url': '/export/' + str(file_id),
+                'irregular_student': [],
                 'irregular_item': [new_data[0][i + 1] for i in irregular_item],
                 'item_performance': corr_item,
-                'content': content_list
+                'boxes': [],
+                'content': content_list,
+                'odd_cells': []
             }
             storage.save_result(json, file_id, 0)
             json = {
@@ -113,6 +116,7 @@ def upload():
                 'file_name': filename,
                 'export_url': '/export/' + str(file_id),
                 'irregular_student': [new_data[i + 2][0] for i in irregular_student],
+                'irregular_item': [],
                 'content': content_list,
                 'boxes': boxes_json,
                 'odd_cells': odd_cells_str_tuple
