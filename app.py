@@ -91,7 +91,7 @@ def upload():
                 print(content_list[i], i, new_data[i][0])
                 content_list[i][new_data[i][0]].append(tail)
             content_list.append({
-                'total': guttman_analysis.sumItemScore(matrix)
+                'total': guttman_analysis.sum_item_score(matrix)
             })
             odd_cells = guttman_analysis.odd_cells(matrix)
             odd_cells_str_tuple = []

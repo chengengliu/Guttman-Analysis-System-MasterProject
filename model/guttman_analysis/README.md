@@ -66,7 +66,6 @@ Input Desciption:
 
     
     sumItemScore(matrix)
-    cal_median(matrix, summation)
     transpose_matrix(matrix)
 The above mentioned functions can be skipped while you read the code.
 
