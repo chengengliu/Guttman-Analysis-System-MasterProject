@@ -33,44 +33,42 @@ def upload():
             file_name.save(path)
             data, index = file_importing.readfile(path)
             data = file_importing.transpose(data)
-            print("Original data is: ",data)
 
-            # TODO Should add a content check here
-
-            ##
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
-            print("This is the new data", new_data)
             matrix = guttman_analysis.clean_input(new_data)
-            print(matrix)
-            print("this is the matrix !!!!!!!!!!!!!")
-            for i in matrix:
-                print(i)
+
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)
             irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
             irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
-            print(new_data)
 
-            excel = ExcelOutput(new_data, mod_path)
-            excel.write_excel()
-            print("Irregular item list is: ",irregular_item)
+            excel = ExcelOutput(mod_path)
+            excel.add_array(new_data)
+            excel.add_array(new_data)
+            excel.write_excel(0)
+            excel.write_excel(1)
+            print("Irregular item list is: ", irregular_item)
             for col in irregular_item:
                 print("Column is: ", col)
-                excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3')
+                excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3', 1)
+                excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3', 0)
             for row in irregular_student:
                 print("Row is : ", row)
-                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69')
-            excel.add_total_score()
+                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 1)
+                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 0)
+            excel.add_total_score(1)
+            excel.add_total_score(0)
             print(corr_item)
-            excel.add_correlation(corr_item, 'column')
-
+            excel.add_correlation(corr_item, 'column', 1)
+            excel.add_correlation(corr_item, 'column', 0)
             boxes = guttman_analysis.irregular_box(matrix)
             boxes_json = []
             for i in boxes:
                 col1, col2, rows = i
                 row1, row2 = rows
-                excel.add_border(row1 + 2, row2 + 2, col1 + 1, col2 + 1)
+                excel.add_border(row1 + 2, row2 + 2, col1 + 1, col2 + 1, 1)
+                excel.add_border(row1 + 2, row2 + 2, col1 + 1, col2 + 1, 0)
                 boxes_json.append({
                     'row_range': [row1 + 2, row2 + 2],
                     'column_range': [col1 + 1, col2 + 1]
@@ -94,7 +92,8 @@ def upload():
             odd_cells = guttman_analysis.odd_cells(matrix)
             odd_cells_str_tuple = []
             for (r, c) in odd_cells:
-                excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5')
+                excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5', 1)
+                excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5', 0)
                 odd_cells_str_tuple.append("(%d, %d)" % (c, r+1))
 
             json = {

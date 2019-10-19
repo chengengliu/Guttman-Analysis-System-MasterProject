@@ -98,7 +98,7 @@ import numpy.ma as ma
 
 def clean_input(original_data):
     removed_header = original_data[2:]
-    print("Removed Header , ", removed_header)
+    # print("Removed Header , ", removed_header)
     for i in range(len(removed_header)):
         removed_header[i] = removed_header[i][1:]
     # print(removed_header)
@@ -378,7 +378,7 @@ def irregular_cal_copy(matrix, flag, is_student):
     matrix_copy = copy.deepcopy(matrix)
     for e in reversed(zero_stddiv_accumulated_list):
         matrix_copy.pop(e)
-    print("After removing: ", matrix_copy)
+    # print("After removing: ", matrix_copy)
 
     scorerate = cal_scorerate_accumulated_matrix(matrix_copy, is_student)
     # print("The second Accumulated Score Matrix: ", scorerate)
@@ -427,11 +427,11 @@ def return_irregular_index_test2(original_data, is_student, flag):
 
     if not is_student:
         columns_similarity = irregular_cal_copy(transpose, flag, is_student)
-        print("Columns Similarity for testing purpose: ", columns_similarity)
+        # print("Columns Similarity for testing purpose: ", columns_similarity)
         return detect_item_irregular(columns_similarity, transpose)
     elif is_student:
         student_similarity = irregular_cal_copy(matrix, flag, is_student)
-        print("Student Similarity for testing purpose: ", student_similarity)
+        # print("Student Similarity for testing purpose: ", student_similarity)
         return detect_item_irregular(student_similarity, matrix)
 
 
@@ -541,9 +541,9 @@ def detect_item_irregular(similarities, matrix):
 
     positions = [i for i in range(len(matrix))]
     potential_list = list(zip(similarities, positions))
-    print(potential_list, "   Unsorted Potential List")
+    # print(potential_list, "   Unsorted Potential List")
     potential_list = sorted(potential_list, key=lambda x: x[0])
-    print(potential_list, "   Sorted Potential List ")
+    # print(potential_list, "   Sorted Potential List ")
     zero_result = []
     # # TODO: 需要将非常规的0.0数值丢到最后面。
     # for i in range(len(potential_list)):
@@ -633,7 +633,7 @@ def irregular_box(matrix):
                     best = dis
                     best_j_k = (j, k)
         result.append((col1, col2, best_j_k))
-    print("BOXES: ", result)
+    # print("BOXES: ", result)
     return result
 
 
@@ -646,7 +646,7 @@ def get_neighbours(radius):
     temp = []
     for i in range(0, radius + 1):
         for j in range(0, radius - i + 1):
-            print((i, j))
+            # print((i, j))
             for k in [-1, 1]:
                 for l in [-1, 1]:
                     temp.append((i * k, j * l))
@@ -703,7 +703,7 @@ def odd_cells(matrix):
 
             if matrix[i][j] == 0 and count_ones / total_neighbours > threshold:
                 # print(count_ones, count_ones + count_zeros, i , j , x , y)
-                print(i, j, count_zeros, count_ones, total_neighbours, matrix[4][2])
+                # print(i, j, count_zeros, count_ones, total_neighbours, matrix[4][2])
                 cells.append((i, j))
             elif matrix[i][j] > 0 and count_zeros / total_neighbours > threshold:
                 # print(i, j, count_zeros, count_ones, total_neighbours)
