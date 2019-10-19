@@ -49,6 +49,30 @@ def upload():
                 excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3', 0)
             excel.add_total_score(0)
             excel.add_correlation(corr_item, 'column', 0)
+            content_list = []
+
+            for i in range(len(new_data)):
+                tail = "total" if i == 0 else "" if i == 1 else sum(new_data[i][1:])
+                content_list.append({
+                    new_data[i][0]: new_data[i][1:]
+                })
+                content_list[i][new_data[i][0]].append(tail)
+            content_list.append({
+                'total': guttman_analysis.sumItemScore(matrix)
+            })
+
+            json = {
+                'file_id': file_id,
+                'file_name': filename,
+                'export_url': '/export/' + str(file_id),
+                'irregular_student': [],
+                'irregular_item': [new_data[0][i + 1] for i in irregular_item],
+                'item_performance': corr_item,
+                'boxes': [],
+                'content': content_list,
+                'odd_cells': []
+            }
+            storage.save_result(json, file_id, 0)
 
             for row in new_data:
                 pos = 1
@@ -80,14 +104,10 @@ def upload():
             content_list = []
 
             for i in range(len(new_data)):
-                if i == 0:
-                    tail = "total"
-                else:
-                    tail = "total" if i == 1 else sum(new_data[i][1:])
+                tail = "total" if i == 0 else "" if i == 1 else sum(new_data[i][1:])
                 content_list.append({
                     new_data[i][0]: new_data[i][1:]
                 })
-                print(content_list[i], i, new_data[i][0])
                 content_list[i][new_data[i][0]].append(tail)
             content_list.append({
                 'total': guttman_analysis.sumItemScore(matrix)
@@ -99,18 +119,7 @@ def upload():
                 excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5', 0)
                 odd_cells_str_tuple.append("(%d, %d)" % (c, r+1))
 
-            json = {
-                'file_id': file_id,
-                'file_name': filename,
-                'export_url': '/export/' + str(file_id),
-                'irregular_student': [],
-                'irregular_item': [new_data[0][i + 1] for i in irregular_item],
-                'item_performance': corr_item,
-                'boxes': [],
-                'content': content_list,
-                'odd_cells': []
-            }
-            storage.save_result(json, file_id, 0)
+
             json = {
                 'file_id': file_id,
                 'file_name': filename,
