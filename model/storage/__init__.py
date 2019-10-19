@@ -47,11 +47,11 @@ def delete_file(file_id):
     shutil.rmtree('upload/' + str(file_id), ignore_errors=True, onerror=None)
 
 
-def get_result(file_id):
-    with open('upload/' + str(file_id) + '/result.json', 'r') as json_file:
+def get_result(file_id, pattern_id):
+    with open('upload/' + str(file_id) + '/result_' + str(pattern_id) + '.json', 'r') as json_file:
         return json.load(json_file)
 
 
-def save_result(json_dict, file_id):
-    with open('upload/' + str(file_id) + '/result.json', 'w') as json_file:
+def save_result(json_dict, file_id, pattern_id):
+    with open('upload/' + str(file_id) + '/result_' + str(pattern_id) + '.json', 'w') as json_file:
         json.dump(json_dict, json_file)

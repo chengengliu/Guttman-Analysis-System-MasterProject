@@ -39,36 +39,39 @@ def upload():
             matrix = guttman_analysis.clean_input(new_data)
 
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
-            corr_item = guttman_analysis.return_correlation(matrix, False, flag)
-            irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
-            irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
 
+            irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
+            corr_item = guttman_analysis.return_correlation(matrix, False, flag)
             excel = ExcelOutput(mod_path)
             excel.add_array(new_data)
-            excel.add_array(new_data)
             excel.write_excel(0)
-            excel.write_excel(1)
-            print("Irregular item list is: ", irregular_item)
             for col in irregular_item:
-                print("Column is: ", col)
-                excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3', 1)
                 excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3', 0)
-            for row in irregular_student:
-                print("Row is : ", row)
-                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 1)
-                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 0)
-            excel.add_total_score(1)
             excel.add_total_score(0)
-            print(corr_item)
-            excel.add_correlation(corr_item, 'column', 1)
             excel.add_correlation(corr_item, 'column', 0)
+
+            for row in new_data:
+                pos = 1
+                for item in irregular_item:
+                    del row[item + pos]
+                    pos -= 1
+            file_importing.sort_2d_array_mark(new_data)
+            matrix = guttman_analysis.clean_input(new_data)
+
+            excel.add_array(new_data)
+            excel.write_excel(1)
+
+            irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
+            for row in irregular_student:
+                excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 1)
+            excel.add_total_score(1)
+
             boxes = guttman_analysis.irregular_box(matrix)
             boxes_json = []
             for i in boxes:
                 col1, col2, rows = i
                 row1, row2 = rows
                 excel.add_border(row1 + 2, row2 + 2, col1 + 1, col2 + 1, 1)
-                excel.add_border(row1 + 2, row2 + 2, col1 + 1, col2 + 1, 0)
                 boxes_json.append({
                     'row_range': [row1 + 2, row2 + 2],
                     'column_range': [col1 + 1, col2 + 1]
@@ -100,14 +103,21 @@ def upload():
                 'file_id': file_id,
                 'file_name': filename,
                 'export_url': '/export/' + str(file_id),
-                'irregular_student': [new_data[i + 2][0] for i in irregular_student],
                 'irregular_item': [new_data[0][i + 1] for i in irregular_item],
                 'item_performance': corr_item,
+                'content': content_list
+            }
+            storage.save_result(json, file_id, 0)
+            json = {
+                'file_id': file_id,
+                'file_name': filename,
+                'export_url': '/export/' + str(file_id),
+                'irregular_student': [new_data[i + 2][0] for i in irregular_student],
                 'content': content_list,
                 'boxes': boxes_json,
                 'odd_cells': odd_cells_str_tuple
             }
-            storage.save_result(json, file_id)
+            storage.save_result(json, file_id, 1)
             excel.close_workbook()
         except IOError as e:
             storage.delete_file(file_id)
@@ -128,9 +138,9 @@ def delete_file(file_id):
     return {}
 
 
-@app.route('/result/<int:file_id>', methods=['GET'])
-def get_result(file_id):
-    return storage.get_result(file_id)
+@app.route('/result/<int:file_id>/pattern/<int:pattern_id>', methods=['GET'])
+def get_result(file_id, pattern_id):
+    return storage.get_result(file_id, pattern_id)
 
 
 @app.route('/')

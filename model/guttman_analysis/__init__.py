@@ -624,8 +624,8 @@ def irregular_box(matrix):
                     if k + 1 == len(matrix) \
                     else post_box_sum / ((len(matrix) - k - 1) * (col2 - col1 + 1))
 
-                dis = (abs(pre_box_correct_rate - box_correct_rate) ** 2) + \
-                    (abs(box_correct_rate - 0.5) ** 2) * 3 + \
+                dis = (abs(box_correct_rate - 0.5) ** 2) * 3\
+                    - (abs(pre_box_correct_rate - box_correct_rate) ** 2) - \
                     (abs(post_box_correct_rate - box_correct_rate) ** 2)
                 dis /= (k - j) + len(matrix) * min_height
 
