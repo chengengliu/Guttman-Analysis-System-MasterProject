@@ -132,7 +132,7 @@ def upload():
             }
             storage.save_result(json, file_id, 1)
             excel.close_workbook()
-        except IOError as e:
+        except Exception as e:
             storage.delete_file(file_id)
             return {'err_msg': str(e)}
         return result
