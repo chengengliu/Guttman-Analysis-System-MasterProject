@@ -6,7 +6,7 @@ const limitFileName = fileName => {
     return len > 18 ? `${fileName.substring(0, 10)}.xlsx` : fileName;
 };
 
-export const renderPopupWindow = (fileName, flag) => {
+export const renderPopupWindow = (fileName, flag, message) => {
 
     let content;
 
@@ -37,8 +37,9 @@ export const renderPopupWindow = (fileName, flag) => {
 
         default:
             content = `
-                <p class="text">Sorry, upexpected error.</p>
-            `;
+                <p class="text">${message}</p>
+            `;;
+            break;
     }
 
     const markup = `

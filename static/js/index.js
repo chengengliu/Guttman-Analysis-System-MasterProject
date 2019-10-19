@@ -16,7 +16,7 @@ const init = async () => {
     });
 
     // render instruction
-    fileView.renderPopupWindow(undefined, INSTRUCTION); 
+    fileView.renderPopupWindow(null, INSTRUCTION, null); 
 };
 
 const initFetch = async () => {
@@ -41,7 +41,7 @@ const validateFile = element => {
 
     // if not a valid file, popup warning
     if (!allowedExtensions.exec(filePath)) {
-        fileView.renderPopupWindow(file.name, INVALID_EXTENSION);
+        fileView.renderPopupWindow(file.name, INVALID_EXTENSION, null);
     } else {
         // send the file to server
         uploadFile(file);
@@ -71,10 +71,13 @@ const uploadFile = file => {
         if (xhr.status >= 200 && xhr.status < 400) {
 
             // const isFormatValid = JSON.parse(xhr.responseText).file_format;   <------- TODO
-            const isFormatValid = true;
+            // const isFormatValid = true;
 
-            // if file format is valid
-            if (isFormatValid === true) {
+            const errorMsg = JSON.parse(xhr.responseText).err_msg;
+            const isErrorOccur = errorMsg === undefined ? false : true;
+
+            // non error msg returns from the server, everything works fine
+            if (!isErrorOccur) {
                 const fileID = JSON.parse(xhr.responseText).file_id;
                 const downloadURL = JSON.parse(xhr.responseText).export_url;
     
@@ -82,12 +85,32 @@ const uploadFile = file => {
                 fileView.renderProcessDone(fileID, file.name, downloadURL);
                 fileView.renderNewFileUpload();
             } else {
-                fileView.renderPopupWindow(file.name, INVALID_FORMAT);
+                // something wrong, render the error msg sent from server
+                fileView.renderPopupWindow(file.name, null, errorMsg);
                 fileView.clearNode('.file-container.processing');
                 fileView.renderNewFileUpload();
             }
-        } else {
-            console.error(`error ${xhr.response}`);
+
+            console.log(`return msg: ${xhr.responseText}`);
+
+            // // if file format is valid
+            // if (isFormatValid === true) {
+            //     const fileID = JSON.parse(xhr.responseText).file_id;
+            //     const downloadURL = JSON.parse(xhr.responseText).export_url;
+    
+            //     fileView.clearNode('.file-container.processing');
+            //     fileView.renderProcessDone(fileID, file.name, downloadURL);
+            //     fileView.renderNewFileUpload();
+            // } else {
+            //     fileView.renderPopupWindow(file.name, INVALID_FORMAT);
+            //     fileView.clearNode('.file-container.processing');
+            //     fileView.renderNewFileUpload();
+            // }
+        } 
+
+        // server is down
+        if (xhr.status >= 500) {
+            
         }
     };
 
