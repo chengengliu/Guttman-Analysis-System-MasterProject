@@ -231,12 +231,14 @@ def transpose_matrix(matrix):
     return result
 
 
-# The inputs are in transposed form.
 def detect_full_score(matrix):
+    """
+    The function assumes that the input data is splited already into small pieces of questions.
+    So the full mark of each question should be 1. It now just aligns the dimension with the input data.
+    :param matrix:  Input data.
+    :return:    A matrix that is full of ones, which has the same dimension as the input matrix.
+    """
     full_score = []
-    # for criteria in matrix:
-    #     full_score.append(max(criteria))
-    #
     for criteria in matrix:
         full_score.append(1)
     return full_score
@@ -255,7 +257,6 @@ def cal_scorerate_accumulated_matrix(matrix, is_student):
     scorerate_accumulated = []
 
     full_marks = detect_full_score(transposed)  # Full mark for each question.
-    # print("This is the full mark", full_marks)
 
     if is_student:
 
@@ -288,10 +289,6 @@ def cal_scorerate_accumulated_matrix(matrix, is_student):
         for i in range(len(transposed)):
             full_marks_accumulated_result.append(numpy.cumsum(full_marks_duplicate[i]).tolist())
 
-        # print("Column accumulated score, ", accumulated_score)
-        # print("Column accumulated full mark", full_marks_duplicate)
-        # print("Column accumulated full mark result, ", full_marks_accumulated_result)
-
         # Need to detect all zeros data.
         try:
             for item in zip(accumulated_score, full_marks_accumulated_result):
@@ -302,10 +299,6 @@ def cal_scorerate_accumulated_matrix(matrix, is_student):
                 scorerate_accumulated.append(temp)
         except:
             print("Exception Occurs")
-        # print("This is the final score accumulated: ", scorerate_accumulated)
-
-        # for score in zip(transposed,full_marks):
-        #     print(score)
 
     return scorerate_accumulated
 
@@ -356,7 +349,7 @@ def similarity_between_column_whole(matrix, ave_per_student):
     return similarity
 
 
-def irregular_cal_copy(matrix, flag, is_student):
+def irregular_calculation(matrix, flag, is_student):
     # TODO: The calculation of scorerate and max score should be paird attention to.
     scorerate = cal_scorerate_accumulated_matrix(matrix, is_student)
     # print("This is the full scorerate: ", scorerate)
@@ -412,7 +405,7 @@ def irregular_cal_copy(matrix, flag, is_student):
         return [j for i in similarity_result for j in i]
 
 
-def return_irregular_index_test2(original_data, is_student, flag):
+def return_irregular_index(original_data, is_student, flag):
     """
     Return the index of irregular column/ row.
     :param original_data: The original data.
@@ -426,11 +419,11 @@ def return_irregular_index_test2(original_data, is_student, flag):
     transpose = transpose_matrix(matrix)
 
     if not is_student:
-        columns_similarity = irregular_cal_copy(transpose, flag, is_student)
+        columns_similarity = irregular_calculation(transpose, flag, is_student)
         # print("Columns Similarity for testing purpose: ", columns_similarity)
         return detect_item_irregular(columns_similarity, transpose)
     elif is_student:
-        student_similarity = irregular_cal_copy(matrix, flag, is_student)
+        student_similarity = irregular_calculation(matrix, flag, is_student)
         # print("Student Similarity for testing purpose: ", student_similarity)
         return detect_item_irregular(student_similarity, matrix)
 
@@ -578,9 +571,9 @@ def return_correlation(original_data, is_student, flag):
 
     # Retrieve the correlation of columns, use transpose
     if not is_student:
-        return irregular_cal_copy(transpose, flag, is_student)
+        return irregular_calculation(transpose, flag, is_student)
     elif is_student:
-        return irregular_cal_copy(matrix, flag, is_student)
+        return irregular_calculation(matrix, flag, is_student)
 
 
 def irregular_box(matrix):
@@ -593,7 +586,7 @@ def irregular_box(matrix):
     item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
-    selected_tuple = tuple_diff[:section_qty-1]
+    selected_tuple = tuple_diff[:section_qty - 1]
     selected_col = [i for _, i in selected_tuple]
     selected_col.append(-1)
     selected_col.append(len(matrix[0]) - 1)
@@ -603,7 +596,7 @@ def irregular_box(matrix):
         best = 99999999
         best_j_k = (-1, -1)
         col1, col2 = selected_col[i] + 1, selected_col[i + 1]
-        for j in [0] + list(range(math.ceil(min_height/2), len(matrix))):
+        for j in [0] + list(range(math.ceil(min_height / 2), len(matrix))):
             for k in range(j + min_height - 1, len(matrix)):
                 box_sum = 0
                 for n in range(j, k + 1):
@@ -614,19 +607,19 @@ def irregular_box(matrix):
                     pre_box_sum += sum(matrix[n][col1: col2 + 1])
 
                 pre_box_sample = [row[col1: col2 + 1] for row in matrix[:min_height]]
-                pre_box_correct_rate = sum(map(sum, pre_box_sample))/(min_height * (col2 - col1 + 1)) \
+                pre_box_correct_rate = sum(map(sum, pre_box_sample)) / (min_height * (col2 - col1 + 1)) \
                     if j == 0 else pre_box_sum / (j * (col2 - col1 + 1))
                 post_box_sum = 0
                 for n in range(k + 1, len(matrix)):
                     post_box_sum += sum(matrix[n][col1: col2 + 1])
                 post_box_sample = [row[col1: col2 + 1] for row in matrix[-min_height:]]
-                post_box_correct_rate = sum(map(sum, post_box_sample))/(min_height * (col2 - col1 + 1)) \
+                post_box_correct_rate = sum(map(sum, post_box_sample)) / (min_height * (col2 - col1 + 1)) \
                     if k + 1 == len(matrix) \
                     else post_box_sum / ((len(matrix) - k - 1) * (col2 - col1 + 1))
 
-                dis = (abs(box_correct_rate - 0.5) ** 2) * 3\
-                    - (abs(pre_box_correct_rate - box_correct_rate) ** 2) - \
-                    (abs(post_box_correct_rate - box_correct_rate) ** 2)
+                dis = (abs(box_correct_rate - 0.5) ** 2) * 3 \
+                      - (abs(pre_box_correct_rate - box_correct_rate) ** 2) - \
+                      (abs(post_box_correct_rate - box_correct_rate) ** 2)
                 dis /= (k - j) + len(matrix) * min_height
 
                 if dis < best:

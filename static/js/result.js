@@ -17,8 +17,8 @@ const renderResult = async () => {
     const query = decodeURIComponent(window.location.search);
     const index1 = query.indexOf('=');
     const index2 = query.indexOf('=', index1 + 1);
-    const typeID = query.substring(index1 + 1, index1 + 2);
-    const fileID = query.substring(index2 + 1, index2 + 2);
+    const fileID = query.substring(index1 + 1, index1 + 2);
+    const typeID = query.substring(index2 + 1, index2 + 2);
 
     console.log(`fileID: ${fileID}`);
     console.log(`typeID: ${typeID}`);
@@ -28,11 +28,11 @@ const renderResult = async () => {
     resultView.renderParsedResult(typeID, processedData);
 };
 
-document.querySelector('.left-panel').addEventListener('click', e => {
-    if (e.target.matches('.other-pattern, .other-pattern *')) {
-        renderOtherPattern();
-        console.log(`click`);
-    }
-});
+// document.querySelector('.left-panel').addEventListener('click', e => {
+//     if (e.target.matches('.other-pattern, .other-pattern *')) {
+//         renderOtherPattern();
+//         console.log(`click`);
+//     }
+// });
 
 window.onload = renderResult;

@@ -40,7 +40,7 @@ def upload():
 
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
 
-            irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
+            irregular_item = guttman_analysis.return_irregular_index(matrix, False, flag)
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)
             excel = ExcelOutput(mod_path)
             excel.add_array(new_data)
@@ -85,7 +85,7 @@ def upload():
             excel.add_array(new_data)
             excel.write_excel(1)
 
-            irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
+            irregular_student = guttman_analysis.return_irregular_index(matrix, True, flag)
             for row in irregular_student:
                 excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 1)
             excel.add_total_score(1)

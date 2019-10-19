@@ -139,8 +139,6 @@ def readfile(file_name):
     if len(item_name) != len(set(item_name)):
         raise Exception("Duplicate item name detected.")
     if len(array1[0][1:]) != len(set(array1[0][1:])):
-        print("arr: ", array1[0][1:])
-        print("set: ", set(array1[0][1:]))
         raise Exception("Duplicate student name detected.")
 
     array2 = []
