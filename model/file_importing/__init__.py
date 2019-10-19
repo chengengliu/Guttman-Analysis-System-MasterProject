@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+
 
 def sort_2d_array_mark(array):
     """
@@ -28,10 +28,12 @@ def sort_2d_array_mark(array):
                 count2 += int(array[k][j + 1])
             if count1 < count2:
                 for k in range(len(array)):
-                    array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
+                    array[k][j], array[k][j + 1] = array[k][j + 1], array[k][j]
     print("Test soring result: ")
     for i in array:
         print(i)
+
+
 #
 # def sort_2d_array_max_mark(array):
 #     """
@@ -80,9 +82,21 @@ def break_down_marks(array, index):
                 count += 1
         indexs.append(count)
 
-    new_array = []
-    new_array.append(index[1])
-    new_array.append(index[0])
+    max_mark = []
+    max_mark.append(0)
+    for i in range(1, len(array[0])):
+        # assume the maximum mark of this task is 1
+        max = 1
+        for j in range(1, len(array)):
+            if max < int(array[j][i]):
+                max = int(array[j][i])
+        max_mark.append(max)
+
+    for i in range(len(indexs)):
+        if indexs[i] < max_mark[i]:
+            raise Exception("the max mark of this task is greater than its total sub-criteria")
+
+    new_array = [index[1], index[0]]
 
     for row in range(1, len(array)):
         tmp = []
@@ -102,12 +116,13 @@ def break_down_marks(array, index):
         new_array[i + 1].insert(0, array[i][0])
     return new_array
 
-def non_int_detect(matrix):
 
+def non_int_detect(matrix):
     for item in matrix:
         for i in range(len(item)):
             if not isinstance(item[i], int):
                 raise Exception('Found non-integer value. Found in data:', item[i])
+
 
 def transpose(array):
     """
@@ -129,18 +144,18 @@ def readfile(file_name):
     """
     xls = pd.ExcelFile(file_name)
     sheet_names = xls.sheet_names
-    if len(sheet_names)<2:
+    if len(sheet_names) < 2:
         raise Exception('Excel file has too few work sheets(less than 2)')
     # If there is only one sheet.
 
     #
-
 
     df1 = pd.read_excel(xls, sheet_names[0])
     df2 = pd.read_excel(xls, sheet_names[1])
     excel_dict1 = df1.to_dict(orient='dict')
     excel_dict2 = df2.to_dict(orient='dict')
     array1 = []
+    # read the first worksheet
     for key in excel_dict1.keys():
         temp_array1 = [str(key)]
         for index in excel_dict1[key]:
@@ -149,15 +164,21 @@ def readfile(file_name):
     for i in range(len(array1[0])):
         array1[0][i] = str(array1[0][i])
     array2 = []
-    column_of_second_sheet = 0
+
+    # read the second worksheet
     for key in excel_dict2.keys():
         temp_array2 = []
         for index in excel_dict2[key]:
             temp_array2.append(excel_dict2[key][index])
-        column_of_second_sheet += 1
+            previous = excel_dict2[key][index]
         array2.append(temp_array2)
 
-
+    # exam if the criteria is listed in order
+    previous = ""
+    for i in range(len(array2[0])):
+        if previous > array2[0][i]:
+            raise Exception("the criteria in worksheet 2 is not listed in order")
+        previous = array2[0][i]
     return array1, array2
 
     # with open(file_name, 'rb') as f:
