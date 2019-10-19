@@ -45,13 +45,16 @@ def upload():
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)
             irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
             irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
+            print(new_data)
 
             excel = ExcelOutput(new_data, mod_path)
             excel.write_excel()
-
+            print("Irregular item list is: ",irregular_item)
             for col in irregular_item:
+                print("Column is: ", col)
                 excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3')
             for row in irregular_student:
+                print("Row is : ", row)
                 excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69')
             excel.add_total_score()
             print(corr_item)
@@ -70,12 +73,16 @@ def upload():
 
             content_list = []
 
-            for i in range(len(data)):
-                tail = "total" if i == 0 else sum(data[i][1:])
+            for i in range(len(new_data)):
+                if i == 0:
+                    tail = "total"
+                else:
+                    tail = "total" if i == 1 else sum(new_data[i][1:])
                 content_list.append({
-                    data[i][0]: data[i][1:]
+                    new_data[i][0]: new_data[i][1:]
                 })
-                content_list[i][data[i][0]].append(tail)
+                print(content_list[i], i, new_data[i][0])
+                content_list[i][new_data[i][0]].append(tail)
             content_list.append({
                 'total': guttman_analysis.sumItemScore(matrix)
             })
@@ -83,14 +90,14 @@ def upload():
             odd_cells_str_tuple = []
             for (r, c) in odd_cells:
                 excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5')
-                odd_cells_str_tuple.append("(%d, %d)" % (c, r))
+                odd_cells_str_tuple.append("(%d, %d)" % (c, r+1))
 
             json = {
                 'file_id': file_id,
                 'file_name': filename,
                 'export_url': '/export/' + str(file_id),
-                'irregular_student': [data[i + 1][0] for i in irregular_student],
-                'irregular_item': [data[0][i + 1] for i in irregular_item],
+                'irregular_student': [new_data[i + 2][0] for i in irregular_student],
+                'irregular_item': [new_data[0][i + 1] for i in irregular_item],
                 'item_performance': corr_item,
                 'content': content_list,
                 'boxes': boxes_json,
@@ -98,7 +105,7 @@ def upload():
             }
             storage.save_result(json, file_id)
             excel.close_workbook()
-        except Exception as e:
+        except IOError as e:
             storage.delete_file(file_id)
             return {'err_msg': str(e)}
         return result
