@@ -4,6 +4,7 @@ import * as fileView from './view/fileView.js';
 const INVALID_EXTENSION = 'INVALID_EXTENSION';
 const INVALID_FORMAT = 'INVALID_FORMAT';
 const INSTRUCTION = 'INSTRUCTION';
+const SERVER_DOWN = "SERVER_DOWN";
 
 // initial query to server asking for processed files
 const init = async () => {
@@ -16,7 +17,7 @@ const init = async () => {
     });
 
     // render instruction
-    fileView.renderPopupWindow(null, INSTRUCTION, null); 
+    fileView.renderPopupWindow(null, INSTRUCTION, null);
 };
 
 const initFetch = async () => {
@@ -70,9 +71,6 @@ const uploadFile = file => {
     xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 400) {
 
-            // const isFormatValid = JSON.parse(xhr.responseText).file_format;   <------- TODO
-            // const isFormatValid = true;
-
             const errorMsg = JSON.parse(xhr.responseText).err_msg;
             const isErrorOccur = errorMsg === undefined ? false : true;
 
@@ -80,7 +78,7 @@ const uploadFile = file => {
             if (!isErrorOccur) {
                 const fileID = JSON.parse(xhr.responseText).file_id;
                 const downloadURL = JSON.parse(xhr.responseText).export_url;
-    
+
                 fileView.clearNode('.file-container.processing');
                 fileView.renderProcessDone(fileID, file.name, downloadURL);
                 fileView.renderNewFileUpload();
@@ -92,25 +90,11 @@ const uploadFile = file => {
             }
 
             console.log(`return msg: ${xhr.responseText}`);
-
-            // // if file format is valid
-            // if (isFormatValid === true) {
-            //     const fileID = JSON.parse(xhr.responseText).file_id;
-            //     const downloadURL = JSON.parse(xhr.responseText).export_url;
-    
-            //     fileView.clearNode('.file-container.processing');
-            //     fileView.renderProcessDone(fileID, file.name, downloadURL);
-            //     fileView.renderNewFileUpload();
-            // } else {
-            //     fileView.renderPopupWindow(file.name, INVALID_FORMAT);
-            //     fileView.clearNode('.file-container.processing');
-            //     fileView.renderNewFileUpload();
-            // }
-        } 
+        }
 
         // server is down
         if (xhr.status >= 500) {
-            
+            fileView.renderPopupWindow(null, SERVER_DOWN, null);
         }
     };
 
@@ -138,7 +122,7 @@ const deleteFile = (fileID, element) => {
 document.querySelector('.right-panel').addEventListener('click', e => {
 
     if (e.target.matches('.upload, .upload *')) {
-        openDialog();      
+        openDialog();
     } else if (e.target.matches('.delete')) {
         const fileID = e.target.dataset.fileId;
         const element = e.target.closest('.file-container.processed');
@@ -151,7 +135,7 @@ document.querySelector('.right-panel').addEventListener('change', e => {
 
     if (e.target.matches('.import, .import *')) validateFile(e.target);
     // set the target to empty so that 'change' will fire even select the same file
-    e.target.value = '';  
+    e.target.value = '';
 });
 
 const openDialog = () => document.querySelector('.import').click();

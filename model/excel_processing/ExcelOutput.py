@@ -31,6 +31,7 @@ class ExcelOutput:
             self.formats[sheet_number].append([])
             for j in range(len(self.arrays[sheet_number][0])):
                 cell_format = self.workbook.add_format(self.base_format)
+
                 if type(self.arrays[sheet_number][i][j]).__name__ == 'int' and self.arrays[sheet_number][i][j] > 0:
                     cell_format.set_bg_color('#ffd5d5')
                 self.formats[sheet_number][i].append(cell_format)

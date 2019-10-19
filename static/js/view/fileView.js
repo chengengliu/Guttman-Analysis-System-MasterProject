@@ -34,7 +34,11 @@ export const renderPopupWindow = (fileName, flag, message) => {
                 <p class="text">6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.</p>
             `;
             break;
-
+        case 'SERVER_DOWN':
+            content =  `
+                <p class="text">Sorry, something wrong with the server, please try again later! </p>
+            `;
+            break;
         default:
             content = `
                 <p class="text">${message}</p>
@@ -84,7 +88,8 @@ export const renderFileProcessing = () => {
 
 export const renderProcessDone = (fileID, fileName, downloadURL) => {
 
-    const query = `?fileID=${fileID}`;
+    // const query = `?fileID=${fileID}`;
+    const query = `?fileID=${fileID}&typeID=1`;
 
     const markup = `
         <div data-file-id=${fileID} class="file-container processed">
