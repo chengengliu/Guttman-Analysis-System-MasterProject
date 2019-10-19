@@ -27,11 +27,10 @@ export const renderPopupWindow = (fileName, flag, message) => {
             content =  `
                 <p class="text">Please ensure that the selected file follows the following rules:</p>
                 <p class="text">1. File extension MUST be <span>.xls</span> or <span>.xlsx</span></p>
-                <p class="text">2. Marked data MUST exist in the <span>first</span> worksheet</p>
-                <p class="text">3. Column A of that worksheet MUST be <span>student name (or id)</span>.</p>
-                <p class="text">4. Row 1 MUST be item <span>name (or id)</span>.</p>
-                <p class="text">5. Starting from column B and row 2, mark data MUST present.</p>
-                <p class="text">6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.</p>
+                <p class="text">2. The excel file MUST have <span>two</span> worksheets.</p>
+                <p class="text">3. The first row should be the description of each item.</p>
+                <p class="text">4. Students' data should begin from the third row.</p>
+                <p class="text">5. The number of sub-items should be greator than the max marks.</p>
             `;
             break;
         case 'SERVER_DOWN':
