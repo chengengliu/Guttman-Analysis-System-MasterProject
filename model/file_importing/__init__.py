@@ -29,6 +29,7 @@ def sort_2d_array_mark(array):
             if count1 < count2:
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
+    print("Test soring result: ")
     for i in array:
         print(i)
 #
@@ -101,8 +102,12 @@ def break_down_marks(array, index):
         new_array[i + 1].insert(0, array[i][0])
     return new_array
 
+def non_int_detect(matrix):
 
-
+    for item in matrix:
+        for i in range(len(item)):
+            if not isinstance(item[i], int):
+                raise Exception('Found non-integer value. Found in data:', item[i])
 
 def transpose(array):
     """
@@ -124,6 +129,13 @@ def readfile(file_name):
     """
     xls = pd.ExcelFile(file_name)
     sheet_names = xls.sheet_names
+    if len(sheet_names)<2:
+        raise Exception('Excel file has too few work sheets(less than 2)')
+    # If there is only one sheet.
+
+    #
+
+
     df1 = pd.read_excel(xls, sheet_names[0])
     df2 = pd.read_excel(xls, sheet_names[1])
     excel_dict1 = df1.to_dict(orient='dict')
@@ -144,6 +156,8 @@ def readfile(file_name):
             temp_array2.append(excel_dict2[key][index])
         column_of_second_sheet += 1
         array2.append(temp_array2)
+
+
     return array1, array2
 
     # with open(file_name, 'rb') as f:
