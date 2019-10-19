@@ -64,14 +64,8 @@ Input Desciption:
     These functions can be skipped and has no relation with the algorithms implementations.
     The helper functions include:
 
-    detectDimenstion(matrix)
-    sumStudentScore(matrix)
+    
     sumItemScore(matrix)
-    sortBasedOnStudent(matrix, studentSum)
-    sortBasedOnItem(matrix, itemSum)
-    cal_median(matrix, summation)
-    cal_average(matrix, summation, number)
-    retrieve_average_per_item(matrix, itemsum)
     transpose_matrix(matrix)
 The above mentioned functions can be skipped while you read the code.
 

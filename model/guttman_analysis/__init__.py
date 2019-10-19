@@ -63,37 +63,17 @@ Section III. Helper functions:
     These functions can be skipped and has no relation with the algorithms implementations.
     The helper functions include:
 
-    detectDimenstion(matrix)
-    sumStudentScore(matrix)
     sumItemScore(matrix)
-    sortBasedOnStudent(matrix, studentSum)
-    sortBasedOnItem(matrix, itemSum)
-    cal_median(matrix, summation)
-    cal_average(matrix, summation, number)
-    retrieve_average_per_item(matrix, itemsum)
     transpose_matrix(matrix)
 
     The above mentioned functions can be skipped while you read the code.
 '''
 
-import pandas as pd
 import copy
 import math
 import numpy
 from numpy import dot
 from numpy.linalg import norm
-import numpy.ma as ma
-
-
-# This function will be used if Yi Wang's module returns the follwing data to me:
-
-# [['file', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'], ['student1', 1, 1, 0, 0, 0, 0, 0,
-# 0], ['student2', 0, 1, 0, 0, 0, 0, 0, 0], ['student3', 1, 1, 1, 0, 0, 0, 0, 0], ['student4', 1, 1, 1, 1, 0, 0, 0, 0],
-# ['student5', 1, 1, 1, 1, 1, 0, 0, 0], ['student6', 1, 1, 1, 1, 1, 1, 0, 0], ['student7', 0, 1, 1, 1, 1, 1, 1, 0],
-# ['student8', 1, 1, 0, 1, 1, 1, 1, 1], ['student9', 1, 1, 1, 1, 0, 1, 1, 1], ['student10', 1, 1, 0, 0, 1, 1, 1, 1],
-# ['student11', 1, 1, 1, 0, 1, 1, 0, 1]]
-# It is necessary to clean the original_data to get the desired format like [[...], [...]],
-# without any names of columns/rows.
 
 
 def clean_input(original_data):
@@ -105,27 +85,8 @@ def clean_input(original_data):
     return removed_header
 
 
-def detectDimenstion(matrix):
-    """
-    Return a tuple of dimension of the 2-d matrix.
-    The first element is the number of student, the second number is the number of items.
-    :param matrix: the 2-d matrix of Guttman Chart
-    :return: A tuple containing the number of student and numebr of items.
-    """
-    return len(matrix), len(matrix[0])
 
-
-# Calculate the summation of student score.
-def sumStudentScore(matrix):
-    """
-    Summation of student total scores.
-    :param matrix: the original data.
-    :return: list that containing each students' scores.
-    """
-    return list(map(sum, matrix))
-
-
-def sumItemScore(matrix):
+def sum_item_score(matrix):
     """
     Summation of item scores.
     :param matrix:  The original data.
@@ -137,85 +98,6 @@ def sumItemScore(matrix):
         result.append(sum_item)
     return result
 
-
-# In case the user accidently provides an unsorted Guttman Chart, sort the chart based on student first.
-def sortBasedOnStudent(matrix, studentSum):
-    """
-    Sort the original data/matrix, in case the user uploads an unsorted data.
-    This sort is based on the student performance/scores.
-    :param matrix:  The original data.
-    :param studentSum:  List of Summation of student scores.
-    :return:    The original data after sorting.
-    """
-    # matrix.sort(key = lambda x: x[len(matrix)-2])
-    result = [x for (y, x) in sorted(zip(studentSum, matrix), key=lambda pair: pair[0])]
-    return list(reversed(result))
-
-
-# Receive a real_matrix (with student and item summation appended)
-def sortBasedOnItem(matrix, itemSum):
-    """
-    Sort the original data/matrix, in case the user uploads an unsorted data.
-    This sort is based on the item/column performace/scores.
-    :param matrix:  The original data.
-    :param itemSum:  List of Summation of student scores.
-    :return:    The original data after sorting.
-    """
-    index = list(range(len(itemSum)))
-    sublist_item = list(zip(itemSum, index))
-    sublist_item = sorted(sublist_item, key=lambda x: x[0], reverse=True)  # Order that the inner list should follow.
-    sorted_item_order = [x[1] for x in sublist_item]
-    result = copy.deepcopy(matrix)
-    for i in range(len(itemSum)):
-        temp_student = list(zip(sorted_item_order, result[i]))
-        temp_student = sorted(temp_student, key=lambda x: x[0])
-        temp_student_list = [x[1] for x in temp_student]
-        result[i] = temp_student_list
-    return result
-
-
-# Can return either the median of the students scores, or the median of the items.
-def cal_median(matrix, summation):
-    """
-    Helper function. Not used for now. It will be used in the next phase, when dividing the partitions
-    It calculate the median of summation list.
-    :param matrix:  null
-    :param summation: A list of summations
-    :return:  The median of the summations
-    """
-    if len(summation) % 2 == 0:
-        median = summation[int(len(summation) / 2)] + summation[int(len(summation) / 2) - 1]
-        return median / 2
-    else:
-        median = summation[math.floor(len(summation) / 2)]
-        return median
-
-
-def cal_average(matrix, summation, number):
-    """
-    Can return either the average of the students scores, or the average score of the items.
-    Not used for now, maybe useful for later usage.
-    :param matrix: null
-    :param summation:   A list of summation.
-    :param number:  Number of element in summation.
-    :return:    Average of the summation.
-    """
-    return sum(summation) / number
-
-
-# Return the average score of item, per student.
-def retrieve_average_per_item(matrix, itemsum):
-    """
-    Retrieve the average of the summation, per student.
-    :param matrix:  The original input matrix data.
-    :param itemsum: Either studentSum or itemSum
-    :return:    Average
-    """
-    # Initialise a matrix to store items average results. len(matrix) is the number of student.
-    result = []
-    for i in range(len(itemsum)):
-        result.append(itemsum[i] / len(matrix))
-    return result
 
 
 # This will be helpful for later use.
@@ -247,58 +129,27 @@ def detect_full_score(matrix):
 # Receive a student matrix. Wants to accumulate the score rate accumulated matrix.
 # Assume the input is cleaned and sorted. No more sorting needed.
 def cal_scorerate_accumulated_matrix(matrix, is_student):
-    # If the input is student as row, (aka the normal data), do the calculation as usual.
-    if is_student:
-        transposed = transpose_matrix(matrix)
-    else:
-        transposed = matrix
+    transposed = transpose_matrix(matrix)
 
     accumulated_score = []
     scorerate_accumulated = []
 
     full_marks = detect_full_score(transposed)  # Full mark for each question.
+    # print(full_marks)
+    # if is_student:
 
-    if is_student:
+    full_marks_accumulated = numpy.cumsum(full_marks).tolist()
+    # print("This is the accumulated full marks, ", full_marks_accumulated)
 
-        full_marks_accumulated = numpy.cumsum(full_marks).tolist()
-        # print("This is the accumulated full marks, ", full_marks_accumulated)
+    for i in range(len(matrix)):
+        accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
+    # print("This is the accumulated score, ", accumulated_score)
 
-        for i in range(len(matrix)):
-            accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
-        # print("This is the accumulated score, ", accumulated_score)
-
-        for item in accumulated_score:
-            temp = []
-            for i in range(len(item)):
-                temp.append(item[i] / full_marks_accumulated[i])
-            scorerate_accumulated.append(temp)
-    else:
-        # Repeated full marks for all students. Different from each question.
-        full_marks_duplicate = []
-        # Full marks accumulated.
-        full_marks_accumulated_result = []
-
-        for i in range(len(transposed)):
-            accumulated_score.append(numpy.cumsum(matrix[i]).tolist())
-            # print("MAtrix i is: ", matrix[i])
-            temp = []
-            for j in range(len(transposed[0])):
-                temp.append(full_marks[i])
-            full_marks_duplicate.append(temp)
-        # Full marks accumulation.
-        for i in range(len(transposed)):
-            full_marks_accumulated_result.append(numpy.cumsum(full_marks_duplicate[i]).tolist())
-
-        # Need to detect all zeros data.
-        try:
-            for item in zip(accumulated_score, full_marks_accumulated_result):
-                # print("Item is , ", item)
-                temp = []
-                for i in range(len(item[0])):
-                    temp.append(item[0][i] / item[1][i])
-                scorerate_accumulated.append(temp)
-        except:
-            print("Exception Occurs")
+    for item in accumulated_score:
+        temp = []
+        for i in range(len(item)):
+            temp.append(item[i] / full_marks_accumulated[i])
+        scorerate_accumulated.append(temp)
 
     return scorerate_accumulated
 
@@ -334,29 +185,10 @@ def in_danger_list(danger_list, current_index):
     return False
 
 
-def similarity_between_column_whole(matrix, ave_per_student):
-    """
-    Calculate the similarity between each column and the whole table(student average score). This calculation is based on cosine,
-    which generated by dot product divided by normalised production.
-    :param matrix:  The transposed matrix, that has the same data but expressed in the different way (to simplify calculation)
-    :param ave_per_student: The average score each column, per student.
-    :return: A list of similarities of each column/item.
-    """
-    similarity = []
-    for i in range(len(matrix)):
-        cosine = dot(matrix[i], ave_per_student) / (norm(matrix[i]) * norm(ave_per_student))
-        similarity.append(cosine)
-    return similarity
-
-
 def irregular_calculation(matrix, flag, is_student):
-    # TODO: The calculation of scorerate and max score should be paird attention to.
     scorerate = cal_scorerate_accumulated_matrix(matrix, is_student)
-    # print("This is the full scorerate: ", scorerate)
 
     zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
-
-    # print("This is the zero standard deviation list: ", zero_stddiv_accumulated_list)
 
     accumulation_result = []
     similarity_result = []
@@ -371,27 +203,16 @@ def irregular_calculation(matrix, flag, is_student):
     matrix_copy = copy.deepcopy(matrix)
     for e in reversed(zero_stddiv_accumulated_list):
         matrix_copy.pop(e)
-    # print("After removing: ", matrix_copy)
 
     scorerate = cal_scorerate_accumulated_matrix(matrix_copy, is_student)
-    # print("The second Accumulated Score Matrix: ", scorerate)
-    # if is_student:
-    #     # print("Student score rate is : ", scorerate)
-    # else:
-    #     # print("Item Score rate is: ", scorerate)
     for i in range(len(matrix_copy)):
-        # similarity_result.append(cal_correlation_items(matrix, i, 'Similarity', scorerate,
-        #                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        # if not accumulation_0stddv_is_empty and in_danger_list(zero_stddiv_accumulated_list, i):
-        #     print("SKIP. There are full scores student!", i)
-        #     # TODO: Throw warning to the front end.
-        #     continue
+        similarity_result.append(irregular_cal(matrix_copy, i, 'Similarity', scorerate,
+                                                       zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
         accumulation_result.append(irregular_cal(matrix_copy, i, 'Accumulation', scorerate,
                                                  zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
-        # correlation_result.append(cal_correlation_items(matrix, i, 'Correlation', scorerate,
-        #                                                 zero_stddiv_accumulated_list, data_0stddv_is_empty))
+        correlation_result.append(irregular_cal(matrix_copy, i, 'Correlation', scorerate,
+                                                        zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
     # Data needs to be put back.
-    # print("ACCUMULATION RESULT  ", accumulation_result)
     # The value is not full. There are values deleted.
     temp = [j for i in accumulation_result for j in i]
     for e in zero_stddiv_accumulated_list:
@@ -414,17 +235,14 @@ def return_irregular_index(original_data, is_student, flag):
     """
     sorted_item = original_data
 
-    # Orginal data is manipulated into either matrix(student as row) or transpose(criteria as row)
     matrix = sorted_item
     transpose = transpose_matrix(matrix)
 
     if not is_student:
         columns_similarity = irregular_calculation(transpose, flag, is_student)
-        # print("Columns Similarity for testing purpose: ", columns_similarity)
         return detect_item_irregular(columns_similarity, transpose)
     elif is_student:
         student_similarity = irregular_calculation(matrix, flag, is_student)
-        # print("Student Similarity for testing purpose: ", student_similarity)
         return detect_item_irregular(student_similarity, matrix)
 
 
@@ -523,6 +341,8 @@ def detect_item_irregular(similarities, matrix):
     Detect if the column/item is irregular. If it is irregular, append its position to the list.
     If the average score of the two lists are smaller than 0.5(for now, I don't know how good the data will be, let's try 0.5 for now)
     This parameter will change as development goes.
+    :param similarities:
+    :return:
     :param similarity1: Similarity calculated between each column.
     :param matrix:  Data input. Either has row as student(matrix), or has row as items/criteria(needs to call transpose to
     re-format the data)
@@ -534,16 +354,8 @@ def detect_item_irregular(similarities, matrix):
 
     positions = [i for i in range(len(matrix))]
     potential_list = list(zip(similarities, positions))
-    # print(potential_list, "   Unsorted Potential List")
     potential_list = sorted(potential_list, key=lambda x: x[0])
-    # print(potential_list, "   Sorted Potential List ")
     zero_result = []
-    # # TODO: 需要将非常规的0.0数值丢到最后面。
-    # for i in range(len(potential_list)):
-    #     if math.isclose(potential_list[i][0], 0.0, abs_tol=0.001):
-    #         temp = potential_list.pop(i)
-    #         potential_list.append(temp)
-    #         zero_result.append(i)
 
     for i in potential_list[0:range_irregular]:
         if i[0] < 0.0:
@@ -582,7 +394,7 @@ def irregular_box(matrix):
     section_qty = min(math.floor(math.sqrt(len(matrix[0]))), 5)
     min_height = math.ceil(math.sqrt(len(matrix)))
 
-    item_sum = sumItemScore(matrix)
+    item_sum = sum_item_score(matrix)
     item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
     tuple_diff = [(item_diff[i], i) for i in range(len(item_diff))]
     tuple_diff.sort(reverse=True)
@@ -695,10 +507,7 @@ def odd_cells(matrix):
                         total_neighbours += 1
 
             if matrix[i][j] == 0 and count_ones / total_neighbours > threshold:
-                # print(count_ones, count_ones + count_zeros, i , j , x , y)
-                # print(i, j, count_zeros, count_ones, total_neighbours, matrix[4][2])
                 cells.append((i, j))
             elif matrix[i][j] > 0 and count_zeros / total_neighbours > threshold:
-                # print(i, j, count_zeros, count_ones, total_neighbours)
                 cells.append((i, j))
     return cells

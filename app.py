@@ -37,6 +37,7 @@ def upload():
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
             matrix = guttman_analysis.clean_input(new_data)
+            print(matrix)
 
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
 
@@ -110,7 +111,7 @@ def upload():
                 })
                 content_list[i][new_data[i][0]].append(tail)
             content_list.append({
-                'total': guttman_analysis.sumItemScore(matrix)
+                'total': guttman_analysis.sum_item_score(matrix)
             })
             odd_cells = guttman_analysis.odd_cells(matrix)
             odd_cells_str_tuple = []
