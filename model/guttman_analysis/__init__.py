@@ -98,6 +98,7 @@ import numpy.ma as ma
 
 def clean_input(original_data):
     removed_header = original_data[2:]
+    print("Removed Header , ", removed_header)
     for i in range(len(removed_header)):
         removed_header[i] = removed_header[i][1:]
     # print(removed_header)

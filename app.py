@@ -33,6 +33,11 @@ def upload():
             file_name.save(path)
             data, index = file_importing.readfile(path)
             data = file_importing.transpose(data)
+            print("Original data is: ",data)
+
+            # TODO Should add a content check here
+
+            ##
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
             print("This is the new data", new_data)
