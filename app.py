@@ -37,6 +37,7 @@ def upload():
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
             matrix = guttman_analysis.clean_input(new_data)
+            print(matrix)
 
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
 
