@@ -6,7 +6,10 @@ import model.file_importing as fi
 class GuttmanAnalysisTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.data = fi.readfile("./testdata/SampleAssessmentResult.xlsx")
+        # The path should be configured as the full path of the test data file. TODO: I don't really understand why the relative path not working.
+        path = "/Users/Apple/Documents/Google-Sync/SWEN90014 Master Project/Project/swen90014-2019-rv-quoll" \
+               "/testdata/SampleAssessmentResult.xlsx"
+        self.data = fi.readfile(path)
         self.data = fi.transpose(self.data)
         fi.sort_2d_array(self.data)
 
@@ -30,6 +33,7 @@ class GuttmanAnalysisTestCase(unittest.TestCase):
                                [1, 2, 1, 1, 0, 0, 0], [0, 2, 1, 1, 0, 0, 0],
                                [0, 1, 0, 1, 1, 1, 0], [3, 0, 0, 0, 0, 0, 0],
                                [0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0]]
+
 
         self.data_first_row_zero = ad.clean_input(self.data)
         # Manipulate the data so that the first element in the list has zero standard deviation.
