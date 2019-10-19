@@ -28,11 +28,11 @@ const renderResult = async () => {
     resultView.renderParsedResult(typeID, processedData);
 };
 
-document.querySelector('.left-panel').addEventListener('click', e => {
-    if (e.target.matches('.other-pattern, .other-pattern *')) {
-        renderOtherPattern();
-        console.log(`click`);
-    }
-});
+// document.querySelector('.left-panel').addEventListener('click', e => {
+//     if (e.target.matches('.other-pattern, .other-pattern *')) {
+//         renderOtherPattern();
+//         console.log(`click`);
+//     }
+// });
 
 window.onload = renderResult;

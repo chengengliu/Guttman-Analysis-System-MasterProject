@@ -61,7 +61,7 @@ export const renderPopupWindow = (fileName, flag, message) => {
                 </div>
             </div>
         </div>
-    `
+    `;
     document.querySelector('body').insertAdjacentHTML('afterbegin', markup);
 
     // close the dialog window

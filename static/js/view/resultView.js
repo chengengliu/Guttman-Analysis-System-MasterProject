@@ -122,9 +122,9 @@ const renderLeftPanel = data => {
 /** This function is remained for dynamically render feedbacks in the future */
 const renderFeedback = (typeID, data) => {
 
-    let content = '';
+    let content;
 
-    if (typeID === 0) {
+    if (typeID == 0) {
         content = `
             <li>
                 <span>Irregular Students Pattern</span>
@@ -168,7 +168,7 @@ const renderFeedback = (typeID, data) => {
                 </p>
             </li>
         `;
-    } else if (typeID === 1) {
+    } else if (typeID == 1) {
         content = `
             <li>
                 <span>Irregular Items Pattern</span>
