@@ -15,13 +15,13 @@ const parseJSON = data => {
     let temp = "";
 
     let font_size = "";
-    if((data.content.length * data.content[0][Object.keys(data.content[0])].length) < 300){
+    if ((data.content.length * data.content[0][Object.keys(data.content[0])].length) < 300) {
         font_size = "24px";
     }
-    else{
+    else {
         font_size = "middle";
     }
-    temp += "<table table cellspacing=\"0\" style=\"font-size: "+ font_size +"\"width= 90%>\n" +
+    temp += "<table table cellspacing=\"0\" style=\"font-size: " + font_size + "\"width= 90%>\n" +
         "<tbody  class = \"test\">";
 
     for (let l = 0; l < data.content.length; l++) {
@@ -47,7 +47,6 @@ const parseJSON = data => {
                     }
                 }
 
-
                 if (i >= boxs[k]["column_range"][0] - 1 && i < boxs[k]["column_range"][1]) {
 
                     if (j === boxs[k]["row_range"][0] + 1) {
@@ -59,20 +58,20 @@ const parseJSON = data => {
                 }
             }
 
-            let coordinate = ("(" + (i) + ", " + (j-2) + ")");
+            let coordinate = ("(" + (i) + ", " + (j - 2) + ")");
             if (l > 0 && data.content[l][stu][i] > 0 && (i !== data.content[l][stu].length - 1) && (stu !== "total")) {
-                if(odd_cells.Exists(coordinate)){
+                if (odd_cells.Exists(coordinate)) {
                     class_ += " odd-cells";
                 }
-                else{
+                else {
                     class_ += " greater-than-0";
                 }
             }
             else if (irregularItem.Exists(data.content[l][stu][i])) {
                 class_ += " irregular-item"
             }
-            else{
-                if(odd_cells.Exists(coordinate)){
+            else {
+                if (odd_cells.Exists(coordinate)) {
                     class_ += " odd-cells";
                 }
             }
@@ -88,11 +87,25 @@ const parseJSON = data => {
 
 const renderLeftPanel = data => {
 
+    // const query = `?fileID=${fileID}`;
+    const query1 = `?fileID=${data.file_id}&typeID=1`;
+    const query2 = `?fileID=${data.file_id}&typeID=2`;
+
     const markup = `
         <div class="back-section">
             <a href="./index.html" class="back-link">
                 <img src="./assets/back.svg" alt="back-icon">
                 <span class="text">Back</span>
+            </a>
+        </div>
+        <div class="other-pattern">
+            <a href="./result.html${query1}" class="pattern-link">
+                <span class="text">Show irregular pattern</span>
+            </a>
+        </div>
+        <div class="other-pattern">
+            <a href="./result.html${query2}" class="pattern-link">
+                <span class="text">Show other pattern</span>
             </a>
         </div>
         <div class="export-section">
@@ -107,7 +120,74 @@ const renderLeftPanel = data => {
 };
 
 /** This function is remained for dynamically render feedbacks in the future */
-const renderFeedback = data => {
+const renderFeedback = (typeID, data) => {
+
+    let content = '';
+
+    if (typeID === 1) {
+        content = `
+            <li>
+                <span>Irregular Students Pattern</span>
+                <p>Irregular students are marked with yellow color, which are ${data["irregular_student"]}.</p>
+                <p> An irregular row of ones and zeros indicates that the student has not engaged fully in the assessment.
+                    The pattern is a reflection of the student’s attention to the task, rather than their skills. Therefore,
+                    it is not possible to identify the student’s point of readiness to learn from the assessment and alternate
+                    means must be used.
+                </p>
+            </li>
+
+            <li>
+                <span>Irregular Items Pattern</span>
+                <p>Irregular items are marked with blue color, which are ${data["irregular_item"]}.</p>
+                <p>If there is an irregular mixture of ones and zeros within
+                    a column, it shows the item is not an indicator of a student’s ability in the underlying construct. This may be
+                    due to ambiguity in the item, inconsistent marking, or
+                    an item that is not matched to the underlying construct.
+                    (Eg: if a maths question is written in difficult language,
+                    the question may measure reading ability, not maths
+                    ability.) It could also be an indication that the item is too
+                    difficult for the students undertaking the assessment.
+                    Items which perform like this should be removed from
+                    the current analysis, and teachers can use this information to improve their assessment tasks in the future.
+                </p>
+            </li>
+
+            <li>
+                <span>odd cells</span>
+                <p>odd cells are marked with purple color</p>
+                <p>odd cells in this graph are ${data["odd_cells"]}.</p>
+                <p>An unexpected greater-then-zero odd cell after the pattern has broken down
+                    should also be disregarded. It is an indication of lucky
+                    guessing or an unusual event, not a skill that the student has mastered.
+                    This is much more likely if the assessment is a multiple choice test,
+                        where the probability of guessing correctly is relatively high.
+                        <br />
+                        An unusual zero amongst a lot of ones is most likely an
+                    indication of a lapse in concentration and not an indication that the student needs to be taught the skill
+                    again. We all occasionally made mistakes with something we can do accurately most of the time!
+                </p>
+            </li>
+        `;
+    } else if (typeID === 2) {
+        content = `
+            <li>
+                <span>Irregular Items Pattern</span>
+                <p>Irregular items are marked with blue color, which are ${data["irregular_item"]}.</p>
+                <p>If there is an irregular mixture of ones and zeros within
+                    a column, it shows the item is not an indicator of a student’s ability in the underlying construct. This may be
+                    due to ambiguity in the item, inconsistent marking, or
+                    an item that is not matched to the underlying construct.
+                    (Eg: if a maths question is written in difficult language,
+                    the question may measure reading ability, not maths
+                    ability.) It could also be an indication that the item is too
+                    difficult for the students undertaking the assessment.
+                    Items which perform like this should be removed from
+                    the current analysis, and teachers can use this information to improve their assessment tasks in the future.
+                </p>
+            </li>
+        `;
+    }
+
     const markup = `
         <div class="feedback-container">
             <div class="feedback-header">
@@ -115,47 +195,7 @@ const renderFeedback = data => {
             </div>
             <div class="feedback-body">
                 <ul class="rule-list">
-                    <li>
-                        <span>Irregular Students Pattern</span>
-                        <p>Irregular students are marked with yellow color, which are ${data["irregular_student"]}.</p>
-                        <p> An irregular row of ones and zeros indicates that the student has not engaged fully in the assessment.
-                         The pattern is a reflection of the student’s attention to the task, rather than their skills. Therefore,
-                         it is not possible to identify the student’s point of readiness to learn from the assessment and alternate
-                         means must be used
-                         </p>
-                    </li>
-
-                    <li>
-                        <span>Irregular Items Pattern</span>
-                        <p>Irregular items are marked with blue color, which are ${data["irregular_item"]}.</p>
-                        <p>If there is an irregular mixture of ones and zeros within
-                            a column, it shows the item is not an indicator of a student’s ability in the underlying construct. This may be
-                            due to ambiguity in the item, inconsistent marking, or
-                            an item that is not matched to the underlying construct.
-                            (Eg: if a maths question is written in difficult language,
-                            the question may measure reading ability, not maths
-                            ability.) It could also be an indication that the item is too
-                            difficult for the students undertaking the assessment.
-                            Items which perform like this should be removed from
-                            the current analysis, and teachers can use this information to improve their assessment tasks in the future.
-                        </p>
-                    </li>
-
-                    <li>
-                        <span>odd cells</span>
-                        <p>odd cells are marked with purple color</p>
-                        <p>odd cells in this graph are ${data["odd_cells"]}.</p>
-                        <p>An unexpected greater-then-zero odd cell after the pattern has broken down
-                            should also be disregarded. It is an indication of lucky
-                            guessing or an unusual event, not a skill that the student has mastered.
-                            This is much more likely if the assessment is a multiple choice test,
-                             where the probability of guessing correctly is relatively high.
-                             <br />
-                             An unusual zero amongst a lot of ones is most likely an
-                            indication of a lapse in concentration and not an indication that the student needs to be taught the skill
-                            again. We all occasionally made mistakes with something we can do accurately most of the time!
-                        </p>
-                    </li>
+                    ${content}
                 </ul>
             </div>
         </div>
@@ -169,8 +209,8 @@ const renderGuttmanChart = data => {
     document.querySelector('#data').insertAdjacentHTML('beforeend', resultMarkup);
 };
 
-export const renderParsedResult = data => {
+export const renderParsedResult = (typeID, data) => {
     renderLeftPanel(data);
-    renderFeedback(data);
+    renderFeedback(typeID, data);
     renderGuttmanChart(data);
 };

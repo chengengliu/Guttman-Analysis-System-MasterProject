@@ -30,6 +30,30 @@ a.download-link:active {
     color: #FFFFFF;
 }
 
+.other-pattern {
+    margin-top: 4rem;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.other-pattern span {
+    color: #FFFFFF; 
+}
+.other-pattern:hover {
+    transform: translateY(-0.3rem); 
+}
+
+a.pattern-link:link,
+a.pattern-link:visited,
+a.pattern-link:hover,
+a.pattern-link:active {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
 .export-section {
     margin-top: 4rem;
     display: flex;
@@ -159,7 +183,7 @@ a.download-link:active {
 }
 
 table{
-    border:1px solid #000;
+    border:1px solid #494ca2;
     margin: auto;
     border-radius:5px;
     font-size: 1.5rem;
@@ -169,20 +193,20 @@ table{
 td {text-align: center;}
 .border-top {
     border-top: 2px solid;
-    border-color:#222831;
+    border-color:#494ca2;
 }
 .border-left {
     border-left: 2px solid;
-    border-color:#222831;
+    border-color:#494ca2;
 }
 .border-bottom {
     border-bottom: 2px solid;
-    border-color:#222831;
+    border-color:#494ca2;
 }
 
 .border-right {
     border-right: 2px solid;
-    border-color:#222831;
+    border-color:#494ca2;
 }
 .greater-than-0{
     background-color:#ffd5d5;
