@@ -1,5 +1,8 @@
+import math
+
 import pandas as pd
 import numpy as np
+
 
 def sort_2d_array_mark(array):
     """
@@ -29,9 +32,9 @@ def sort_2d_array_mark(array):
             if count1 < count2:
                 for k in range(len(array)):
                     array[k][j], array[k][j+1] = array[k][j+1], array[k][j]
-    print("Test soring result: ")
-    for i in array:
-        print(i)
+    # print("Test soring result: ")
+    # for i in array:
+    #     print(i)
 #
 # def sort_2d_array_max_mark(array):
 #     """
@@ -76,7 +79,7 @@ def break_down_marks(array, index):
     for i in range(1, len(array[0])):
         count = 0
         for string in index[0]:
-            if string[:3] == array[0][i]:
+            if string[:3] == str(array[0][i]):
                 count += 1
         indexs.append(count)
 
@@ -129,34 +132,53 @@ def readfile(file_name):
     """
     xls = pd.ExcelFile(file_name)
     sheet_names = xls.sheet_names
-    if len(sheet_names)<2:
-        raise Exception('Excel file has too few work sheets(less than 2)')
-    # If there is only one sheet.
-
-    #
-
+    # if there is no se
+    if len(sheet_names) < 2:
+        raise Exception('Excel file has less than 2 work sheets')
 
     df1 = pd.read_excel(xls, sheet_names[0])
-    df2 = pd.read_excel(xls, sheet_names[1])
+
     excel_dict1 = df1.to_dict(orient='dict')
-    excel_dict2 = df2.to_dict(orient='dict')
+
     array1 = []
     for key in excel_dict1.keys():
-        temp_array1 = [str(key)]
+        temp_array1 = []
         for index in excel_dict1[key]:
             temp_array1.append(excel_dict1[key][index])
+
         array1.append(temp_array1)
     for i in range(len(array1[0])):
         array1[0][i] = str(array1[0][i])
+
+    fst_row_int_cnt, snd_row_int_cnt = 0, 0
+    item_name = []
+    for i in range(1, len(array1)):
+        if isinstance(array1[i][0], (float, int)) and int(math.floor(array1[i][0])) == array1[i][0]:
+            snd_row_int_cnt += 1
+        item_name.append(array1[i][0])
+        for j in range(1, len(array1[0])):
+            if not isinstance(array1[i][j], (float, int)) or \
+                    math.isnan(array1[i][j]) or \
+                    int(math.floor(array1[i][j])) != array1[i][j]:
+                raise Exception("Mark data should present starting from B3, non-integer value detected.")
+    if snd_row_int_cnt == len(array1) - 1:
+        raise Exception("Second row should be item names, digit value detected.")
+    if len(item_name) != len(set(item_name)):
+        raise Exception("Duplicate item name detected.")
+    if len(array1[0][1:]) != len(set(array1[0][1:])):
+        raise Exception("Duplicate student name detected.")
+
     array2 = []
     column_of_second_sheet = 0
+
+    df2 = pd.read_excel(xls, sheet_names[1])
+    excel_dict2 = df2.to_dict(orient='dict')
     for key in excel_dict2.keys():
         temp_array2 = []
         for index in excel_dict2[key]:
             temp_array2.append(excel_dict2[key][index])
         column_of_second_sheet += 1
         array2.append(temp_array2)
-
 
     return array1, array2
 

@@ -33,28 +33,19 @@ def upload():
             file_name.save(path)
             data, index = file_importing.readfile(path)
             data = file_importing.transpose(data)
-            print("Original data is: ",data)
 
-            # TODO Should add a content check here
-
-            ##
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
-            print("This is the new data", new_data)
             matrix = guttman_analysis.clean_input(new_data)
-            print(matrix)
-            print("this is the matrix !!!!!!!!!!!!!")
-            for i in matrix:
-                print(i)
+
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
             corr_item = guttman_analysis.return_correlation(matrix, False, flag)
             irregular_item = guttman_analysis.return_irregular_index_test2(matrix, False, flag)
             irregular_student = guttman_analysis.return_irregular_index_test2(matrix, True, flag)
-            print(new_data)
 
             excel = ExcelOutput(new_data, mod_path)
             excel.write_excel()
-            print("Irregular item list is: ",irregular_item)
+            print("Irregular item list is: ", irregular_item)
             for col in irregular_item:
                 print("Column is: ", col)
                 excel.highlight_area(0, 0, col + 1, col + 1, '#95e1d3')
