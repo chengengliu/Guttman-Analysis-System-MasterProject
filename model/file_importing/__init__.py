@@ -1,5 +1,5 @@
 import math
-
+import textdistance
 import pandas as pd
 
 
@@ -35,22 +35,20 @@ def sort_2d_array_mark(array):
 
 def break_down_marks(array, index):
     indexs = []
+
     for i in range(1, len(array[0])):
         count = 0
         for string in index[0]:
-            if string[:3] == str(array[0][i]):
+            if textdistance.hamming.normalized_similarity(string, str(array[0][i])) >= 0.5:
                 count += 1
         indexs.append(count)
 
+    transposed_array = transpose(array)
+
     max_mark = []
-    max_mark.append(0)
-    for i in range(1, len(array[0])):
+    for i in range(1, len(transposed_array)):
         # assume the maximum mark of this task is 1
-        max = 1
-        for j in range(1, len(array)):
-            if max < int(array[j][i]):
-                max = int(array[j][i])
-        max_mark.append(max)
+        max_mark.append(int(max(transposed_array[i][2:])))
 
     for i in range(len(indexs)):
         if indexs[i] < max_mark[i]:
@@ -75,14 +73,6 @@ def break_down_marks(array, index):
     for i in range(len(array)):
         new_array[i + 1].insert(0, array[i][0])
     return new_array
-
-
-def non_int_detect(matrix):
-    for item in matrix:
-        for i in range(len(item)):
-            if not isinstance(item[i], int):
-                raise Exception('Found non-integer value. Found in data:', item[i])
-
 
 def transpose(array):
     """

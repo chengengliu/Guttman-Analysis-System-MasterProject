@@ -87,8 +87,10 @@ def upload():
             excel.write_excel(1)
 
             irregular_student = guttman_analysis.return_irregular_index(matrix, True, flag)
+
             for row in irregular_student:
                 excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 1)
+
             excel.add_total_score(1)
 
             boxes = guttman_analysis.irregular_box(matrix)
@@ -133,6 +135,7 @@ def upload():
             }
             storage.save_result(json, file_id, 1)
             excel.close_workbook()
+
         except Exception as e:
             storage.delete_file(file_id)
             return {'err_msg': str(e)}
