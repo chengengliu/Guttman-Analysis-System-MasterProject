@@ -59,7 +59,7 @@ def upload():
                 })
                 content_list[i][new_data[i][0]].append(tail)
             content_list.append({
-                'total': guttman_analysis.sumItemScore(matrix)
+                'total': guttman_analysis.sum_item_score(matrix)
             })
 
             json = {
