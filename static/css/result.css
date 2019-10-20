@@ -174,8 +174,8 @@ a.pattern-link:active {
 } */
 @media only screen and (max-width: 68.75rem) {
     .feedback-container {
-        width: 23rem;
-        height: 52.4rem;
+        width: 25rem;
+        height: auto;
     }
 
     .guttman-page-right {
