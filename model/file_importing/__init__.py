@@ -39,7 +39,7 @@ def break_down_marks(array, index):
     for i in range(1, len(array[0])):
         count = 0
         for string in index[0]:
-            if textdistance.hamming.normalized_similarity(string, str(array[0][i])) >= 0.6:
+            if textdistance.hamming.normalized_similarity(string, str(array[0][i])) >= 0.5:
                 count += 1
         indexs.append(count)
 
