@@ -51,7 +51,7 @@ def upload():
             excel.add_total_score(0)
             excel.add_correlation(corr_item, 'column', 0)
             content_list = []
-            print("this is a test !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             for i in range(len(new_data)):
                 tail = "total" if i == 0 else "" if i == 1 else sum(new_data[i][1:])
                 content_list.append({
@@ -61,7 +61,7 @@ def upload():
             content_list.append({
                 'total': guttman_analysis.sum_item_score(matrix)
             })
-            print("this is a test1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             json = {
                 'file_id': file_id,
                 'file_name': filename,
@@ -85,14 +85,14 @@ def upload():
 
             excel.add_array(new_data)
             excel.write_excel(1)
-            print("this is a test2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             irregular_student = guttman_analysis.return_irregular_index(matrix, True, flag)
-            print("this is a test3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             for row in irregular_student:
                 excel.highlight_area(row + 2, row + 2, 0, 0, '#f9ed69', 1)
-            print("this is a test3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             excel.add_total_score(1)
-            print("this is a test3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             boxes = guttman_analysis.irregular_box(matrix)
             boxes_json = []
             for i in boxes:
@@ -103,7 +103,7 @@ def upload():
                     'row_range': [row1 + 2, row2 + 2],
                     'column_range': [col1 + 1, col2 + 1]
                 })
-            print("this is a test4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             content_list = []
 
             for i in range(len(new_data)):
@@ -122,7 +122,7 @@ def upload():
                 excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5', 0)
                 odd_cells_str_tuple.append("(%d, %d)" % (c, r+1))
 
-            print("this is a test !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             json = {
                 'file_id': file_id,
                 'file_name': filename,
@@ -135,7 +135,7 @@ def upload():
             }
             storage.save_result(json, file_id, 1)
             excel.close_workbook()
-            print("this is a test !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
         except Exception as e:
             storage.delete_file(file_id)
             return {'err_msg': str(e)}

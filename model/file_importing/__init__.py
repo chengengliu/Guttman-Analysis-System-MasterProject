@@ -35,7 +35,7 @@ def sort_2d_array_mark(array):
 
 def break_down_marks(array, index):
     indexs = []
-    print("!!!!!!!!!!!!!!!!!!\n")
+
     for i in range(1, len(array[0])):
         count = 0
         for string in index[0]:
@@ -44,14 +44,12 @@ def break_down_marks(array, index):
         indexs.append(count)
 
     transposed_array = transpose(array)
-    print(indexs)
-    print("!!!!!!!!!!!!!!!!!!\n")
+
     max_mark = []
     for i in range(1, len(transposed_array)):
         # assume the maximum mark of this task is 1
         max_mark.append(int(max(transposed_array[i][2:])))
-    print(max_mark)
-    print("!!!!!!!!!!!!!!!!!!\n")
+
     for i in range(len(indexs)):
         if indexs[i] < max_mark[i]:
             raise Exception("the max mark of this task is greater than its total sub-criteria")
