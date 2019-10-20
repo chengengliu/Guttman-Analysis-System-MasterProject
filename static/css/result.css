@@ -208,6 +208,10 @@ td {text-align: center;}
     border-top: 2px solid;
     border-color:#494ca2;
 }
+.all_border {
+    border: 2px solid  #dfd3d3;
+}
+
 .border-left {
     border-left: 2px solid;
     border-color:#494ca2;

@@ -36,7 +36,9 @@ const parseJSON = data => {
 
         for (let i = 0; i < data.content[l][stu].length; i++) {
             let class_ = "";
-
+            if(l === 0 || l === 1){
+                class_ += " all_border";
+            }
             for (let k = 0; k < boxs.length; k++) {
                 if (j > boxs[k]["row_range"][0] && j <= boxs[k]["row_range"][1] + 1) {
                     if (i === boxs[k]["column_range"][0] - 1) {
