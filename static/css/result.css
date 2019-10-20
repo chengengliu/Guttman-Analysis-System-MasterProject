@@ -153,6 +153,19 @@ a.pattern-link:active {
     color: rgb(0, 0, 0);
 }
 
+.rule-list li .green {
+    color: #45998a;
+}
+.rule-list li .yellow {
+    color: #ddcd20;
+}
+.rule-list li .purple {
+    color: #9543ac;
+}
+.rule-list li .blue {
+    color: #494ca2;
+}
+
 /* .guttman-page-right img {
     width: 100%;
     height: auto;
