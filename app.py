@@ -67,7 +67,7 @@ def upload():
                 'file_name': filename,
                 'export_url': '/export/' + str(file_id),
                 'irregular_student': [],
-                'irregular_item': [new_data[0][i + 1] for i in irregular_item],
+                'irregular_item': [new_data[1][i + 1] for i in irregular_item],
                 'item_performance': corr_item,
                 'boxes': [],
                 'content': content_list,
