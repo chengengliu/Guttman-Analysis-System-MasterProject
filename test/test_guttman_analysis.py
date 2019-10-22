@@ -166,15 +166,18 @@ class GuttmanAnalysisTestCase(unittest.TestCase):
             item = ad.irregular_calculation(data,flag, True)
             for i in item:
                 self.assertTrue(-1<=i<=1)
+            item = ad.irregular_calculation(transposed,flag,False)
+            for i in item:
+                self.assertTrue(-1<=i<=1)
+
     def test_irregular_box(self):
-        print()
+        self.assertTrue(ad.irregular_box(self.data_shoudlbe)[0] == (0, 6, (24, 38)))
     def test_get_neighbours(self):
         self.assertTrue(ad.get_neighbours(1) == [(0, -1), (0, 1), (-1, 0), (1, 0)])
     def test_calculate_radius(self):
         self.assertTrue(ad.calculate_radius(self.data_shoudlbe) == 4)
     def test_odd_cells(self):
-        print
-
+        self.assertTrue(ad.odd_cells(self.data_shoudlbe).__len__() ==11)
     # self.assertTrue(self.data_first_row_one == ad.detect_full_score(self.data_shoudlbe))
     # def test_
     # def test_get_0staddv_index(self):
