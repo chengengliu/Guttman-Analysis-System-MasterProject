@@ -1,4 +1,4 @@
-import sys
+import time
 
 from flask import Flask, send_from_directory, request
 from .model.excel_processing.ExcelOutput import ExcelOutput
@@ -16,6 +16,7 @@ def export(file_id):
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    start = time.time()
     if 'file' not in request.files:
         return {'err_msg': 'No file part'}
     file_name = request.files['file']
@@ -37,7 +38,7 @@ def upload():
             new_data = file_importing.break_down_marks(data, index)
             file_importing.sort_2d_array_mark(new_data)
             matrix = guttman_analysis.clean_input(new_data)
-            print(matrix)
+            # print(matrix)
 
             flag = 'Accumulation'  # Similarity, Correlation, Accumulation
 
@@ -119,9 +120,7 @@ def upload():
             odd_cells_str_tuple = []
             for (r, c) in odd_cells:
                 excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5', 1)
-                excel.highlight_area(r + 2, r + 2, c + 1, c + 1, '#b063c5', 0)
-                odd_cells_str_tuple.append("(%d, %d)" % (c, r+1))
-
+                odd_cells_str_tuple.append("(%d, %d)" % (c, r + 1))
 
             json = {
                 'file_id': file_id,
@@ -135,7 +134,8 @@ def upload():
             }
             storage.save_result(json, file_id, 1)
             excel.close_workbook()
-
+            end = time.time()
+            print("took ", end - start, " sec to process.")
         except Exception as e:
             storage.delete_file(file_id)
             return {'err_msg': str(e)}

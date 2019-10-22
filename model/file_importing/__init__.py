@@ -74,6 +74,7 @@ def break_down_marks(array, index):
         new_array[i + 1].insert(0, array[i][0])
     return new_array
 
+
 def transpose(array):
     """
     # transpose the array
@@ -121,9 +122,9 @@ def readfile(file_name):
         item_name.append(array1[i][0])
         for j in range(1, len(array1[0])):
             if not isinstance(array1[i][j], (float, int)) or \
-                    math.isnan(array1[i][j]) or \
+                    math.isnan(array1[i][j]) or array1[i][j] < 0 or \
                     int(math.floor(array1[i][j])) != array1[i][j]:
-                raise Exception("Mark data should present starting from B3, non-integer value detected.")
+                raise Exception("Mark data should present starting from B3, non-integer or negative value detected.")
     if snd_row_int_cnt == len(array1) - 1:
         raise Exception("Second row should be item names, digit value detected.")
     if len(item_name) != len(set(item_name)):
@@ -149,4 +150,3 @@ def readfile(file_name):
             raise Exception("the criteria in worksheet 2 is not listed in order")
         previous = array2[0][i]
     return array1, array2
-

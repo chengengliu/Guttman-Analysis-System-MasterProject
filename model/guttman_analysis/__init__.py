@@ -85,7 +85,6 @@ def clean_input(original_data):
     return removed_header
 
 
-
 def sum_item_score(matrix):
     """
     Summation of item scores.
@@ -97,7 +96,6 @@ def sum_item_score(matrix):
         sum_item = sum([row[i] for row in matrix])
         result.append(sum_item)
     return result
-
 
 
 # This will be helpful for later use.
@@ -207,11 +205,11 @@ def irregular_calculation(matrix, flag, is_student):
     scorerate = cal_scorerate_accumulated_matrix(matrix_copy, is_student)
     for i in range(len(matrix_copy)):
         similarity_result.append(irregular_cal(matrix_copy, i, 'Similarity', scorerate,
-                                                       zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+                                               zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
         accumulation_result.append(irregular_cal(matrix_copy, i, 'Accumulation', scorerate,
                                                  zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
         correlation_result.append(irregular_cal(matrix_copy, i, 'Correlation', scorerate,
-                                                        zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
+                                                zero_stddiv_accumulated_list, accumulation_0stddv_is_empty))
     # Data needs to be put back.
     # The value is not full. There are values deleted.
     temp = [j for i in accumulation_result for j in i]
@@ -393,6 +391,7 @@ def irregular_box(matrix):
         return []
     section_qty = min(math.floor(math.sqrt(len(matrix[0]))), 5)
     min_height = math.ceil(math.sqrt(len(matrix)))
+    sample_height = math.ceil(math.log(len(matrix)))
 
     item_sum = sum_item_score(matrix)
     item_diff = [item_sum[i] - item_sum[i + 1] for i in range(len(item_sum) - 1)]
@@ -408,31 +407,42 @@ def irregular_box(matrix):
         best = 99999999
         best_j_k = (-1, -1)
         col1, col2 = selected_col[i] + 1, selected_col[i + 1]
-        for j in [0] + list(range(math.ceil(min_height / 2), len(matrix))):
-            for k in range(j + min_height - 1, len(matrix)):
-                box_sum = 0
-                for n in range(j, k + 1):
-                    box_sum += sum(matrix[n][col1: col2 + 1])
-                box_correct_rate = box_sum / ((k - j + 1) * (col2 - col1 + 1))
-                pre_box_sum = 0
-                for n in range(j):
-                    pre_box_sum += sum(matrix[n][col1: col2 + 1])
+        pre_box_sample_sum = sum([sum(row[col1: col2 + 1]) for row in matrix[:sample_height]])
+        pre_box_sample_correct_rate = pre_box_sample_sum / (sample_height * (col2 - col1 + 1))
+        post_box_sample_sum = sum([sum(row[col1: col2 + 1]) for row in matrix[-sample_height:]])
+        post_box_sample_correct_rate = post_box_sample_sum / (sample_height * (col2 - col1 + 1))
 
-                pre_box_sample = [row[col1: col2 + 1] for row in matrix[:min_height]]
-                pre_box_correct_rate = sum(map(sum, pre_box_sample)) / (min_height * (col2 - col1 + 1)) \
-                    if j == 0 else pre_box_sum / (j * (col2 - col1 + 1))
-                post_box_sum = 0
-                for n in range(k + 1, len(matrix)):
-                    post_box_sum += sum(matrix[n][col1: col2 + 1])
-                post_box_sample = [row[col1: col2 + 1] for row in matrix[-min_height:]]
-                post_box_correct_rate = sum(map(sum, post_box_sample)) / (min_height * (col2 - col1 + 1)) \
-                    if k + 1 == len(matrix) \
+        for j in [0] + list(range(math.ceil(min_height / 2), len(matrix))):
+            pre_box_sum = 0
+            for n in range(j):
+                pre_box_sum += sum(matrix[n][col1: col2 + 1])
+            pre_box_correct_rate = pre_box_sample_correct_rate if j == 0 \
+                else pre_box_sum / (j * (col2 - col1 + 1))
+
+            box_sum = -1
+            post_box_sum = -1
+            for k in range(j + min_height - 1, len(matrix)):
+                if box_sum == -1:
+                    box_sum, post_box_sum = 0, 0
+                    for n in range(j, k + 1):
+                        box_sum += sum(matrix[n][col1: col2 + 1])
+                    for n in range(k + 1, len(matrix)):
+                        post_box_sum += sum(matrix[n][col1: col2 + 1])
+                else:
+                    edge_row_sum = sum(matrix[k][col1: col2 + 1])
+                    box_sum += edge_row_sum
+                    post_box_sum -= edge_row_sum
+                box_correct_rate = box_sum / ((k - j + 1) * (col2 - col1 + 1))
+
+                post_box_correct_rate = post_box_sample_correct_rate if k + 1 == len(matrix) \
                     else post_box_sum / ((len(matrix) - k - 1) * (col2 - col1 + 1))
 
-                dis = (abs(box_correct_rate - 0.5) ** 2) * 3 \
-                      - (abs(pre_box_correct_rate - box_correct_rate) ** 2) - \
-                      (abs(post_box_correct_rate - box_correct_rate) ** 2)
-                dis /= (k - j) + len(matrix) * min_height
+                dis = 2 + (abs(box_correct_rate - 0.5) ** 2) * 3 - \
+                    (abs(pre_box_correct_rate - box_correct_rate) ** 2) - \
+                    (abs(post_box_correct_rate - box_correct_rate) ** 2)
+
+                dis *= 1 + (k - j) / (len(matrix) ** 1.5) if abs(box_correct_rate - 0.5) < 0.4 \
+                    else 10 - (k - j) / (len(matrix) ** 1.5)
 
                 if dis < best:
                     best = dis
