@@ -125,12 +125,18 @@ const renderLeftPanel = data => {
 const renderFeedback = (typeID, data) => {
 
     let content;
+    const irregularStudent = data["irregular_student"];
+    const oddCells = data["odd_cells"];
+    const irregularItem = data["irregular_item"];
+    let irregularStudentStr = Array.isArray(irregularStudent) && irregularStudent.length === 0 ? 'none in this dataset' : irregularStudent;
+    let oddCellsStr = Array.isArray(oddCells) && oddCells.length === 0 ? 'none in this dataset' : oddCells;
+    let irregularItemStr = Array.isArray(irregularItem) && irregularItem.length === 0 ? 'none in this dataset' : irregularItem;
 
     if (typeID == 1) {
         content = `
             <li>
                 <span>Irregular Students Pattern</span>
-                <p>Irregular students are marked with <span class="yellow">yellow</span> color, which are ${data["irregular_student"]}.</p>
+                <p>Irregular students are marked with <span class="yellow">yellow</span> color, which are ${irregularStudentStr}.</p>
                 <p> An irregular row of ones and zeros indicates that the student has not engaged fully in the assessment.
                     The pattern is a reflection of the student’s attention to the task, rather than their skills. Therefore,
                     it is not possible to identify the student’s point of readiness to learn from the assessment and alternate
@@ -154,7 +160,7 @@ const renderFeedback = (typeID, data) => {
             <li>
                 <span>Odd Cells</span>
                 <p>Odd cells are marked with <span class="purple">purple</span> color</p>
-                <p>odd cells in this graph are ${data["odd_cells"]}.</p>
+                <p>odd cells in this graph are ${oddCellsStr}.</p>
                 <p>An unexpected greater-then-zero odd cell after the pattern has broken down
                     should also be disregarded. It is an indication of lucky
                     guessing or an unusual event, not a skill that the student has mastered.
@@ -171,7 +177,7 @@ const renderFeedback = (typeID, data) => {
         content = `
             <li>
                 <span>Irregular Items Pattern</span>
-                <p>Irregular items are marked with <span class="green">green</span> color, which are ${data["irregular_item"]}.</p>
+                <p>Irregular items are marked with <span class="green">green</span> color, which are ${irregularItemStr}.</p>
                 <p>If there is an irregular mixture of ones and zeros within
                     a column, it shows the item is not an indicator of a student’s ability in the underlying construct. This may be
                     due to ambiguity in the item, inconsistent marking, or

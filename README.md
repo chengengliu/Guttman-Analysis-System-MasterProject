@@ -4,9 +4,10 @@
 
 Simply go to http://45.113.232.214/index.html
 
-You could use **[repo_root_path]/testdata/SampleAssessmentResult.xlsx** as test data.
+You could use **[repo_root_path]/testdata** as test data.
 If you are going to use your own test data, please follow Step5 below.
 
+<br/>
 
 ## Run On Your Local PC
 
@@ -19,11 +20,13 @@ Makes sure you have `python3` and `pip` installed. `Python 3.7` was confirmed to
 
 ### Step2. Install Python libraries
 
-`pip3 install 'flask>=1.1.1' pandas xlsxwriter xlrd`
+`pip3 install 'flask>=1.1.1' pandas xlsxwriter xlrd textdistance`
 
 If you do not have a shortcut for pip, use
-`python3 -m pip install 'flask>=1.1.1' pandas xlsxwriter xlrd`
-instead.
+`python3 -m pip install 'flask>=1.1.1' pandas xlsxwriter xlrd textdistance` 
+ 
+or `python -m pip install 'flask>=1.1.1' pandas xlsxwriter xlrd textdistance` 
+
 
 Please notice some lower versions of flask were confirmed **NOT** working.
 
@@ -40,7 +43,9 @@ Please notice some lower versions of flask were confirmed **NOT** working.
 `flask run`
 
 If you do not have a shortcut for flask, use
-`python3 -m flask run`
+`python3 -m flask run` or
+
+`python -m flask run`
 
 The server should be listening on http://127.0.0.1:5000 (defualt setting of flask)
 
@@ -48,18 +53,19 @@ The server should be listening on http://127.0.0.1:5000 (defualt setting of flas
 ### Step5. Test
 To run all back-end unit tests: `python3 test.py` 
 
-For mannual test, you could use **[repo_root_path]/testdata/SampleAssessmentResult.xlsx** as test data.
+For mannual test, you could use **[repo_root_path]/testdata** as test data.
 
 **Note:**
 In this sprint, we have not handled possible errors or exceptions yet. 
 If you are going to use your own test data, please notice that the format of the Excel file must follow all rules below:
 
 1. File extension **MUST** be .xls or .xlsx
-2. Marked data **MUST** exist in the first worksheet
-3. Column A of that worksheet **MUST** be student name (or id).
-4. Row 1 **MUST** be item name (or id).
-5. Starting from column B and row 2, mark data **MUST** present.
-6. No other data like "total" column or row allowed. Those will be automatically calculated by our program.<br/>
+2. The excel file **MUST** have **two** worksheets.
+3. The **first** row should be the description of each item.
+4. Students' data should begin from the **third** row.
+5. The number of sub-items should be greater than the max marks.<br/>
+
+<br />
 
 # Code Commit and Branch Policy
 ## Branch Policy:
