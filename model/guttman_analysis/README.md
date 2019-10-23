@@ -96,7 +96,3 @@ call the fucntion:
     transpose_matrix(matrix)
 The above mentioned functions can be skipped while you read the code.
 
-### Section IV. Furthrer Notice
-The algorithms are tested (for now) under `test_anomaly_detect.py` file. 
-Current(end of sprint 2) build has not received any useful test data to validate the algorithms. 
-The tests performed are more like a format/math check, but not a effectiveness check. 
