@@ -77,6 +77,11 @@ from numpy.linalg import norm
 
 
 def clean_input(original_data):
+    """
+    Clean the data. Remove any headers.
+    :param original_data:   Original input data that contains header.
+    :return:    A cleaned 2-D matrix that has no headers.
+    """
     removed_header = original_data[2:]
     # print("Removed Header , ", removed_header)
     for i in range(len(removed_header)):
@@ -98,7 +103,7 @@ def sum_item_score(matrix):
     return result
 
 
-# This will be helpful for later use.
+
 def transpose_matrix(matrix):
     """
     Transpose of the input matrix. The output is a 2-d/ nested list, but with row: items  and column: students.
@@ -127,6 +132,12 @@ def detect_full_score(matrix):
 # Receive a student matrix. Wants to accumulate the score rate accumulated matrix.
 # Assume the input is cleaned and sorted. No more sorting needed.
 def cal_scorerate_accumulated_matrix(matrix, is_student):
+    """
+    Receive a student/item as row, matrix. Accumulate the score rate.
+    :param matrix:  2-d matrix, either with student as row, or with item as row.
+    :param is_student:  Is true when student is the row of the input matrix.
+    :return:    Accumulated score rate.
+    """
     transposed = transpose_matrix(matrix)
 
     accumulated_score = []
@@ -184,6 +195,14 @@ def in_danger_list(danger_list, current_index):
 
 
 def irregular_calculation(matrix, flag, is_student):
+    """
+    The function is called by the interface function(return_irregular_index) and returns result
+    as the input specified.
+    :param matrix:  2-d matrix, with either student as the row or item as the row.
+    :param flag:    Specify what data should be retrieved. 'Accumulation' or 'Correlation' or 'Similarity'
+    :param is_student:  If the row is student, is_student is true. Else is false.
+    :return:    Return the irregular index.
+    """
     scorerate = cal_scorerate_accumulated_matrix(matrix, is_student)
 
     zero_stddiv_accumulated_list = get_0staddv_index(scorerate)
@@ -227,6 +246,7 @@ def irregular_calculation(matrix, flag, is_student):
 def return_irregular_index(original_data, is_student, flag):
     """
     Return the index of irregular column/ row.
+    This is the function(interface) that exposes to the main function.
     :param original_data: The original data.
     :param is_student:  A boolean value, specifying if the user wants the row/column detection.
     :return:    A list of irregular pattern.
@@ -245,6 +265,18 @@ def return_irregular_index(original_data, is_student, flag):
 
 
 def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_list, is_empty):
+    """
+    This is the main calculation process. Calculate the element's (at the current index) correlation
+    with the other data, within a specific range. The range is determined by the size of the input dynamically.
+    :param matrix:  Input data.
+    :param current_index:   Current index of element that you want to calculate.
+    :param flag:    'Accumulation' or 'Correlation' or Similarity'
+    :param scorerate:   The scorerate of the input matrix.
+    :param danger_accumulated_list: Danger list contains the positions where the data contains a zero standard deviation, that
+    may lead the correlation calculation process to an error(divison by zero error).
+    :param is_empty:
+    :return:    Index of irregualr items/student, depend on which row it is.
+    """
     correlation_result = []
     accumulation_correlation_result = []
     similarity_result = []
@@ -337,8 +369,8 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
 def detect_item_irregular(similarities, matrix):
     """
     Detect if the column/item is irregular. If it is irregular, append its position to the list.
-    If the average score of the two lists are smaller than 0.5(for now, I don't know how good the data will be, let's try 0.5 for now)
-    This parameter will change as development goes.
+    If the average score of the two lists are smaller than 0.0. Change the threshold according to how sensitivity you want
+    the return value is.
     :param similarities:
     :return:
     :param similarity1: Similarity calculated between each column.
@@ -356,15 +388,12 @@ def detect_item_irregular(similarities, matrix):
     zero_result = []
 
     for i in potential_list[0:range_irregular]:
+        # Threshold value is 0.0. Any item/studnet that has less than 0.0 value will be picked as irregular.
         if i[0] < 0.0:
             result.append(i[1])
     return result
 
 
-# Getter for correlations
-# The INTERFACE exposed to the outside package.
-# Notice that the second arg is a Bool, the thrid arg is a string
-#
 def return_correlation(original_data, is_student, flag):
     """
     Return the correlations of each column. This is the interface exposed to other modules.
@@ -387,6 +416,11 @@ def return_correlation(original_data, is_student, flag):
 
 
 def irregular_box(matrix):
+    """
+    Calculate the irregular box.
+    :param matrix:  Input matrix
+    :return:    The range of irregular box.
+    """
     if len(matrix[0]) < 2 or len(matrix) < 4:
         return []
     section_qty = min(math.floor(math.sqrt(len(matrix[0]))), 5)
