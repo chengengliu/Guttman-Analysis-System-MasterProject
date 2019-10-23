@@ -370,8 +370,8 @@ def irregular_cal(matrix, current_index, flag, scorerate, danger_accumulated_lis
 def detect_item_irregular(similarities, matrix):
     """
     Detect if the column/item is irregular. If it is irregular, append its position to the list.
-    If the average score of the two lists are smaller than 0.5(for now, I don't know how good the data will be, let's try 0.5 for now)
-    This parameter will change as development goes.
+    If the average score of the two lists are smaller than 0.0. Change the threshold according to how sensitivity you want
+    the return value is.
     :param similarities:
     :return:
     :param similarity1: Similarity calculated between each column.
@@ -389,6 +389,7 @@ def detect_item_irregular(similarities, matrix):
     zero_result = []
 
     for i in potential_list[0:range_irregular]:
+        # Threshold value is 0.0. Any item/studnet that has less than 0.0 value will be picked as irregular.
         if i[0] < 0.0:
             result.append(i[1])
     return result
