@@ -30,7 +30,7 @@ export const renderPopupWindow = (fileName, flag, message) => {
                 <p class="text">2. The excel file MUST have <span>two</span> worksheets.</p>
                 <p class="text">3. The first row should be the description of each item.</p>
                 <p class="text">4. Students' data should begin from the third row.</p>
-                <p class="text">5. The number of sub-items should be greator than the max marks.</p>
+                <p class="text">5. The number of sub-items should be greater than the max marks.</p>
             `;
             break;
         case 'SERVER_DOWN':
