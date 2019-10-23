@@ -28,7 +28,8 @@ If you do not have a shortcut for pip, use
 or `python -m pip install 'flask>=1.1.1' pandas xlsxwriter xlrd textdistance` 
 
 
-Please notice some lower versions of flask were confirmed **NOT** working.
+Please notice some lower versions of flask were confirmed **NOT** working.<br>
+The version of pandas should be greater than 0.25.2
 
 
 ### Step3. Install Git, and clone our repo
